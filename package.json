@@ -21,8 +21,13 @@
     "vite-plugin-solid": "^2.8.2"
   },
   "dependencies": {
+    "@kobalte/core": "^0.13.6",
     "@solid-primitives/storage": "^4.2.1",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.1.1",
     "megalodon": "^10.0.3",
-    "solid-js": "^1.8.11"
+    "solid-js": "^1.8.11",
+    "tailwind-merge": "^2.5.2",
+    "tailwindcss-animate": "^1.0.7"
   }
 }
