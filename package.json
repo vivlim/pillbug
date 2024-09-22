@@ -23,6 +23,7 @@
   "dependencies": {
     "@kobalte/core": "^0.13.6",
     "@solid-primitives/storage": "^4.2.1",
+    "@solidjs/router": "^0.14.5",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "megalodon": "^10.0.3",
