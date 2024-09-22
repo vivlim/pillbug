@@ -18,5 +18,12 @@
         "uriFormat": "http://localhost:%s"
       }
     },
+    {
+      "name": "Launch Edge",
+      "request": "launch",
+      "type": "msedge",
+      "url": "http://localhost:3000",
+      "webRoot": "${workspaceFolder}"
+    }
   ],
 }

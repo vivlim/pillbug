@@ -6,11 +6,13 @@ import LandingView from "./views/landing";
 import { createStore, SetStoreFunction } from "solid-js/store";
 import { RouteProps, RouteSectionProps } from "@solidjs/router";
 import OAuth from "megalodon/lib/src/oauth";
+import { makePersisted } from "@solid-primitives/storage";
 
 const AuthContext = createContext<AuthProviderProps>();
 
 export interface AuthState {
     appData: OAuth.AppData | undefined;
+    instanceUrl: string | undefined;
 }
 
 interface AuthProviderProps {
@@ -27,9 +29,12 @@ export function useAuthContext(): AuthProviderProps {
 }
 
 const App: Component<RouteSectionProps> = (props: RouteSectionProps) => {
-    const [authState, setAuthState] = createStore<AuthState>({
-        appData: undefined,
-    });
+    const [authState, setAuthState] = makePersisted(
+        createStore<AuthState>({
+            appData: undefined,
+            instanceUrl: undefined,
+        })
+    );
     return (
         <AuthContext.Provider value={{ authState, setAuthState }}>
             <h1>header</h1>

@@ -1,3 +1,4 @@
+import { useSearchParams } from "@solidjs/router";
 import generator, { detector } from "megalodon";
 import { createResource, createSignal, type Component } from "solid-js";
 import { useAuthContext } from "~/App";
@@ -13,26 +14,31 @@ import {
 } from "~/components/ui/text-field";
 
 const LoginView: Component = () => {
+    const authContext = useAuthContext();
+
+    const [searchParams, setSearchParams] = useSearchParams();
+
     const doOAuth = async () => {
         setBusy(true);
         try {
             let software = await detector(instance());
+            authContext.setAuthState("instanceUrl", (_) => instance()); // Replace any existing app data. Probably shouldn't be able to do this if you are signed in!
             let client = generator(software, instance());
             let appData = await client.registerApp("pillbug", {
-                redirect_uris: "localhost:3000/oauthCallback",
+                redirect_uris: "http://localhost:3000/login", // code will be passed as get parameter 'code'
             });
             if (appData === undefined || appData.url === null) {
                 setError("Failed to log in");
                 setBusy(false);
                 return;
             }
-            let authContext = useAuthContext();
             authContext.setAuthState("appData", (_) => appData); // Replace any existing app data. Probably shouldn't be able to do this if you are signed in!
             console.log(JSON.stringify(authContext));
             alert("about to try to launch url");
             window.location.assign(appData.url);
         } catch (error) {
             if (error instanceof Error) {
+                console.log(`error during login ${error.message}`);
                 setError(error.message);
                 setBusy(false);
             }
@@ -43,6 +49,14 @@ const LoginView: Component = () => {
     const [busy, setBusy] = createSignal(false);
     const [error, setError] = createSignal<string | undefined>(undefined);
     //const [appData] = createResource(instance, doOAuth);
+
+    if (searchParams.code !== undefined) {
+        setBusy(true);
+        // test instanceurl
+        console.log(
+            `entered login for instance ${authContext.authState.instanceUrl} with a code`
+        );
+    }
 
     return (
         <Grid cols={1} colsMd={2} class="w-full gap-2">
@@ -69,6 +83,7 @@ const LoginView: Component = () => {
                         <Button onClick={doOAuth} disabled={busy()}>
                             Log in
                         </Button>
+                        {error() !== undefined && <p>{error()}</p>}
                     </CardContent>
                 </Card>
             </Col>
