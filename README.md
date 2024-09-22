@@ -1,3 +1,9 @@
+## pillbug
+
+not much to see here at the moment.
+
+this is deployed to <https://vivlim.github.io/pillbug>
+
 ## Usage
 
 Those templates dependencies are maintained via [pnpm](https://pnpm.io) via `pnpm up -Lri`.
@@ -35,4 +41,5 @@ You can deploy the `dist` folder to any static host provider (netlify, surge, no
 
 ## components
 
+i'm grazing from here:
 <https://www.solid-ui.com/docs/components/flex>
