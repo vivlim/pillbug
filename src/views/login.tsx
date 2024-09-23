@@ -1,5 +1,5 @@
 import { makePersisted } from "@solid-primitives/storage";
-import { useSearchParams } from "@solidjs/router";
+import { useLocation, useSearchParams } from "@solidjs/router";
 import generator, { detector } from "megalodon";
 import { createResource, createSignal, type Component } from "solid-js";
 import { useAuthContext } from "~/App";
@@ -25,8 +25,11 @@ const LoginView: Component = () => {
             let software = await detector(instance());
             authContext.setAuthState("instanceUrl", (_) => instance()); // Replace any existing app data. Probably shouldn't be able to do this if you are signed in!
             let client = generator(software, instance());
+            let redirect_uri = window.location.href;
+            console.log(`redirect uri: ${redirect_uri}`);
+
             let appData = await client.registerApp("pillbug", {
-                redirect_uris: "http://localhost:3000/login", // code will be passed as get parameter 'code'
+                redirect_uris: redirect_uri, // code will be passed as get parameter 'code'
             });
             if (appData === undefined || appData.url === null) {
                 setError("Failed to log in");
@@ -35,7 +38,6 @@ const LoginView: Component = () => {
             }
             authContext.setAuthState("appData", (_) => appData); // Replace any existing app data. Probably shouldn't be able to do this if you are signed in!
             console.log(JSON.stringify(authContext));
-            alert("about to try to launch url");
             window.location.assign(appData.url);
         } catch (error) {
             if (error instanceof Error) {
@@ -85,6 +87,9 @@ const LoginView: Component = () => {
                         </TextField>
                         <Button onClick={doOAuth} disabled={busy()}>
                             Log in
+                            {busy() && (
+                                <span class="animate-spin ml-3">🤔</span>
+                            )}
                         </Button>
                         {error() !== undefined && <p>{error()}</p>}
                     </CardContent>
