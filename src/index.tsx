@@ -7,6 +7,7 @@ import { Route, Router } from "@solidjs/router";
 import HomeView from "./views/home";
 import LoginView from "./views/login";
 import ErrorView from "./views/error";
+import UserProfile from "./views/userprofile";
 
 const root = document.getElementById("root");
 
@@ -21,6 +22,7 @@ render(
         <Router root={App}>
             <Route path="/" component={HomeView} />
             <Route path="/login" component={LoginView} />
+            <Route path="/user/:username" component={UserProfile} />
             <Route path="*paramName" component={ErrorView} />
         </Router>
     ),

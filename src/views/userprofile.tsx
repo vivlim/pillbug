@@ -1,4 +1,4 @@
-import { A } from "@solidjs/router";
+import { A, useParams } from "@solidjs/router";
 import { Entity } from "megalodon";
 import {
     createResource,
@@ -30,44 +30,50 @@ type GetTimelineOptions = {
     min_id?: string;
 };
 
-const fetchPostList = async (
+const fetchUserInfo = async (
     authContext: AuthProviderProps,
-    timelineOptions: GetTimelineOptions,
-    setPosts: Setter<Entity.Status[]>
+    username: string
 ) => {
     if (!authContext.authState.signedIn) {
         return;
     }
 
     const client = authContext.authState.signedIn.authenticatedClient;
-    const result = await client.getHomeTimeline(timelineOptions);
+    console.log(`getting account ${username}`);
+
+    const result = await client.lookupAccount(username);
     if (result.status !== 200) {
-        throw new Error(`Failed to get timeline: ${result.statusText}`);
+        throw new Error(`Failed to get user ${username}: ${result.statusText}`);
     }
-    setPosts(result.data);
+    return result.data;
 };
 
-const Feed: Component<FeedProps> = (props) => {
+const UserProfile: Component = () => {
     const authContext = useAuthContext();
-    const [pageNumber, setPageNumber] = createSignal(0);
-    const [posts, setPosts] = createSignal<Array<Entity.Status>>([]);
-    const [timelineOptions, setTimelineOptions] =
-        createSignal<GetTimelineOptions>({ local: false, limit: 25 });
-    const [postList] = createResource(timelineOptions, () =>
-        fetchPostList(authContext, timelineOptions(), setPosts)
+    const params = useParams();
+    const [username, setUserName] = createSignal<string>(params.username);
+    const [userInfo] = createResource(username, (u) =>
+        fetchUserInfo(authContext, u)
     );
 
     return (
         <div class="flex flex-row p-8 size-full">
             <div class="md:grow"></div>
             <div class="grow w-max md:w-1/2 place-self">
-                <For each={posts()}>
-                    {(status, index) => <Post status={status} />}
-                </For>
+                {userInfo.loading && <div>loading user</div>}
+                <Card class="m-4">
+                    <CardHeader>{userInfo()?.display_name}</CardHeader>
+                    <CardContent>
+                        <div>{userInfo()?.acct}</div>
+                        <div>
+                            <a href={userInfo()?.url}>{userInfo()?.url}</a>
+                        </div>
+                    </CardContent>
+                </Card>
             </div>
             <div class="md:grow"></div>
         </div>
     );
 };
 
-export default Feed;
+export default UserProfile;
