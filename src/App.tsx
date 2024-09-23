@@ -37,8 +37,16 @@ const App: Component<RouteSectionProps> = (props: RouteSectionProps) => {
     );
     return (
         <AuthContext.Provider value={{ authState, setAuthState }}>
-            <h1>header</h1>
-            {props.children}
+            <div class="bg-white dark:bg-slate-800">
+                <div class="sticky top-0 z-40 w-full backdrop-blur flex-none">
+                    <div class="max-w-8xl mx-auto">
+                        <div class="py-4 border-b border-slade-900/10 lg:px-8 lg:border-0 dark:border-slate-300/10 mx-4 lg:mx-0">
+                            pillbug
+                        </div>
+                    </div>
+                </div>
+                {props.children}
+            </div>
         </AuthContext.Provider>
     );
 };

@@ -7,21 +7,25 @@ import { Grid, Col } from "~/components/ui/grid";
 
 const LandingView: Component = () => {
     return (
-        <Grid cols={1} colsMd={2} class="w-full gap-2">
-            <Col span={1} spanMd={2}>
+        <div class="flex flex-row p-8 size-full">
+            <div class="md:grow"></div>
+            <div class="grow w-max md:w-1/2 place-self">
                 <Card>
                     <CardHeader>
                         <CardTitle>pillbug</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <p>you aren't signed in. wanna?</p>
+                        <p>you aren't signed in.</p>
                         <p>
-                            <A href="/login">Log in</A>
+                            <A href="/login" class="underline">
+                                Log in
+                            </A>
                         </p>
                     </CardContent>
                 </Card>
-            </Col>
-        </Grid>
+            </div>
+            <div class="md:grow"></div>
+        </div>
     );
 };
 

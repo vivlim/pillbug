@@ -1,3 +1,4 @@
+import { makePersisted } from "@solid-primitives/storage";
 import { useSearchParams } from "@solidjs/router";
 import generator, { detector } from "megalodon";
 import { createResource, createSignal, type Component } from "solid-js";
@@ -45,7 +46,8 @@ const LoginView: Component = () => {
         }
     };
 
-    const [instance, setInstance] = createSignal("");
+    // persist the entered instance so that if you need to log again, it's already there.
+    const [instance, setInstance] = makePersisted(createSignal(""));
     const [busy, setBusy] = createSignal(false);
     const [error, setError] = createSignal<string | undefined>(undefined);
     //const [appData] = createResource(instance, doOAuth);
@@ -59,11 +61,12 @@ const LoginView: Component = () => {
     }
 
     return (
-        <Grid cols={1} colsMd={2} class="w-full gap-2">
-            <Col span={1} spanMd={2}>
+        <div class="flex flex-row p-8 size-full">
+            <div class="md:grow"></div>
+            <div class="grow w-max md:w-1/2 place-self">
                 <Card>
                     <CardHeader>
-                        <CardTitle>pillbug</CardTitle>
+                        <CardTitle>log in</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <TextField>
@@ -86,8 +89,9 @@ const LoginView: Component = () => {
                         {error() !== undefined && <p>{error()}</p>}
                     </CardContent>
                 </Card>
-            </Col>
-        </Grid>
+            </div>
+            <div class="md:grow"></div>
+        </div>
     );
 };
 

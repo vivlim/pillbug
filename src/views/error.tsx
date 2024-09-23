@@ -6,18 +6,18 @@ import { Grid, Col } from "~/components/ui/grid";
 
 const ErrorView: Component = () => {
     return (
-        <Grid cols={1} colsMd={2} class="w-full gap-2">
-            <Col span={1} spanMd={2}>
+        <div class="flex flex-row p-8 size-full">
+            <div class="md:grow"></div>
+            <div class="grow w-max md:w-1/2 place-self">
                 <Card>
                     <CardHeader>
                         <CardTitle>oh no</CardTitle>
                     </CardHeader>
-                    <CardContent>
-                        <p>ouchie</p>
-                    </CardContent>
+                    <CardContent>ouchie</CardContent>
                 </Card>
-            </Col>
-        </Grid>
+            </div>
+            <div class="md:grow"></div>
+        </div>
     );
 };
 
