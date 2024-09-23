@@ -2,7 +2,7 @@
 
 not much to see here at the moment.
 
-this is deployed to <https://vivlim.github.io/pillbug>
+this is deployed to <https://pillbug.vivl.im>
 
 ## Usage
 
