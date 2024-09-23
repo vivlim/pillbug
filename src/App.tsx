@@ -9,6 +9,8 @@ import OAuth from "megalodon/lib/src/oauth";
 import { makePersisted } from "@solid-primitives/storage";
 import generator, { MegalodonInterface } from "megalodon";
 import AppFrame from "./Frame";
+import { Instance } from "megalodon/lib/src/entities/instance";
+import { Account } from "megalodon/lib/src/entities/account";
 
 const AuthContext = createContext<AuthProviderProps>();
 
@@ -27,8 +29,15 @@ export interface PersistentAuthState {
 }
 
 export interface EphemeralAuthState {
-    signedIn: boolean | null;
-    authenticatedClient: MegalodonInterface | null;
+    signedIn:
+        | {
+              authenticatedClient: MegalodonInterface;
+              instanceData: Instance;
+              accountData: Account;
+              domain: string;
+          }
+        | false
+        | null;
 }
 
 interface TokenState {
@@ -146,7 +155,6 @@ export function logOut(authContext: AuthProviderProps) {
     // authContext.setPersistentAuthState("instanceUrl", undefined); // this is inconvenient for dev
     authContext.setPersistentAuthState("instanceSoftware", undefined);
     authContext.setPersistentAuthState("token", undefined);
-    authContext.setAuthState("authenticatedClient", null);
     authContext.setAuthState("signedIn", false);
 }
 
@@ -263,7 +271,6 @@ const App: Component<RouteSectionProps> = (props: RouteSectionProps) => {
     );
     const [authState, setAuthState] = createStore<EphemeralAuthState>({
         signedIn: null,
-        authenticatedClient: null,
     });
     return (
         <AuthContext.Provider

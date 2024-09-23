@@ -15,10 +15,8 @@ const HomeView: Component = () => {
 
     return (
         <>
-            {authContext.authState.signedIn !== true && (
-                <NotSignedInLandingView />
-            )}
-            {authContext.authState.signedIn === true && <Feed />}
+            {!authContext.authState.signedIn && <NotSignedInLandingView />}
+            {authContext.authState.signedIn && <Feed />}
         </>
     );
 };

@@ -33,8 +33,25 @@ export const initAppFrameAsync = async (authContext: AuthProviderProps) => {
     try {
         const client = await tryGetAuthenticatedClient(authContext);
         if (client !== null) {
-            authContext.setAuthState("authenticatedClient", client);
-            authContext.setAuthState("signedIn", true);
+            const instanceInfo = await client.getInstance();
+            if (instanceInfo.status !== 200) {
+                throw new Error(
+                    `Failed to get instance info: ${instanceInfo.statusText}`
+                );
+            }
+            const creds = await client.verifyAccountCredentials();
+            if (creds.status !== 200) {
+                throw new Error(
+                    `Failed to get current user info: ${creds.statusText}`
+                );
+            }
+            const domain = new URL(instanceInfo.data.uri).hostname;
+            authContext.setAuthState("signedIn", {
+                authenticatedClient: client,
+                instanceData: instanceInfo.data,
+                accountData: creds.data,
+                domain: domain,
+            });
         } else {
             authContext.setAuthState("signedIn", false);
         }
@@ -72,26 +89,29 @@ const AppFrame: Component<{ children: JSX.Element }> = (props) => {
                                 pillbug
                             </div>
                         </div>
-                        {authContext.authState.signedIn && (
-                            <Menubar>
-                                <MenubarMenu>
-                                    <MenubarTrigger>Account</MenubarTrigger>
-                                    <MenubarContent>
-                                        {authContext.authState.signedIn && (
-                                            <MenubarItem
-                                                onClick={() => {
-                                                    logOut(authContext);
-                                                    navigate("/");
-                                                }}
-                                            >
-                                                Log out
-                                            </MenubarItem>
-                                        )}
-                                    </MenubarContent>
-                                </MenubarMenu>
-                            </Menubar>
-                        )}
-                        {!authContext.authState.signedIn && (
+                        {authContext.authState.signedIn !== null &&
+                            authContext.authState.signedIn !== false && (
+                                <Menubar>
+                                    <MenubarMenu>
+                                        <MenubarTrigger>
+                                            {`${authContext.authState.signedIn.accountData.username}@${authContext.authState.signedIn.domain}`}
+                                        </MenubarTrigger>
+                                        <MenubarContent>
+                                            {authContext.authState.signedIn && (
+                                                <MenubarItem
+                                                    onClick={() => {
+                                                        logOut(authContext);
+                                                        navigate("/");
+                                                    }}
+                                                >
+                                                    Log out
+                                                </MenubarItem>
+                                            )}
+                                        </MenubarContent>
+                                    </MenubarMenu>
+                                </Menubar>
+                            )}
+                        {authContext.authState.signedIn === false && (
                             <Button
                                 onClick={() =>
                                     navigate("/login", {
