@@ -2,9 +2,9 @@ import { createContext, useContext, type Component } from "solid-js";
 
 import logo from "./logo.svg";
 import styles from "./App.module.css";
-import LandingView from "./views/landing";
+import HomeView from "./views/home";
 import { createStore, SetStoreFunction } from "solid-js/store";
-import { RouteProps, RouteSectionProps } from "@solidjs/router";
+import { RouteProps, RouteSectionProps, useNavigate } from "@solidjs/router";
 import OAuth from "megalodon/lib/src/oauth";
 import { makePersisted } from "@solid-primitives/storage";
 import generator, { MegalodonInterface } from "megalodon";
@@ -40,7 +40,7 @@ export class GetClientError extends Error {}
 
 export const AppDisplayName: string = "pillbug";
 
-interface AuthProviderProps {
+export interface AuthProviderProps {
     persistentAuthState: PersistentAuthState;
     setPersistentAuthState: SetStoreFunction<PersistentAuthState>;
     authState: EphemeralAuthState;
@@ -138,6 +138,16 @@ export async function tryGetAuthenticatedClient(
         }
         return null;
     }
+}
+
+export function logOut(authContext: AuthProviderProps) {
+    authContext.setPersistentAuthState("appData", undefined);
+    authContext.setPersistentAuthState("authorizationCode", undefined);
+    // authContext.setPersistentAuthState("instanceUrl", undefined); // this is inconvenient for dev
+    authContext.setPersistentAuthState("instanceSoftware", undefined);
+    authContext.setPersistentAuthState("token", undefined);
+    authContext.setAuthState("authenticatedClient", null);
+    authContext.setAuthState("signedIn", false);
 }
 
 export function tryGetUnauthenticatedClient(

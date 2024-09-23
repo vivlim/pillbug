@@ -1,5 +1,5 @@
 import { makePersisted } from "@solid-primitives/storage";
-import { useLocation, useSearchParams } from "@solidjs/router";
+import { useLocation, useNavigate, useSearchParams } from "@solidjs/router";
 import generator, { detector } from "megalodon";
 import { createResource, createSignal, type Component } from "solid-js";
 import {
@@ -19,6 +19,7 @@ import {
     TextFieldInput,
     TextFieldLabel,
 } from "~/components/ui/text-field";
+import { initAppFrameAsync } from "~/Frame";
 
 const LoginView: Component = () => {
     const authContext = useAuthContext();
@@ -81,6 +82,7 @@ const LoginView: Component = () => {
     const [busy, setBusy] = createSignal(false);
     const [error, setError] = createSignal<string | undefined>(undefined);
     //const [appData] = createResource(instance, doOAuth);
+    const navigate = useNavigate();
 
     const getToken = async () => {
         if (searchParams.code !== undefined) {
@@ -104,6 +106,8 @@ const LoginView: Component = () => {
                 await tryGetToken(authContext);
                 console.log("got token!");
                 setBusy(false);
+                await initAppFrameAsync(authContext);
+                navigate("/");
             } catch (error) {
                 if (error instanceof Error) {
                     console.log(`error getting token ${error.message}`);

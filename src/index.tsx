@@ -4,7 +4,7 @@ import { render } from 'solid-js/web';
 import './index.css';
 import App from './App';
 import { Route, Router } from "@solidjs/router";
-import LandingView from "./views/landing";
+import HomeView from "./views/home";
 import LoginView from "./views/login";
 import ErrorView from "./views/error";
 
@@ -19,7 +19,7 @@ if (import.meta.env.DEV && !(root instanceof HTMLElement)) {
 render(
     () => (
         <Router root={App}>
-            <Route path="/" component={LandingView} />
+            <Route path="/" component={HomeView} />
             <Route path="/login" component={LoginView} />
             <Route path="*paramName" component={ErrorView} />
         </Router>

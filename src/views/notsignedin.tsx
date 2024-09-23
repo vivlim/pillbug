@@ -6,15 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Flex } from "~/components/ui/flex";
 import { Grid, Col } from "~/components/ui/grid";
 
-const LandingView: Component = () => {
-    const authContext = useAuthContext();
-
-    const [busy, setBusy] = createSignal(true);
-
-    const getAuthenticatedClient = async () => {
-        let client = await tryGetAuthenticatedClient(authContext);
-    };
-
+const NotSignedInLandingView: Component = () => {
     return (
         <div class="flex flex-row p-8 size-full">
             <div class="md:grow"></div>
@@ -38,4 +30,4 @@ const LandingView: Component = () => {
     );
 };
 
-export default LandingView;
+export default NotSignedInLandingView;
