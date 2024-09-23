@@ -2,7 +2,13 @@ import { makePersisted } from "@solid-primitives/storage";
 import { useLocation, useSearchParams } from "@solidjs/router";
 import generator, { detector } from "megalodon";
 import { createResource, createSignal, type Component } from "solid-js";
-import { useAuthContext } from "~/App";
+import {
+    GetClientError,
+    tryGetUnauthenticatedClient,
+    tryGetToken,
+    useAuthContext,
+    AppDisplayName,
+} from "~/App";
 import { NewInstanceOauth } from "~/client/auth";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
@@ -20,15 +26,33 @@ const LoginView: Component = () => {
     const [searchParams, setSearchParams] = useSearchParams();
 
     const doOAuth = async () => {
+        if (busy()) {
+            console.log(
+                "tried to enter oauth when already busy. taking no action"
+            );
+            return;
+        }
         setBusy(true);
         try {
             let software = await detector(instance());
+            console.log(`detected software '${software}' on ${instance()}`);
+
+            // Set instance url and software in auth state. That's the minimum needed to get client
             authContext.setAuthState("instanceUrl", (_) => instance()); // Replace any existing app data. Probably shouldn't be able to do this if you are signed in!
-            let client = generator(software, instance());
+            authContext.setAuthState("instanceSoftware", (_) => software);
+
+            let client = tryGetUnauthenticatedClient(authContext);
+
             let redirect_uri = window.location.href;
+            if (window.location.search.length > 0) {
+                redirect_uri = redirect_uri.substring(
+                    0,
+                    redirect_uri.length - window.location.search.length
+                );
+            }
             console.log(`redirect uri: ${redirect_uri}`);
 
-            let appData = await client.registerApp("pillbug", {
+            let appData = await client.registerApp(AppDisplayName, {
                 redirect_uris: redirect_uri, // code will be passed as get parameter 'code'
             });
             if (appData === undefined || appData.url === null) {
@@ -37,7 +61,6 @@ const LoginView: Component = () => {
                 return;
             }
             authContext.setAuthState("appData", (_) => appData); // Replace any existing app data. Probably shouldn't be able to do this if you are signed in!
-            console.log(JSON.stringify(authContext));
             window.location.assign(appData.url);
         } catch (error) {
             if (error instanceof Error) {
@@ -54,13 +77,38 @@ const LoginView: Component = () => {
     const [error, setError] = createSignal<string | undefined>(undefined);
     //const [appData] = createResource(instance, doOAuth);
 
-    if (searchParams.code !== undefined) {
-        setBusy(true);
-        // test instanceurl
-        console.log(
-            `entered login for instance ${authContext.authState.instanceUrl} with a code`
-        );
-    }
+    const getToken = async () => {
+        if (searchParams.code !== undefined) {
+            if (busy()) {
+                console.log(
+                    "tried to enter getting token when already busy. taking no action"
+                );
+                return;
+            }
+            setBusy(true);
+            try {
+                console.log(
+                    "trying to acquire a token using the provided code"
+                );
+
+                let authContext = useAuthContext();
+                authContext.setAuthState(
+                    "authorizationCode",
+                    searchParams.code
+                );
+                await tryGetToken(authContext);
+                console.log("got token!");
+                setBusy(false);
+            } catch (error) {
+                if (error instanceof Error) {
+                    console.log(`error getting token ${error.message}`);
+                    setError(error.message);
+                    setBusy(false);
+                }
+            }
+        }
+    };
+    getToken();
 
     return (
         <div class="flex flex-row p-8 size-full">
