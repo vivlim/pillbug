@@ -1,15 +1,16 @@
 {
-  "name": "vite-template-solid",
+  "name": "pillbug",
   "version": "0.0.0",
   "description": "",
   "type": "module",
+  "homepage": "https://pillbug.vivl.im",
   "scripts": {
     "start": "vite",
     "dev": "vite",
     "build": "vite build",
     "serve": "vite preview"
   },
-  "license": "MIT",
+  "license": "UNLICENSED",
   "devDependencies": {
     "@types/node": "^22.5.5",
     "autoprefixer": "^10.4.20",
