@@ -8,6 +8,7 @@ import HomeView from "./views/home";
 import LoginView from "./views/login";
 import ErrorView from "./views/error";
 import UserProfile from "./views/userprofile";
+import PostPage from "./views/postpage";
 
 const root = document.getElementById("root");
 
@@ -23,6 +24,7 @@ render(
             <Route path="/" component={HomeView} />
             <Route path="/login" component={LoginView} />
             <Route path="/user/:username" component={UserProfile} />
+            <Route path="/post/:postId" component={PostPage} />
             <Route path="*paramName" component={ErrorView} />
         </Router>
     ),

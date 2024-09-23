@@ -27,14 +27,37 @@ const Post: Component<PostProps> = (postData) => {
     const status = postData.status;
 
     const userHref = `/user/${status.account.acct}`;
+    const postHref = `/post/${status.id}`;
 
     return (
-        <Card class="m-4">
-            <CardHeader>
-                <A href={userHref}>{status.account.display_name}</A>
-            </CardHeader>
-            <CardContent>{status.content}</CardContent>
-        </Card>
+        <div class="flex flex-row px-8 py-1">
+            <div class="w-7 flex-none">
+                <A href={userHref} class="m-2">
+                    <img
+                        src={status.account.avatar}
+                        class="size-16"
+                        alt={`the avatar of ${status.account.acct}`}
+                    />
+                </A>
+            </div>
+            <Card class="m-4 flex-1 grow ">
+                <div class="p-3 border-b">
+                    <A href={userHref} class="m-2">
+                        {status.account.display_name}
+                    </A>
+                    <A href={userHref} class="m-1 text-neutral-500">
+                        {status.account.acct}
+                    </A>
+                    <A href={postHref} class="m-1 text-neutral-500">
+                        {status.created_at}
+                    </A>
+                </div>
+                <CardContent class="p-3">{status.content}</CardContent>
+                <div class="p-3 border-t">
+                    <A href={postHref}>{status.replies_count} replies</A>
+                </div>
+            </Card>
+        </div>
     );
 };
 

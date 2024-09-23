@@ -22,13 +22,15 @@ type FeedProps = {
     firstPost?: number | null;
 };
 
-type GetTimelineOptions = {
+interface GetTimelineOptionsApi {
     local?: boolean;
     limit?: number;
     max_id?: string;
     since_id?: string;
     min_id?: string;
-};
+}
+
+interface GetTimelineOptions extends GetTimelineOptionsApi {}
 
 const fetchPostList = async (
     authContext: AuthProviderProps,
@@ -59,13 +61,11 @@ const Feed: Component<FeedProps> = (props) => {
 
     return (
         <div class="flex flex-row p-8 size-full">
-            <div class="md:grow"></div>
             <div class="grow w-max md:w-1/2 place-self">
                 <For each={posts()}>
                     {(status, index) => <Post status={status} />}
                 </For>
             </div>
-            <div class="md:grow"></div>
         </div>
     );
 };
