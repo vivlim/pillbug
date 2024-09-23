@@ -38,8 +38,13 @@ const LoginView: Component = () => {
             console.log(`detected software '${software}' on ${instance()}`);
 
             // Set instance url and software in auth state. That's the minimum needed to get client
-            authContext.setAuthState("instanceUrl", (_) => instance()); // Replace any existing app data. Probably shouldn't be able to do this if you are signed in!
-            authContext.setAuthState("instanceSoftware", (_) => software);
+            authContext.setPersistentAuthState("instanceUrl", (_) =>
+                instance()
+            ); // Replace any existing app data. Probably shouldn't be able to do this if you are signed in!
+            authContext.setPersistentAuthState(
+                "instanceSoftware",
+                (_) => software
+            );
 
             let client = tryGetUnauthenticatedClient(authContext);
 
@@ -60,7 +65,7 @@ const LoginView: Component = () => {
                 setBusy(false);
                 return;
             }
-            authContext.setAuthState("appData", (_) => appData); // Replace any existing app data. Probably shouldn't be able to do this if you are signed in!
+            authContext.setPersistentAuthState("appData", (_) => appData); // Replace any existing app data. Probably shouldn't be able to do this if you are signed in!
             window.location.assign(appData.url);
         } catch (error) {
             if (error instanceof Error) {
@@ -92,7 +97,7 @@ const LoginView: Component = () => {
                 );
 
                 let authContext = useAuthContext();
-                authContext.setAuthState(
+                authContext.setPersistentAuthState(
                     "authorizationCode",
                     searchParams.code
                 );

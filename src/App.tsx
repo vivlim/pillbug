@@ -8,10 +8,11 @@ import { RouteProps, RouteSectionProps } from "@solidjs/router";
 import OAuth from "megalodon/lib/src/oauth";
 import { makePersisted } from "@solid-primitives/storage";
 import generator, { MegalodonInterface } from "megalodon";
+import AppFrame from "./Frame";
 
 const AuthContext = createContext<AuthProviderProps>();
 
-export interface AuthState {
+export interface PersistentAuthState {
     appData?: OAuth.AppData | undefined;
     instanceUrl?: string | undefined;
     instanceSoftware?:
@@ -25,6 +26,11 @@ export interface AuthState {
     token?: TokenState | undefined;
 }
 
+export interface EphemeralAuthState {
+    signedIn: boolean | null;
+    authenticatedClient: MegalodonInterface | null;
+}
+
 interface TokenState {
     tokenData: OAuth.TokenData;
     expiresAfterTime: number | null;
@@ -35,8 +41,10 @@ export class GetClientError extends Error {}
 export const AppDisplayName: string = "pillbug";
 
 interface AuthProviderProps {
-    authState: AuthState;
-    setAuthState: SetStoreFunction<AuthState>;
+    persistentAuthState: PersistentAuthState;
+    setPersistentAuthState: SetStoreFunction<PersistentAuthState>;
+    authState: EphemeralAuthState;
+    setAuthState: SetStoreFunction<EphemeralAuthState>;
 }
 
 export function useAuthContext(): AuthProviderProps {
@@ -62,7 +70,7 @@ async function checkToken(
     authContext: AuthProviderProps,
     tryRefresh: boolean
 ): Promise<boolean> {
-    let tokenState = authContext.authState.token;
+    let tokenState = authContext.persistentAuthState.token;
 
     if (tokenState === undefined) {
         console.log("There is no token state currently");
@@ -101,7 +109,7 @@ async function checkToken(
 export async function tryGetAuthenticatedClient(
     authContext: AuthProviderProps
 ): Promise<MegalodonInterface | null> {
-    let authState = authContext.authState;
+    let authState = authContext.persistentAuthState;
 
     if (
         authState.instanceSoftware === undefined ||
@@ -135,7 +143,7 @@ export async function tryGetAuthenticatedClient(
 export function tryGetUnauthenticatedClient(
     authContext: AuthProviderProps
 ): MegalodonInterface {
-    let authState = authContext.authState;
+    let authState = authContext.persistentAuthState;
 
     if (
         authState.instanceSoftware === undefined ||
@@ -156,7 +164,7 @@ export function tryGetUnauthenticatedClient(
 export async function tryGetToken(
     authContext: AuthProviderProps
 ): Promise<OAuth.TokenData> {
-    let authState = authContext.authState;
+    let authState = authContext.persistentAuthState;
     let client = tryGetUnauthenticatedClient(authContext);
 
     let tokenDataPromise: Promise<OAuth.TokenData> | null = null;
@@ -222,12 +230,12 @@ export async function tryGetToken(
     let accessToken = await tokenDataPromise;
 
     if (accessToken.expires_in === null) {
-        authContext.setAuthState("token", {
+        authContext.setPersistentAuthState("token", {
             tokenData: accessToken,
             expiresAfterTime: null,
         });
     } else {
-        authContext.setAuthState("token", {
+        authContext.setPersistentAuthState("token", {
             tokenData: accessToken,
             expiresAfterTime: nowUtc + accessToken.expires_in,
         });
@@ -237,24 +245,26 @@ export async function tryGetToken(
 }
 
 const App: Component<RouteSectionProps> = (props: RouteSectionProps) => {
-    const [authState, setAuthState] = makePersisted(
-        createStore<AuthState>({
+    const [persistentAuthState, setPersistentAuthState] = makePersisted(
+        createStore<PersistentAuthState>({
             appData: undefined,
             instanceUrl: undefined,
         })
     );
+    const [authState, setAuthState] = createStore<EphemeralAuthState>({
+        signedIn: null,
+        authenticatedClient: null,
+    });
     return (
-        <AuthContext.Provider value={{ authState, setAuthState }}>
-            <div class="bg-white dark:bg-slate-800">
-                <div class="sticky top-0 z-40 w-full backdrop-blur flex-none">
-                    <div class="max-w-8xl mx-auto">
-                        <div class="py-4 border-b border-slade-900/10 lg:px-8 lg:border-0 dark:border-slate-300/10 mx-4 lg:mx-0">
-                            pillbug
-                        </div>
-                    </div>
-                </div>
-                {props.children}
-            </div>
+        <AuthContext.Provider
+            value={{
+                persistentAuthState: persistentAuthState,
+                setPersistentAuthState: setPersistentAuthState,
+                authState: authState,
+                setAuthState: setAuthState,
+            }}
+        >
+            <AppFrame>{props.children}</AppFrame>
         </AuthContext.Provider>
     );
 };
