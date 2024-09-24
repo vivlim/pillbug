@@ -9,6 +9,7 @@ import LoginView from "./views/login";
 import ErrorView from "./views/error";
 import UserProfile from "./views/userprofile";
 import PostPage from "./views/postpage";
+import DevEditDialogPage from "./views/dev/editdialogpage";
 
 const root = document.getElementById("root");
 
@@ -26,6 +27,7 @@ render(
             <Route path="/user/:username" component={UserProfile} />
             <Route path="/post/:postId" component={PostPage} />
             <Route path="*paramName" component={ErrorView} />
+            <Route path="/dev/editDialog" component={DevEditDialogPage} />
         </Router>
     ),
     root!

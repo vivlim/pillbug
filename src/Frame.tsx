@@ -47,7 +47,11 @@ export const initAppFrameAsync = async (authContext: AuthProviderProps) => {
                     `Failed to get current user info: ${creds.statusText}`
                 );
             }
-            const domain = new URL(instanceInfo.data.uri).hostname;
+            console.log(`signed in to instance ${instanceInfo.data.uri}`);
+            let domain = instanceInfo.data.uri;
+            try {
+                domain = new URL(instanceInfo.data.uri).hostname;
+            } catch {}
             authContext.setAuthState("signedIn", {
                 authenticatedClient: client,
                 instanceData: instanceInfo.data,
@@ -113,6 +117,17 @@ const AppFrame: Component<{ children: JSX.Element }> = (props) => {
                                                         Log out
                                                     </MenubarItem>
                                                 )}
+
+                                                <MenubarItem
+                                                    onClick={() => {
+                                                        logOut(authContext);
+                                                        navigate(
+                                                            "/dev/editDialog"
+                                                        );
+                                                    }}
+                                                >
+                                                    Dev tools: edit dialog
+                                                </MenubarItem>
                                             </MenubarContent>
                                         </MenubarMenu>
                                     </Menubar>
