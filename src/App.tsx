@@ -1,4 +1,11 @@
-import { createContext, useContext, type Component } from "solid-js";
+import {
+    Accessor,
+    createContext,
+    createSignal,
+    Setter,
+    useContext,
+    type Component,
+} from "solid-js";
 
 import logo from "./logo.svg";
 import styles from "./App.module.css";
@@ -13,7 +20,19 @@ import { Instance } from "megalodon/lib/src/entities/instance";
 import { Account } from "megalodon/lib/src/entities/account";
 
 const AuthContext = createContext<AuthProviderProps>();
+export interface AuthProviderProps {
+    persistentAuthState: PersistentAuthState;
+    setPersistentAuthState: SetStoreFunction<PersistentAuthState>;
+    authState: EphemeralAuthState;
+    setAuthState: SetStoreFunction<EphemeralAuthState>;
+}
 
+const EditingOverlayContext = createContext<EditingOverlayProps>();
+
+export interface EditingOverlayProps {
+    showingEditorOverlay: Accessor<boolean>;
+    setShowingEditorOverlay: Setter<boolean>;
+}
 export interface PersistentAuthState {
     appData?: OAuth.AppData | undefined;
     instanceUrl?: string | undefined;
@@ -49,17 +68,18 @@ export class GetClientError extends Error {}
 
 export const AppDisplayName: string = "pillbug";
 
-export interface AuthProviderProps {
-    persistentAuthState: PersistentAuthState;
-    setPersistentAuthState: SetStoreFunction<PersistentAuthState>;
-    authState: EphemeralAuthState;
-    setAuthState: SetStoreFunction<EphemeralAuthState>;
-}
-
 export function useAuthContext(): AuthProviderProps {
     const value = useContext(AuthContext);
     if (value === undefined) {
         throw new Error("useAuthContext must be used within a provider");
+    }
+    return value;
+}
+
+export function useEditOverlayContext(): EditingOverlayProps {
+    const value = useContext(EditingOverlayContext);
+    if (value === undefined) {
+        throw new Error("useEditOverlayContext must be used within a provider");
     }
     return value;
 }
@@ -272,6 +292,9 @@ const App: Component<RouteSectionProps> = (props: RouteSectionProps) => {
     const [authState, setAuthState] = createStore<EphemeralAuthState>({
         signedIn: null,
     });
+
+    const [showingEditorOverlay, setShowingEditorOverlay] = createSignal(false);
+
     return (
         <AuthContext.Provider
             value={{
@@ -281,7 +304,14 @@ const App: Component<RouteSectionProps> = (props: RouteSectionProps) => {
                 setAuthState: setAuthState,
             }}
         >
-            <AppFrame>{props.children}</AppFrame>
+            <EditingOverlayContext.Provider
+                value={{
+                    showingEditorOverlay: showingEditorOverlay,
+                    setShowingEditorOverlay: setShowingEditorOverlay,
+                }}
+            >
+                <AppFrame>{props.children}</AppFrame>
+            </EditingOverlayContext.Provider>
         </AuthContext.Provider>
     );
 };

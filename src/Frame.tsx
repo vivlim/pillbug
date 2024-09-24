@@ -19,6 +19,7 @@ import {
     logOut,
     tryGetAuthenticatedClient,
     useAuthContext,
+    useEditOverlayContext,
 } from "./App";
 import {
     Menubar,
@@ -28,6 +29,7 @@ import {
     MenubarTrigger,
 } from "./components/ui/menubar";
 import { Button } from "./components/ui/button";
+import EditOverlay from "./views/editoverlay";
 
 export const initAppFrameAsync = async (authContext: AuthProviderProps) => {
     try {
@@ -64,6 +66,7 @@ export const initAppFrameAsync = async (authContext: AuthProviderProps) => {
 
 const AppFrame: Component<{ children: JSX.Element }> = (props) => {
     const authContext = useAuthContext();
+    const editingOverlayContext = useEditOverlayContext();
     const [busy, setBusy] = createSignal(true);
 
     const init = async () => {
@@ -78,6 +81,7 @@ const AppFrame: Component<{ children: JSX.Element }> = (props) => {
 
     return (
         <div class="bg-white dark:bg-slate-800">
+            <EditOverlay></EditOverlay>
             <div class="sticky top-0 z-40 w-full backdrop-blur flex-none">
                 <div class="max-w-8xl mx-auto">
                     <div class="py-4 border-b border-slate-900/10 lg:px-8 lg:border-0 dark:border-slate-300/10 mx-4 lg:mx-0 flex flex-row">
@@ -91,25 +95,38 @@ const AppFrame: Component<{ children: JSX.Element }> = (props) => {
                         </div>
                         {authContext.authState.signedIn !== null &&
                             authContext.authState.signedIn !== false && (
-                                <Menubar>
-                                    <MenubarMenu>
-                                        <MenubarTrigger>
-                                            {`${authContext.authState.signedIn.accountData.username}@${authContext.authState.signedIn.domain}`}
-                                        </MenubarTrigger>
-                                        <MenubarContent>
-                                            {authContext.authState.signedIn && (
-                                                <MenubarItem
-                                                    onClick={() => {
-                                                        logOut(authContext);
-                                                        navigate("/");
-                                                    }}
-                                                >
-                                                    Log out
-                                                </MenubarItem>
-                                            )}
-                                        </MenubarContent>
-                                    </MenubarMenu>
-                                </Menubar>
+                                <>
+                                    <Menubar>
+                                        <MenubarMenu>
+                                            <MenubarTrigger>
+                                                {`${authContext.authState.signedIn.accountData.username}@${authContext.authState.signedIn.domain}`}
+                                            </MenubarTrigger>
+                                            <MenubarContent>
+                                                {authContext.authState
+                                                    .signedIn && (
+                                                    <MenubarItem
+                                                        onClick={() => {
+                                                            logOut(authContext);
+                                                            navigate("/");
+                                                        }}
+                                                    >
+                                                        Log out
+                                                    </MenubarItem>
+                                                )}
+                                            </MenubarContent>
+                                        </MenubarMenu>
+                                    </Menubar>
+
+                                    <Button
+                                        onClick={() =>
+                                            editingOverlayContext.setShowingEditorOverlay(
+                                                true
+                                            )
+                                        }
+                                    >
+                                        Post
+                                    </Button>
+                                </>
                             )}
                         {authContext.authState.signedIn === false && (
                             <Button

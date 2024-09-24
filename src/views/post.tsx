@@ -17,6 +17,7 @@ import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Flex } from "~/components/ui/flex";
 import { Grid, Col } from "~/components/ui/grid";
+import HtmlSandbox from "./htmlsandbox";
 
 export type PostProps = {
     status: Status;
@@ -31,11 +32,11 @@ const Post: Component<PostProps> = (postData) => {
 
     return (
         <div class="flex flex-row px-8 py-1">
-            <div class="w-7 flex-none">
-                <A href={userHref} class="m-2">
+            <div class="w-7 flex-none size-16 aspect-square">
+                <A href={userHref} class="m-2 size-16 aspect-square">
                     <img
                         src={status.account.avatar}
-                        class="size-16"
+                        class="size-16 aspect-square"
                         alt={`the avatar of ${status.account.acct}`}
                     />
                 </A>
@@ -52,7 +53,9 @@ const Post: Component<PostProps> = (postData) => {
                         {status.created_at}
                     </A>
                 </div>
-                <CardContent class="p-3">{status.content}</CardContent>
+                <CardContent class="p-3">
+                    <HtmlSandbox html={status.content} />
+                </CardContent>
                 <div class="p-3 border-t">
                     <A href={postHref}>{status.replies_count} replies</A>
                 </div>
