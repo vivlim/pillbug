@@ -17,6 +17,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Flex } from "~/components/ui/flex";
 import { Grid, Col } from "~/components/ui/grid";
 import Post from "./post";
+import { Status } from "megalodon/lib/src/entities/status";
 
 type FeedProps = {
     firstPost?: number | null;
@@ -42,11 +43,17 @@ const fetchPostList = async (
     }
 
     const client = authContext.authState.signedIn.authenticatedClient;
+    const posts: Status[] = [];
     const result = await client.getHomeTimeline(timelineOptions);
     if (result.status !== 200) {
         throw new Error(`Failed to get timeline: ${result.statusText}`);
     }
-    setPosts(result.data);
+    for (const post of result.data) {
+        if (post.in_reply_to_id === null) {
+            posts.push(post);
+        }
+    }
+    setPosts(posts);
 };
 
 const Feed: Component<FeedProps> = (props) => {

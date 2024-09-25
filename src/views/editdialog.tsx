@@ -33,6 +33,7 @@ import {
     TextFieldLabel,
     TextFieldInput,
     TextField,
+    TextFieldTextArea,
 } from "~/components/ui/text-field";
 import { DialogRootProps } from "@kobalte/core/dialog";
 
@@ -43,19 +44,17 @@ const EditDialog: Component<EditDialogProps> = (props) => {
 
     return (
         <Dialog open={props.open} onOpenChange={props.onOpenChange}>
-            <DialogContent class="sm:max-w-[425px]">
+            <DialogContent class="w-1/2 m-4">
                 <DialogHeader>
                     <DialogTitle>New post</DialogTitle>
                     <DialogDescription>write your cool post</DialogDescription>
                 </DialogHeader>
                 <div class="grid gap-4 py-4">
                     <TextField class="grid grid-cols-4 items-center gap-4">
-                        <TextFieldLabel class="text-right">Name</TextFieldLabel>
-                        <TextFieldInput
+                        <TextFieldTextArea
                             value="sup"
                             class="col-span-3"
-                            type="text"
-                        />
+                        ></TextFieldTextArea>
                     </TextField>
                 </div>
                 <DialogFooter>
