@@ -29,6 +29,7 @@
     "clsx": "^2.1.1",
     "digraph-js": "^2.2.3",
     "megalodon": "^10.0.3",
+    "solid-icons": "^1.1.0",
     "solid-js": "^1.8.11",
     "tailwind-merge": "^2.5.2",
     "tailwindcss-animate": "^1.0.7"

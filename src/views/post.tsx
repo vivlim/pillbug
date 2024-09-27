@@ -30,6 +30,7 @@ import {
     ContextMenuTrigger,
 } from "~/components/ui/context-menu";
 import { TextField, TextFieldTextArea } from "~/components/ui/text-field";
+import { FaSolidArrowsRotate } from "solid-icons/fa";
 
 export type PostProps = {
     status: Status;
@@ -47,18 +48,18 @@ const Post: Component<PostProps> = (postData) => {
     return (
         <div class="flex flex-row px-8 py-1">
             <ErrorBoundary fallback={(err) => err}>
-                <div class="w-7 flex-none size-16 aspect-square">
+                <div class="w-16 flex-none">
                     <A href={userHref} class="m-2 size-16 aspect-square">
                         <img
                             src={status.account.avatar}
-                            class="size-16 aspect-square"
+                            class="aspect-square"
                             alt={`the avatar of ${status.account.acct}`}
                         />
                     </A>
                 </div>
                 <Card class="m-4 flex-1 grow ">
                     <div class="p-3 border-b">
-                        <A href={userHref} class="m-2">
+                        <A href={userHref} class="m-2 whitespace-nowrap">
                             {status.account.display_name}
                         </A>
                         <A href={userHref} class="m-1 text-neutral-500">
@@ -68,16 +69,16 @@ const Post: Component<PostProps> = (postData) => {
                             {status.created_at}
                         </A>
                         <Show when={status.reblog !== null}>
-                            reblogged
+                            <FaSolidArrowsRotate class="inline-block m-1" />
                             <A
                                 href={`/user/${status.reblog!.account.acct}`}
-                                class="m-2"
+                                class="m-2 whitespace-nowrap"
                             >
                                 {status.reblog!.account.display_name}
                             </A>
                             <A
                                 href={`/user/${status.reblog!.account.acct}`}
-                                class="m-1 text-neutral-500"
+                                class="m-1 text-neutral-500 whitespace-nowrap"
                             >
                                 {status.reblog!.account.acct}
                             </A>
@@ -95,7 +96,7 @@ const Post: Component<PostProps> = (postData) => {
                                     href={`/user/${
                                         status.reblog!.account.acct
                                     }`}
-                                    class="m-2"
+                                    class="m-2 whitespace-nowrap"
                                 >
                                     {status.reblog!.account.display_name}
                                 </A>
