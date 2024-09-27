@@ -3,9 +3,12 @@ import { Entity } from "megalodon";
 import {
     createResource,
     createSignal,
+    ErrorBoundary,
     For,
+    Match,
     Setter,
     Show,
+    Switch,
     type Component,
 } from "solid-js";
 import {
@@ -140,26 +143,32 @@ const PostPage: Component = () => {
     );
 
     return (
-        <>
-            {threadInfo.loading && <div>loading post</div>}
-
-            <Show when={threadInfo() !== undefined}>
-                <Post
-                    status={
-                        threadInfo()
-                            ?.post as Status /* I don't know why this cast is necessary. todo: convince the type system correctly. */
-                    }
-                />
-                <For each={threadInfo()?.comments}>
-                    {(statusWithDepth, index) => (
-                        <CommentPostComponent
-                            status={statusWithDepth.status}
-                            depth={statusWithDepth.depth}
-                        />
-                    )}
-                </For>
-            </Show>
-        </>
+        <ErrorBoundary fallback={(err) => err}>
+            <Switch>
+                <Match when={threadInfo.loading}>
+                    <div>loading post</div>
+                </Match>
+                <Match when={threadInfo.state === "ready"}>
+                    <Post
+                        status={
+                            threadInfo()
+                                ?.post as Status /* I don't know why this cast is necessary. todo: convince the type system correctly. */
+                        }
+                    />
+                    <For each={threadInfo()?.comments}>
+                        {(statusWithDepth, index) => (
+                            <CommentPostComponent
+                                status={statusWithDepth.status}
+                                depth={statusWithDepth.depth}
+                            />
+                        )}
+                    </For>
+                </Match>
+                <Match when={threadInfo.error}>
+                    <div>error: {threadInfo.error}</div>
+                </Match>
+            </Switch>
+        </ErrorBoundary>
     );
 };
 
