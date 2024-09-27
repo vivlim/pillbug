@@ -84,7 +84,7 @@ const AppFrame: Component<{ children: JSX.Element }> = (props) => {
     const navigate = useNavigate();
 
     return (
-        <div class="bg-white dark:bg-slate-800">
+        <div>
             <EditOverlay></EditOverlay>
             <div class="sticky top-0 z-40 w-full backdrop-blur flex-none">
                 <div class="max-w-8xl mx-auto">
@@ -117,6 +117,17 @@ const AppFrame: Component<{ children: JSX.Element }> = (props) => {
                                                         Log out
                                                     </MenubarItem>
                                                 )}
+
+                                                <MenubarItem
+                                                    onClick={() => {
+                                                        logOut(authContext);
+                                                        navigate(
+                                                            "/dev/editDialog"
+                                                        );
+                                                    }}
+                                                >
+                                                    Dev tools: edit dialog
+                                                </MenubarItem>
 
                                                 <MenubarItem
                                                     onClick={() => {

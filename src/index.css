@@ -50,7 +50,7 @@
 
   .dark,
   [data-kb-theme="dark"] {
-    --background: 240 10% 3.9%;
+    --background: 240 10% 7%;
     --foreground: 0 0% 98%;
 
     --muted: 240 3.7% 15.9%;
@@ -62,7 +62,7 @@
     --popover: 240 10% 3.9%;
     --popover-foreground: 0 0% 98%;
 
-    --border: 240 3.7% 15.9%;
+    --border: 240 3.7% 33.9%;
     --input: 240 3.7% 15.9%;
 
     --card: 240 10% 3.9%;
