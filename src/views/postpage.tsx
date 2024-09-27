@@ -1,6 +1,7 @@
 import { A, useParams } from "@solidjs/router";
 import { Entity } from "megalodon";
 import {
+    children,
     createResource,
     createSignal,
     ErrorBoundary,
@@ -22,8 +23,8 @@ import { Flex } from "~/components/ui/flex";
 import { Grid, Col } from "~/components/ui/grid";
 import Post from "./post";
 import { Status } from "megalodon/lib/src/entities/status";
-import CommentPostComponent from "./comment";
 import { DiGraph, VertexDefinition } from "digraph-js";
+import { CommentPostComponent } from "./comment";
 
 type FeedProps = {
     firstPost?: number | null;
@@ -37,12 +38,12 @@ type GetTimelineOptions = {
     min_id?: string;
 };
 
-const fetchPostInfo = async (
+async function fetchPostInfo(
     authContext: AuthProviderProps,
     postId: string
-) => {
+): Promise<NestedStatus> {
     if (!authContext.authState.signedIn) {
-        return;
+        throw new Error(`Not signed in`);
     }
 
     const client = authContext.authState.signedIn.authenticatedClient;
@@ -62,68 +63,116 @@ const fetchPostInfo = async (
         );
     }
 
-    const graph = new DiGraph<VertexDefinition<Status>>();
-    const statuses = [
-        requestedStatus.data,
-        requestedStatusContext.data.ancestors,
-        requestedStatusContext.data.descendants,
-    ].flat();
-    graph.addVertices(...statuses.map((s) => statusNode(s)));
+    let rootPost: StatusNode = new NestedStatus(requestedStatus.data, [], true);
+    let unsortedStatuses: Status[] = [];
+    unsortedStatuses.push(...requestedStatusContext.data.ancestors);
+    unsortedStatuses.push(...requestedStatusContext.data.descendants);
 
-    const rootStatuses = [];
+    let idMap: Map<string, StatusNode> = new Map();
+    idMap.set(rootPost.status.id, rootPost);
 
-    for (const s of statuses) {
-        if (s.in_reply_to_id !== null) {
-            graph.addEdge({ from: s.in_reply_to_id, to: s.id });
-        } else {
-            rootStatuses.push(s);
+    // Go upwards until finding the root, in case the requested status is a reply.
+    while (rootPost.status.in_reply_to_id !== null) {
+        const parentStatusIndex = unsortedStatuses.findIndex(
+            (s) => s.id === (rootPost as NestedStatus).status.in_reply_to_id
+        );
+        if (parentStatusIndex === -1) {
+            // The parent of this isn't available, so it's just going to be the parent.
+            break;
         }
+
+        const newRootStatus: Status = unsortedStatuses.splice(
+            parentStatusIndex,
+            1
+        )[0];
+        rootPost = new NestedStatus(newRootStatus, [rootPost]);
+        idMap.set(rootPost.status.id, rootPost);
     }
 
-    console.log(`roots: ${rootStatuses.length}`);
+    // Try to attach all the remaining statuses to the tree somewhere
+    while (unsortedStatuses.length > 0) {
+        let numAdded = 0;
 
-    if (graph.hasCycles()) {
-        console.log(`graph has cycles.`);
-    }
-
-    const rootVertexId = rootStatuses.shift()?.id;
-    if (rootVertexId === undefined) {
-        console.log("no root vertex");
-        throw new Error("no root vertex");
-    }
-
-    let anyNodesWithUnlabelledDepth = true;
-    let currentDepth = 1;
-    let nodeDepths = new Map<string, number>();
-    while (anyNodesWithUnlabelledDepth) {
-        anyNodesWithUnlabelledDepth = false;
-
-        for (const id of graph.getDeepChildren(rootVertexId, currentDepth)) {
-            if (!nodeDepths.has(id)) {
-                anyNodesWithUnlabelledDepth = true;
-                nodeDepths.set(id, currentDepth);
+        for (let i = 0; i < unsortedStatuses.length; i++) {
+            const status = unsortedStatuses[i];
+            if (status.in_reply_to_id === null) {
+                // This is not attached to anything. Just stick it underneath the root.
+                const s = new NestedStatus(status, []);
+                idMap.set(status.id, s);
+                rootPost.children.push(s);
+                numAdded += 1;
+                unsortedStatuses.splice(i, 1);
+                continue;
+            }
+            const existingParent = idMap.get(status.in_reply_to_id);
+            if (existingParent !== undefined) {
+                // The parent of this status has a nestedstatus node, so we can attach this status to it now.
+                const s = new NestedStatus(status, []);
+                idMap.set(status.id, s);
+                existingParent.children.push(s);
+                numAdded += 1;
+                unsortedStatuses.splice(i, 1);
+                continue;
             }
         }
 
-        currentDepth += 1;
+        if (unsortedStatuses.length === 0) {
+            break;
+        }
+
+        if (numAdded === 0) {
+            let status = unsortedStatuses.pop()!;
+            let statusNode = new NestedStatus(status, [], false);
+            let missingPostMarker = new StatusPlaceholder(
+                `Missing post id ${status?.in_reply_to_id}`,
+                [statusNode],
+                false
+            );
+            idMap.set(status.id, statusNode);
+            rootPost.children.push(statusNode);
+        }
     }
 
-    const dfsStatuses = graph.traverseEager({
-        rootVertexId: rootVertexId,
-        traversal: "dfs",
-    });
-    const firstStatus = dfsStatuses.shift();
-    return {
-        post: firstStatus?.body,
-        comments: dfsStatuses.map((v) => {
-            return { status: v.body, depth: nodeDepths.get(v.id) ?? 0 };
-        }),
-    };
-};
+    // Now try to attach
 
-interface StatusWithDepth {
-    depth: number;
+    return rootPost;
+}
+
+interface ArrangedThreadContext {
+    post: Status;
+    comments: NestedStatus[];
+}
+
+type StatusNode = NestedStatus | StatusPlaceholder;
+
+class NestedStatus {
     status: Status;
+    children: NestedStatus[];
+    highlighted: boolean;
+    constructor(
+        status: Status,
+        children: NestedStatus[],
+        highlighted: boolean = false
+    ) {
+        this.status = status;
+        this.children = children;
+        this.highlighted = highlighted;
+    }
+}
+
+class StatusPlaceholder {
+    message: string;
+    children: NestedStatus[];
+    highlighted: boolean;
+    constructor(
+        message: string,
+        children: NestedStatus[],
+        highlighted: boolean = false
+    ) {
+        this.message = message;
+        this.children = children;
+        this.highlighted = highlighted;
+    }
 }
 
 function statusNode(status: Status): VertexDefinition<Status> {
@@ -133,6 +182,62 @@ function statusNode(status: Status): VertexDefinition<Status> {
         adjacentTo: [],
     };
 }
+
+const TopNestedComment: Component<{ node: StatusNode }> = (props) => {
+    return (
+        <ErrorBoundary fallback={(err) => err}>
+            <Card class="m-4 mx-20 my-1 py-4 px-4">
+                <div>
+                    <Switch>
+                        <Match when={props.node instanceof NestedStatus}>
+                            <CommentPostComponent
+                                status={(props.node as NestedStatus).status}
+                            />
+                        </Match>
+                        <Match when={props.node instanceof StatusPlaceholder}>
+                            <Card class="m-4 flex flex-row mx-20 my-1 py-1">
+                                {(props.node as StatusPlaceholder).message}
+                            </Card>
+                        </Match>
+                    </Switch>
+                </div>
+                <div class="ml-8 border-l pl-4 pr-4">
+                    <For each={props.node.children}>
+                        {(node, index) => <InnerNestedComment node={node} />}
+                    </For>
+                </div>
+            </Card>
+        </ErrorBoundary>
+    );
+};
+
+const InnerNestedComment: Component<{ node: StatusNode }> = (props) => {
+    return (
+        <ErrorBoundary fallback={(err) => err}>
+            <Switch>
+                <Match when={props.node instanceof NestedStatus}>
+                    <CommentPostComponent
+                        status={(props.node as NestedStatus).status}
+                    />
+                </Match>
+                <Match when={props.node instanceof StatusPlaceholder}>
+                    <Card class="m-4 flex flex-row mx-20 my-1 py-1">
+                        {(props.node as StatusPlaceholder).message}
+                    </Card>
+                </Match>
+            </Switch>
+            <div class="ml-4">
+                <For each={props.node.children}>
+                    {(node, index) => <InnerNestedComment node={node} />}
+                </For>
+            </div>
+        </ErrorBoundary>
+    );
+};
+
+export type CommentProps = {
+    status: Status;
+};
 
 const PostPage: Component = () => {
     const authContext = useAuthContext();
@@ -152,16 +257,11 @@ const PostPage: Component = () => {
                     <Post
                         status={
                             threadInfo()
-                                ?.post as Status /* I don't know why this cast is necessary. todo: convince the type system correctly. */
+                                ?.status as Status /* i don't think a placeholder should ever become root? */
                         }
                     />
-                    <For each={threadInfo()?.comments}>
-                        {(statusWithDepth, index) => (
-                            <CommentPostComponent
-                                status={statusWithDepth.status}
-                                depth={statusWithDepth.depth}
-                            />
-                        )}
+                    <For each={threadInfo()?.children}>
+                        {(node, index) => <TopNestedComment node={node} />}
                     </For>
                 </Match>
                 <Match when={threadInfo.error}>
