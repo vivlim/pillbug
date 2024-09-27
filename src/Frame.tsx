@@ -120,13 +120,42 @@ const AppFrame: Component<{ children: JSX.Element }> = (props) => {
 
                                                 <MenubarItem
                                                     onClick={() => {
-                                                        logOut(authContext);
-                                                        navigate(
-                                                            "/dev/editDialog"
-                                                        );
+                                                        if (
+                                                            window.localStorage.getItem(
+                                                                "theme"
+                                                            ) === "dark" ||
+                                                            (localStorage.getItem(
+                                                                "theme"
+                                                            ) === null &&
+                                                                window.matchMedia(
+                                                                    "(prefers-color-scheme: dark)"
+                                                                ).matches)
+                                                        ) {
+                                                            console.log(
+                                                                "switch to light theme"
+                                                            );
+                                                            window.localStorage.setItem(
+                                                                "theme",
+                                                                "light"
+                                                            );
+                                                            document.documentElement.classList.remove(
+                                                                "dark"
+                                                            );
+                                                        } else {
+                                                            console.log(
+                                                                "switch to dark theme"
+                                                            );
+                                                            window.localStorage.setItem(
+                                                                "theme",
+                                                                "dark"
+                                                            );
+                                                            document.documentElement.classList.add(
+                                                                "dark"
+                                                            );
+                                                        }
                                                     }}
                                                 >
-                                                    Dev tools: edit dialog
+                                                    Toggle light/dark
                                                 </MenubarItem>
 
                                                 <MenubarItem
