@@ -1,4 +1,4 @@
-import { A } from "@solidjs/router";
+import { A, useNavigate, useParams } from "@solidjs/router";
 import { createResource, createSignal, type Component } from "solid-js";
 import { tryGetAuthenticatedClient, useAuthContext } from "~/App";
 import { Button } from "~/components/ui/button";
@@ -10,13 +10,17 @@ import Feed from "./feed";
 
 const HomeView: Component = () => {
     const authContext = useAuthContext();
-
     const [busy, setBusy] = createSignal(true);
+    const navigate = useNavigate();
+
+    if (authContext.authState.signedIn) {
+        navigate("/feed");
+    }
 
     return (
         <>
             {!authContext.authState.signedIn && <NotSignedInLandingView />}
-            {authContext.authState.signedIn && <Feed />}
+            {authContext.authState.signedIn && <div>redirecting to feed</div>}
         </>
     );
 };

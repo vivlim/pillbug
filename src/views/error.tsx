@@ -13,7 +13,7 @@ const ErrorView: Component = () => {
                     <CardHeader>
                         <CardTitle>oh no</CardTitle>
                     </CardHeader>
-                    <CardContent>ouchie</CardContent>
+                    <CardContent>not found</CardContent>
                 </Card>
             </div>
             <div class="md:grow"></div>

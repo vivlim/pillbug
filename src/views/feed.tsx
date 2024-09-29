@@ -1,8 +1,9 @@
-import { A } from "@solidjs/router";
+import { A, useNavigate, useParams, useSearchParams } from "@solidjs/router";
 import { Entity } from "megalodon";
 import {
     createResource,
     createSignal,
+    ErrorBoundary,
     For,
     Setter,
     type Component,
@@ -20,7 +21,7 @@ import Post from "./post";
 import { Status } from "megalodon/lib/src/entities/status";
 
 type FeedProps = {
-    firstPost?: number | null;
+    before_id?: string | null;
 };
 
 interface GetTimelineOptionsApi {
@@ -35,9 +36,11 @@ interface GetTimelineOptions extends GetTimelineOptionsApi {}
 
 const fetchPostList = async (
     authContext: AuthProviderProps,
-    timelineOptions: GetTimelineOptions,
-    setPosts: Setter<Entity.Status[]>
+    timelineOptions: GetTimelineOptions
 ) => {
+    console.log(
+        `fetching posts with options: ${JSON.stringify(timelineOptions)}`
+    );
     if (!authContext.authState.signedIn) {
         return;
     }
@@ -53,27 +56,59 @@ const fetchPostList = async (
             posts.push(post);
         }
     }
-    setPosts(posts);
+    return posts;
 };
 
-const Feed: Component<FeedProps> = (props) => {
+const Feed: Component = () => {
     const authContext = useAuthContext();
     const [pageNumber, setPageNumber] = createSignal(0);
-    const [posts, setPosts] = createSignal<Array<Entity.Status>>([]);
-    const [timelineOptions, setTimelineOptions] =
-        createSignal<GetTimelineOptions>({ local: false, limit: 25 });
-    const [postList] = createResource(timelineOptions, () =>
-        fetchPostList(authContext, timelineOptions(), setPosts)
+    const [searchParams, setSearchParams] = useSearchParams();
+    const [postList] = createResource(
+        () => {
+            return {
+                local: false,
+                limit: 25,
+                max_id: searchParams.after,
+            };
+        }, // If this returns null or undefined, resource won't be loaded.
+        (options) => fetchPostList(authContext, options)
     );
+    const navigate = useNavigate();
 
     return (
-        <div class="flex flex-row p-8 size-full">
-            <div class="grow w-max md:w-1/2 place-self">
-                <For each={posts()}>
-                    {(status, index) => <Post status={status} />}
-                </For>
+        <>
+            <div class="flex flex-row p-8 size-full">
+                <ErrorBoundary fallback={<div>ouch!</div>}>
+                    <div class="grow w-max md:w-1/2 place-self">
+                        <For each={postList()}>
+                            {(status, index) => <Post status={status} />}
+                        </For>
+                    </div>
+                </ErrorBoundary>
             </div>
-        </div>
+            <div>
+                <div class="flex flex-row w-100 m-8">
+                    <div class="grow"></div>
+                    <Button
+                        class="grow-0"
+                        onClick={() => {
+                            let p = postList();
+                            if (p !== undefined) {
+                                let last = p[p.length - 1];
+                                if (last !== undefined) {
+                                    setSearchParams(
+                                        { after: last.id },
+                                        { scroll: true }
+                                    );
+                                }
+                            }
+                        }}
+                    >
+                        Next
+                    </Button>
+                </div>
+            </div>
+        </>
     );
 };
 
