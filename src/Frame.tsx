@@ -88,111 +88,118 @@ const AppFrame: Component<{ children: JSX.Element }> = (props) => {
             <EditOverlay></EditOverlay>
             <div class="sticky top-0 z-40 w-full backdrop-blur flex-none">
                 <div class="max-w-8xl mx-auto">
-                    <div class="py-4 border-b border-slate-900/10 lg:px-8 lg:border-0 dark:border-slate-300/10 mx-4 lg:mx-0 flex flex-row">
-                        <div class="grow">
-                            <div
-                                class="cursor-pointer"
-                                onClick={() => navigate("/")}
-                            >
-                                pillbug
-                            </div>
+                    <div class="border-b border-slate-900/10 lg:px-8 lg:border-0 dark:border-slate-300/10 mx-4 lg:mx-0 flex flex-row">
+                        <div
+                            class="flex-0 p-4 cursor-pointer"
+                            onClick={() => navigate("/")}
+                        >
+                            <span class="text-lg">pillbug</span>{" "}
+                            <span class="text-xs">pre-alpha</span>
                         </div>
+                        <div class="flex-1 py-4"></div>
                         {authContext.authState.signedIn !== null &&
                             authContext.authState.signedIn !== false && (
                                 <>
-                                    <Menubar>
-                                        <MenubarMenu>
-                                            <MenubarTrigger>
-                                                {`${authContext.authState.signedIn.accountData.username}@${authContext.authState.signedIn.domain}`}
-                                            </MenubarTrigger>
-                                            <MenubarContent>
-                                                {authContext.authState
-                                                    .signedIn && (
+                                    <div class="flex-0 py-4">
+                                        <Menubar>
+                                            <MenubarMenu>
+                                                <MenubarTrigger>
+                                                    {`${authContext.authState.signedIn.accountData.username}@${authContext.authState.signedIn.domain}`}
+                                                </MenubarTrigger>
+                                                <MenubarContent>
+                                                    {authContext.authState
+                                                        .signedIn && (
+                                                        <MenubarItem
+                                                            onClick={() => {
+                                                                logOut(
+                                                                    authContext
+                                                                );
+                                                                navigate("/");
+                                                            }}
+                                                        >
+                                                            Log out
+                                                        </MenubarItem>
+                                                    )}
+
+                                                    <MenubarItem
+                                                        onClick={() => {
+                                                            if (
+                                                                window.localStorage.getItem(
+                                                                    "theme"
+                                                                ) === "dark" ||
+                                                                (localStorage.getItem(
+                                                                    "theme"
+                                                                ) === null &&
+                                                                    window.matchMedia(
+                                                                        "(prefers-color-scheme: dark)"
+                                                                    ).matches)
+                                                            ) {
+                                                                console.log(
+                                                                    "switch to light theme"
+                                                                );
+                                                                window.localStorage.setItem(
+                                                                    "theme",
+                                                                    "light"
+                                                                );
+                                                                document.documentElement.classList.remove(
+                                                                    "dark"
+                                                                );
+                                                            } else {
+                                                                console.log(
+                                                                    "switch to dark theme"
+                                                                );
+                                                                window.localStorage.setItem(
+                                                                    "theme",
+                                                                    "dark"
+                                                                );
+                                                                document.documentElement.classList.add(
+                                                                    "dark"
+                                                                );
+                                                            }
+                                                        }}
+                                                    >
+                                                        Toggle light/dark
+                                                    </MenubarItem>
+
                                                     <MenubarItem
                                                         onClick={() => {
                                                             logOut(authContext);
-                                                            navigate("/");
+                                                            navigate(
+                                                                "/dev/editDialog"
+                                                            );
                                                         }}
                                                     >
-                                                        Log out
+                                                        Dev tools: edit dialog
                                                     </MenubarItem>
-                                                )}
-
-                                                <MenubarItem
-                                                    onClick={() => {
-                                                        if (
-                                                            window.localStorage.getItem(
-                                                                "theme"
-                                                            ) === "dark" ||
-                                                            (localStorage.getItem(
-                                                                "theme"
-                                                            ) === null &&
-                                                                window.matchMedia(
-                                                                    "(prefers-color-scheme: dark)"
-                                                                ).matches)
-                                                        ) {
-                                                            console.log(
-                                                                "switch to light theme"
-                                                            );
-                                                            window.localStorage.setItem(
-                                                                "theme",
-                                                                "light"
-                                                            );
-                                                            document.documentElement.classList.remove(
-                                                                "dark"
-                                                            );
-                                                        } else {
-                                                            console.log(
-                                                                "switch to dark theme"
-                                                            );
-                                                            window.localStorage.setItem(
-                                                                "theme",
-                                                                "dark"
-                                                            );
-                                                            document.documentElement.classList.add(
-                                                                "dark"
-                                                            );
-                                                        }
-                                                    }}
-                                                >
-                                                    Toggle light/dark
-                                                </MenubarItem>
-
-                                                <MenubarItem
-                                                    onClick={() => {
-                                                        logOut(authContext);
-                                                        navigate(
-                                                            "/dev/editDialog"
-                                                        );
-                                                    }}
-                                                >
-                                                    Dev tools: edit dialog
-                                                </MenubarItem>
-                                            </MenubarContent>
-                                        </MenubarMenu>
-                                    </Menubar>
-
-                                    <Button
-                                        onClick={() =>
-                                            editingOverlayContext.setShowingEditorOverlay(
-                                                true
-                                            )
-                                        }
-                                    >
-                                        Post
-                                    </Button>
+                                                </MenubarContent>
+                                            </MenubarMenu>
+                                        </Menubar>
+                                    </div>
+                                    <div class="flex-0 py-4 mx-4">
+                                        <Button
+                                            onClick={() =>
+                                                editingOverlayContext.setShowingEditorOverlay(
+                                                    true
+                                                )
+                                            }
+                                        >
+                                            Post
+                                        </Button>
+                                    </div>
                                 </>
                             )}
                         {authContext.authState.signedIn === false && (
-                            <Button
-                                onClick={() =>
-                                    navigate("/login", {
-                                        replace: true,
-                                    })
-                                }
-                            >
-                                Log in
-                            </Button>
+                            <div class="flex-0 py-4">
+                                <Button
+                                    onClick={() =>
+                                        navigate("/login", {
+                                            replace: true,
+                                        })
+                                    }
+                                >
+                                    Log in
+                                </Button>
+                            </div>
                         )}
                     </div>
                 </div>
