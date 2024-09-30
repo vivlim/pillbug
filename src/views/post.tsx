@@ -7,6 +7,7 @@ import {
     ErrorBoundary,
     For,
     Match,
+    Resource,
     Setter,
     Show,
     Switch,
@@ -31,13 +32,105 @@ import {
 } from "~/components/ui/context-menu";
 import { TextField, TextFieldTextArea } from "~/components/ui/text-field";
 import { FaSolidArrowsRotate } from "solid-icons/fa";
+import createUrlRegExp from "url-regex-safe";
+
+export type PostWithSharedProps = {
+    status: Status;
+    showRaw: boolean;
+    fetchShareParent: boolean;
+    shareParentUrl?: string | null;
+};
 
 export type PostProps = {
     status: Status;
+    fetchShareParent: boolean;
+    shareParent?: Resource<Status | undefined> | undefined;
+};
+
+export type StatusPostBlockProps = {
+    status: Status;
+    showRaw: boolean;
+    fetchShareParent: boolean;
+    shareParent?: Resource<Status | undefined> | undefined;
+};
+
+export async function fetchShareParentPost(
+    authContext: AuthProviderProps,
+    postUrl: string
+): Promise<Status | null> {
+    if (!authContext.authState.signedIn) {
+        return null;
+    }
+
+    console.log(`fetching parent post ${postUrl}`);
+    const client = authContext.authState.signedIn.authenticatedClient;
+    const result = await client.search(postUrl, { type: "statuses", limit: 1 });
+    if (result.status !== 200) {
+        throw new Error(`Failed to get shared post: ${result.statusText}`);
+    }
+    if (result.data.statuses.length === 0) {
+        return null;
+    }
+    return result.data.statuses[0];
+}
+
+const urlRegex = createUrlRegExp({
+    strict: true,
+    localhost: false,
+});
+export function getShareParentUrl(status: Status): string | undefined {
+    let urls = status.content.match(urlRegex);
+    if (urls === null) {
+        return undefined;
+    }
+    return urls.find((u) => u.match(/statuses/)) ?? undefined;
+}
+
+const PostUserBar: Component<{
+    status: Status;
+    sharedStatus?: Status | undefined;
+}> = (props) => {
+    const userHref = `/user/${props.status.account.acct}`;
+    const postHref = `/post/${props.status.id}`;
+    const status = props.status;
+    const shared = props.sharedStatus ?? status.reblog ?? null;
+
+    return (
+        <div class="p-0 border-b flex flex-row items-center gap-4 p-2">
+            <img
+                src={status.account.avatar}
+                class="aspect-square h-8 inline"
+                alt={`the avatar of ${status.account.acct}`}
+            />
+            <A href={userHref} class="whitespace-nowrap">
+                {status.account.display_name}
+            </A>
+            <A href={userHref} class="text-neutral-500">
+                {status.account.acct}
+            </A>
+            <A href={postHref} class="text-neutral-500">
+                {status.created_at}
+            </A>
+            <Show when={shared !== null}>
+                <FaSolidArrowsRotate class="m-1" />
+                <A
+                    href={`/user/${shared!.account.acct}`}
+                    class="m-2 whitespace-nowrap"
+                >
+                    {shared!.account.display_name}
+                </A>
+                <A
+                    href={`/user/${shared!.account.acct}`}
+                    class="m-1 text-neutral-500 whitespace-nowrap"
+                >
+                    {shared!.account.acct}
+                </A>
+            </Show>
+        </div>
+    );
 };
 
 const Post: Component<PostProps> = (postData) => {
-    const authContext = useAuthContext();
     const status = postData.status;
 
     const [showRaw, setShowRaw] = createSignal<boolean>(false);
@@ -58,80 +151,11 @@ const Post: Component<PostProps> = (postData) => {
                     </A>
                 </div>
                 <Card class="m-4 flex-1 grow ">
-                    <div class="p-3 border-b">
-                        <A href={userHref} class="m-2 whitespace-nowrap">
-                            {status.account.display_name}
-                        </A>
-                        <A href={userHref} class="m-1 text-neutral-500">
-                            {status.account.acct}
-                        </A>
-                        <A href={postHref} class="m-1 text-neutral-500">
-                            {status.created_at}
-                        </A>
-                        <Show when={status.reblog !== null}>
-                            <FaSolidArrowsRotate class="inline-block m-1" />
-                            <A
-                                href={`/user/${status.reblog!.account.acct}`}
-                                class="m-2 whitespace-nowrap"
-                            >
-                                {status.reblog!.account.display_name}
-                            </A>
-                            <A
-                                href={`/user/${status.reblog!.account.acct}`}
-                                class="m-1 text-neutral-500 whitespace-nowrap"
-                            >
-                                {status.reblog!.account.acct}
-                            </A>
-                        </Show>
-                    </div>
-                    <Switch>
-                        <Match when={status.reblog === null}>
-                            <CardContent class="p-3">
-                                <HtmlSandbox html={status.content} />
-                            </CardContent>
-                        </Match>
-                        <Match when={status.reblog !== null}>
-                            <div class="p-3 border-b">
-                                <A
-                                    href={`/user/${
-                                        status.reblog!.account.acct
-                                    }`}
-                                    class="m-2 whitespace-nowrap"
-                                >
-                                    {status.reblog!.account.display_name}
-                                </A>
-                                <A
-                                    href={`/user/${
-                                        status.reblog!.account.acct
-                                    }`}
-                                    class="m-1 text-neutral-500"
-                                >
-                                    {status.reblog!.account.acct}
-                                </A>
-                                <A
-                                    href={`/post/${status.reblog!.id}`}
-                                    class="m-1 text-neutral-500"
-                                >
-                                    {status.reblog!.created_at}
-                                </A>
-                            </div>
-
-                            <CardContent class="p-3">
-                                <HtmlSandbox html={status.reblog!.content} />
-                            </CardContent>
-                        </Match>
-                    </Switch>
-                    <Show when={showRaw()}>
-                        <div class="p-3 border-t">
-                            <TextField>
-                                <TextFieldTextArea
-                                    readOnly={true}
-                                    class="h-[40vh]"
-                                    value={JSON.stringify(status, null, 2)}
-                                ></TextFieldTextArea>
-                            </TextField>
-                        </div>
-                    </Show>
+                    <PostWithShared
+                        status={postData.status}
+                        fetchShareParent={postData.fetchShareParent}
+                        showRaw={showRaw()}
+                    />
                     <ContextMenu>
                         <ContextMenuTrigger>
                             <div class="p-3 border-t">
@@ -151,6 +175,99 @@ const Post: Component<PostProps> = (postData) => {
                 </Card>
             </ErrorBoundary>
         </div>
+    );
+};
+
+const StatusPostBlock: Component<StatusPostBlockProps> = (postData) => {
+    const status = postData.status;
+
+    const [showRaw, setShowRaw] = createSignal<boolean>(false);
+
+    return (
+        <>
+            <Switch>
+                <Match when={status.reblog === null}>
+                    <Switch>
+                        <Match when={postData.shareParent?.loading}>
+                            <div>fetching shared post...</div>
+                        </Match>
+                        <Match
+                            when={
+                                postData.shareParent !== undefined &&
+                                postData.shareParent() !== undefined
+                            }
+                        >
+                            <PostWithShared
+                                status={postData.shareParent!() as Status}
+                                showRaw={postData.showRaw}
+                                fetchShareParent={postData.fetchShareParent}
+                            />
+                            <PostUserBar
+                                status={status}
+                                sharedStatus={postData.shareParent!()}
+                            />
+                            <CardContent class="p-3 border-b">
+                                <HtmlSandbox html={status.content} />
+                            </CardContent>
+                        </Match>
+                        <Match
+                            when={
+                                postData.shareParent === undefined ||
+                                (postData.shareParent !== undefined &&
+                                    postData.shareParent() === undefined)
+                            }
+                        >
+                            <PostUserBar status={status} />
+                            <CardContent class="p-3 border-b">
+                                <HtmlSandbox html={status.content} />
+                            </CardContent>
+                        </Match>
+                    </Switch>
+                </Match>
+                <Match when={status.reblog !== null}>
+                    <PostUserBar status={status} />
+                    <PostUserBar status={status.reblog!} />
+
+                    <CardContent class="p-3 border-b">
+                        <HtmlSandbox html={status.reblog!.content} />
+                    </CardContent>
+                </Match>
+            </Switch>
+            <Show when={postData.showRaw}>
+                <div class="p-3 border-t">
+                    <TextField>
+                        <TextFieldTextArea
+                            readOnly={true}
+                            class="h-[40vh]"
+                            value={JSON.stringify(status, null, 2)}
+                        ></TextFieldTextArea>
+                    </TextField>
+                </div>
+            </Show>
+        </>
+    );
+};
+
+export const PostWithShared: Component<PostWithSharedProps> = (postData) => {
+    const authContext = useAuthContext();
+    const [parentPostUrl, setParentPostUrl] = createSignal<string | null>(
+        postData.shareParentUrl ?? null
+    );
+    const [shareParentPost] = createResource(parentPostUrl, (pp) => {
+        return fetchShareParentPost(authContext, pp);
+    });
+    if (postData.shareParentUrl === undefined) {
+        const sharedUrl = getShareParentUrl(postData.status);
+        if (sharedUrl !== undefined) {
+            setParentPostUrl(sharedUrl);
+        }
+    }
+    return (
+        <StatusPostBlock
+            status={postData.status}
+            shareParent={shareParentPost}
+            showRaw={postData.showRaw}
+        ></StatusPostBlock>
     );
 };
 

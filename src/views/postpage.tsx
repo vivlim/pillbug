@@ -21,7 +21,7 @@ import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Flex } from "~/components/ui/flex";
 import { Grid, Col } from "~/components/ui/grid";
-import Post from "./post";
+import Post, { PostWithShared } from "./post";
 import { Status } from "megalodon/lib/src/entities/status";
 import { DiGraph, VertexDefinition } from "digraph-js";
 import { CommentPostComponent } from "./comment";
@@ -38,7 +38,7 @@ type GetTimelineOptions = {
     min_id?: string;
 };
 
-async function fetchPostInfo(
+export async function fetchPostInfo(
     authContext: AuthProviderProps,
     postId: string
 ): Promise<NestedStatus> {
@@ -259,6 +259,7 @@ const PostPage: Component = () => {
                             threadInfo()
                                 ?.status as Status /* i don't think a placeholder should ever become root? */
                         }
+                        fetchShareParent={true}
                     />
                     <For each={threadInfo()?.children}>
                         {(node, index) => <TopNestedComment node={node} />}
