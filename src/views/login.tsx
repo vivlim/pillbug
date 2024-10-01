@@ -35,6 +35,12 @@ const LoginView: Component = () => {
         }
         setBusy(true);
         try {
+            try {
+                new URL(instance());
+            } catch (_) {
+                // assume a URL without protocol was entered, and add HTTPS
+                setInstance("https://" + instance());
+            }
             let software = await detector(instance());
             console.log(`detected software '${software}' on ${instance()}`);
 
