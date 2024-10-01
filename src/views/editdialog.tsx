@@ -39,26 +39,52 @@ import { DialogRootProps } from "@kobalte/core/dialog";
 
 export interface EditDialogProps extends DialogRootProps {}
 
+function onCwToggle(event: ToggleEvent) {
+    console.log("toggle event: " + event.newState);
+}
+
 const EditDialog: Component<EditDialogProps> = (props) => {
     const authContext = useAuthContext();
+    const [cwVisible, setCwVisible] = createSignal(false);
 
     return (
         <Dialog open={props.open} onOpenChange={props.onOpenChange}>
-            <DialogContent class="w-1/2 m-4">
+            <DialogContent class="flex-grow flex-1 w-full">
                 <DialogHeader>
                     <DialogTitle>New post</DialogTitle>
-                    <DialogDescription>write your cool post</DialogDescription>
                 </DialogHeader>
-                <div class="grid gap-4 py-4">
-                    <TextField class="grid grid-cols-4 items-center gap-4">
+                <div class="flex flex-col py-3 gap-3">
+                    <TextField class="border-none w-full flex-grow py-0 items-start justify-between min-h-24">
                         <TextFieldTextArea
-                            value="sup"
-                            class="col-span-3"
+                            tabindex="0"
+                            placeholder="write your cool post"
+                            class="resize-none overflow-hidden px-3 py-2 text-md"
                         ></TextFieldTextArea>
+                    </TextField>
+                    <TextField
+                        class="border-none w-full flex-shrink"
+                        hidden={!cwVisible()}
+                    >
+                        <TextFieldInput
+                            type="text"
+                            class="resize-none h-6 px-3 py-0 text-sm border-none rounded-none focus-visible:ring-0"
+                            placeholder="content warnings"
+                        ></TextFieldInput>
                     </TextField>
                 </div>
                 <DialogFooter>
-                    <Button type="submit">Save changes</Button>
+                    <div class="flex-grow">
+                        <button
+                            type="button"
+                            class="rounded-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                            onClick={() => {
+                                setCwVisible(!cwVisible());
+                            }}
+                        >
+                            CW
+                        </button>
+                    </div>
+                    <Button type="submit">Post</Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>
