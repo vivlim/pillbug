@@ -6,7 +6,6 @@ import {
     GetClientError,
     tryGetUnauthenticatedClient,
     tryGetToken,
-    useAuthContext,
     AppDisplayName,
 } from "~/App";
 import { NewInstanceOauth } from "~/client/auth";
@@ -20,6 +19,7 @@ import {
     TextFieldLabel,
 } from "~/components/ui/text-field";
 import { initAppFrameAsync } from "~/Frame";
+import { useAuthContext } from "~/lib/auth-context";
 
 const LoginView: Component = () => {
     const authContext = useAuthContext();

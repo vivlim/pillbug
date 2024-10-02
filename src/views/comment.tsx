@@ -8,16 +8,13 @@ import {
     Setter,
     type Component,
 } from "solid-js";
-import {
-    AuthProviderProps,
-    tryGetAuthenticatedClient,
-    useAuthContext,
-} from "~/App";
+import { tryGetAuthenticatedClient } from "~/App";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Flex } from "~/components/ui/flex";
 import { Grid, Col } from "~/components/ui/grid";
 import HtmlSandbox from "./htmlsandbox";
+import { useAuthContext } from "~/lib/auth-context";
 
 export type CommentProps = {
     status: Status;

@@ -1,5 +1,6 @@
 import { type Component } from "solid-js";
-import { useAuthContext, useEditOverlayContext } from "~/App";
+import { useEditOverlayContext } from "~/lib/edit-overlay-context";
+import { useAuthContext } from "~/lib/auth-context";
 import EditDialog from "./editdialog";
 
 const EditOverlay: Component = () => {

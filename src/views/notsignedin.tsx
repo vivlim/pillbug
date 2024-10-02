@@ -1,6 +1,6 @@
 import { A } from "@solidjs/router";
 import { createResource, createSignal, type Component } from "solid-js";
-import { tryGetAuthenticatedClient, useAuthContext } from "~/App";
+import { tryGetAuthenticatedClient } from "~/App";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Flex } from "~/components/ui/flex";

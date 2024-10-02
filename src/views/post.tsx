@@ -13,11 +13,8 @@ import {
     Switch,
     type Component,
 } from "solid-js";
-import {
-    AuthProviderProps,
-    tryGetAuthenticatedClient,
-    useAuthContext,
-} from "~/App";
+import { tryGetAuthenticatedClient } from "~/App";
+import { AuthProviderProps, useAuthContext } from "~/lib/auth-context";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Flex } from "~/components/ui/flex";
@@ -96,7 +93,7 @@ const PostUserBar: Component<{
     const shared = props.sharedStatus ?? status.reblog ?? null;
 
     return (
-        <div class="p-0 border-b flex flex-row items-center gap-4 p-2">
+        <div class="border-b flex flex-row items-center gap-4 p-2">
             <img
                 src={status.account.avatar}
                 class="aspect-square h-8 inline"
@@ -265,6 +262,7 @@ export const PostWithShared: Component<PostWithSharedProps> = (postData) => {
     return (
         <StatusPostBlock
             status={postData.status}
+            /* @ts-expect-error: 'Status | null' */
             shareParent={shareParentPost}
             showRaw={postData.showRaw}
         ></StatusPostBlock>

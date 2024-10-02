@@ -1,26 +1,9 @@
-import {
-    createContext,
-    createSignal,
-    JSX,
-    useContext,
-    type Component,
-} from "solid-js";
+import { createSignal, JSX, type Component } from "solid-js";
 
 import logo from "./logo.svg";
 import styles from "./App.module.css";
-import HomeView from "./views/home";
-import { createStore, SetStoreFunction } from "solid-js/store";
-import { RouteProps, RouteSectionProps, useNavigate } from "@solidjs/router";
-import OAuth from "megalodon/lib/src/oauth";
-import { makePersisted } from "@solid-primitives/storage";
-import generator, { MegalodonInterface } from "megalodon";
-import {
-    AuthProviderProps,
-    logOut,
-    tryGetAuthenticatedClient,
-    useAuthContext,
-    useEditOverlayContext,
-} from "./App";
+import { useNavigate } from "@solidjs/router";
+import { logOut, tryGetAuthenticatedClient } from "./App";
 import {
     Menubar,
     MenubarContent,
@@ -30,6 +13,8 @@ import {
 } from "./components/ui/menubar";
 import { Button } from "./components/ui/button";
 import EditOverlay from "./views/editoverlay";
+import { AuthProviderProps, useAuthContext } from "./lib/auth-context";
+import { useEditOverlayContext } from "./lib/edit-overlay-context";
 
 export const initAppFrameAsync = async (authContext: AuthProviderProps) => {
     try {

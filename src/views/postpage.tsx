@@ -12,11 +12,7 @@ import {
     Switch,
     type Component,
 } from "solid-js";
-import {
-    AuthProviderProps,
-    tryGetAuthenticatedClient,
-    useAuthContext,
-} from "~/App";
+import { tryGetAuthenticatedClient } from "~/App";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Flex } from "~/components/ui/flex";
@@ -25,6 +21,7 @@ import Post, { PostWithShared } from "./post";
 import { Status } from "megalodon/lib/src/entities/status";
 import { DiGraph, VertexDefinition } from "digraph-js";
 import { CommentPostComponent } from "./comment";
+import { AuthProviderProps, useAuthContext } from "~/lib/auth-context";
 
 type FeedProps = {
     firstPost?: number | null;

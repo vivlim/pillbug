@@ -8,11 +8,7 @@ import {
     Setter,
     type Component,
 } from "solid-js";
-import {
-    AuthProviderProps,
-    tryGetAuthenticatedClient,
-    useAuthContext,
-} from "~/App";
+import { AuthProviderProps, useAuthContext } from "~/lib/auth-context";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Flex } from "~/components/ui/flex";
@@ -61,7 +57,6 @@ const fetchPostList = async (
 
 const Feed: Component = () => {
     const authContext = useAuthContext();
-    const [pageNumber, setPageNumber] = createSignal(0);
     const [searchParams, setSearchParams] = useSearchParams();
     const [postList] = createResource(
         () => {

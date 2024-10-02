@@ -18,71 +18,18 @@ import generator, { MegalodonInterface } from "megalodon";
 import AppFrame from "./Frame";
 import { Instance } from "megalodon/lib/src/entities/instance";
 import { Account } from "megalodon/lib/src/entities/account";
-
-const AuthContext = createContext<AuthProviderProps>();
-export interface AuthProviderProps {
-    persistentAuthState: PersistentAuthState;
-    setPersistentAuthState: SetStoreFunction<PersistentAuthState>;
-    authState: EphemeralAuthState;
-    setAuthState: SetStoreFunction<EphemeralAuthState>;
-}
-
-const EditingOverlayContext = createContext<EditingOverlayProps>();
-
-export interface EditingOverlayProps {
-    showingEditorOverlay: Accessor<boolean>;
-    setShowingEditorOverlay: Setter<boolean>;
-}
-export interface PersistentAuthState {
-    appData?: OAuth.AppData | undefined;
-    instanceUrl?: string | undefined;
-    instanceSoftware?:
-        | "mastodon"
-        | "pleroma"
-        | "friendica"
-        | "firefish"
-        | "gotosocial"
-        | undefined;
-    authorizationCode?: string | undefined;
-    token?: TokenState | undefined;
-}
-
-export interface EphemeralAuthState {
-    signedIn:
-        | {
-              authenticatedClient: MegalodonInterface;
-              instanceData: Instance;
-              accountData: Account;
-              domain: string;
-          }
-        | false
-        | null;
-}
-
-interface TokenState {
-    tokenData: OAuth.TokenData;
-    expiresAfterTime: number | null;
-}
+import {
+    AuthContext,
+    AuthProviderProps,
+    EphemeralAuthState,
+    PersistentAuthState,
+    TokenState,
+} from "./lib/auth-context";
+import { EditingOverlayContext } from "./lib/edit-overlay-context";
 
 export class GetClientError extends Error {}
 
 export const AppDisplayName: string = "pillbug";
-
-export function useAuthContext(): AuthProviderProps {
-    const value = useContext(AuthContext);
-    if (value === undefined) {
-        throw new Error("useAuthContext must be used within a provider");
-    }
-    return value;
-}
-
-export function useEditOverlayContext(): EditingOverlayProps {
-    const value = useContext(EditingOverlayContext);
-    if (value === undefined) {
-        throw new Error("useEditOverlayContext must be used within a provider");
-    }
-    return value;
-}
 
 function tokenIsExpired(tokenState: TokenState): boolean {
     const nowUtc: number = new Date().getTime();
