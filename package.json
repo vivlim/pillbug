@@ -1,40 +1,40 @@
 {
-  "name": "pillbug",
-  "version": "0.0.0",
-  "description": "",
-  "type": "module",
-  "homepage": "https://pillbug.vivl.im",
-  "scripts": {
-    "start": "vite",
-    "dev": "vite",
-    "build": "vite build",
-    "serve": "vite preview"
-  },
-  "license": "UNLICENSED",
-  "devDependencies": {
-    "@types/node": "^22.5.5",
-    "@types/url-regex-safe": "^1.0.2",
-    "autoprefixer": "^10.4.20",
-    "postcss": "^8.4.47",
-    "solid-devtools": "^0.29.2",
-    "tailwindcss": "^3.4.12",
-    "typescript": "^5.3.3",
-    "vite": "^5.0.11",
-    "vite-plugin-solid": "^2.8.2"
-  },
-  "dependencies": {
-    "@kobalte/core": "^0.13.6",
-    "@solid-primitives/storage": "^4.2.1",
-    "@solidjs/router": "^0.14.5",
-    "class-variance-authority": "^0.7.0",
-    "clsx": "^2.1.1",
-    "digraph-js": "^2.2.3",
-    "get-urls": "^12.1.0",
-    "megalodon": "^10.0.3",
-    "solid-icons": "^1.1.0",
-    "solid-js": "^1.8.11",
-    "tailwind-merge": "^2.5.2",
-    "tailwindcss-animate": "^1.0.7",
-    "url-regex-safe": "^4.0.0"
-  }
+    "name": "pillbug",
+    "version": "0.0.0",
+    "description": "",
+    "type": "module",
+    "homepage": "https://pillbug.vivl.im",
+    "scripts": {
+        "start": "vite",
+        "dev": "vite",
+        "build": "vite build",
+        "serve": "vite preview"
+    },
+    "license": "MIT",
+    "devDependencies": {
+        "@types/node": "^22.5.5",
+        "@types/url-regex-safe": "^1.0.2",
+        "autoprefixer": "^10.4.20",
+        "postcss": "^8.4.47",
+        "solid-devtools": "^0.29.2",
+        "tailwindcss": "^3.4.12",
+        "typescript": "^5.3.3",
+        "vite": "^5.0.11",
+        "vite-plugin-solid": "^2.8.2"
+    },
+    "dependencies": {
+        "@kobalte/core": "^0.13.6",
+        "@solid-primitives/storage": "^4.2.1",
+        "@solidjs/router": "^0.14.5",
+        "class-variance-authority": "^0.7.0",
+        "clsx": "^2.1.1",
+        "digraph-js": "^2.2.3",
+        "get-urls": "^12.1.0",
+        "megalodon": "^10.0.3",
+        "solid-icons": "^1.1.0",
+        "solid-js": "^1.8.11",
+        "tailwind-merge": "^2.5.2",
+        "tailwindcss-animate": "^1.0.7",
+        "url-regex-safe": "^4.0.0"
+    }
 }

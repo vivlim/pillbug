@@ -1,7 +1,7 @@
 import { makePersisted } from "@solid-primitives/storage";
 import { useLocation, useNavigate, useSearchParams } from "@solidjs/router";
 import generator, { detector } from "megalodon";
-import { createResource, createSignal, type Component } from "solid-js";
+import { createResource, createSignal, Show, type Component } from "solid-js";
 import {
     GetClientError,
     tryGetUnauthenticatedClient,
@@ -141,6 +141,12 @@ const LoginView: Component = () => {
                                 }
                                 readOnly={busy()}
                             />
+                            <Show when={!instance().startsWith("http")}>
+                                <div>
+                                    The url must start with either https:// or
+                                    http://
+                                </div>
+                            </Show>
                         </TextField>
                         <Button onClick={doOAuth} disabled={busy()}>
                             Log in
@@ -148,6 +154,10 @@ const LoginView: Component = () => {
                                 <span class="animate-spin ml-3">🤔</span>
                             )}
                         </Button>
+                        <div>
+                            (you need to click the button right now, the enter
+                            key isn't hooked up)
+                        </div>
                         {error() !== undefined && <p>{error()}</p>}
                     </CardContent>
                 </Card>
