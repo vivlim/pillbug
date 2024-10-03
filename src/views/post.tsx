@@ -1,15 +1,18 @@
 import { A } from "@solidjs/router";
-import { Entity } from "megalodon";
+import { Entity, MegalodonInterface } from "megalodon";
 import { Status } from "megalodon/lib/src/entities/status";
 import {
+    createMemo,
     createResource,
     createSignal,
     ErrorBoundary,
     For,
+    JSX,
     Match,
     Resource,
     Setter,
     Show,
+    splitProps,
     Switch,
     type Component,
 } from "solid-js";
@@ -31,6 +34,10 @@ import { TextField, TextFieldTextArea } from "~/components/ui/text-field";
 import { FaSolidArrowsRotate } from "solid-icons/fa";
 import createUrlRegExp from "url-regex-safe";
 import { VisibilityIcon } from "~/components/visibility-icon";
+import { IoHeart, IoHeartOutline } from "solid-icons/io";
+import { IconProps } from "solid-icons";
+import { cn } from "~/lib/utils";
+import { Dynamic } from "solid-js/web";
 
 export type PostWithSharedProps = {
     status: Status;
@@ -131,13 +138,56 @@ const PostUserBar: Component<{
     );
 };
 
+const PostFooter: Component<{ children: JSX.Element }> = (props) => {
+    return (
+        <div class="m-2 flex flex-row items-center justify-stretch">
+            {props.children}
+        </div>
+    );
+};
+
+function favButton(isLiked: boolean): Component<IconProps> {
+    if (isLiked) {
+        return (props) => {
+            const [, rest] = splitProps(props, ["class"]);
+            return (
+                <IoHeart class={cn("text-red-500", props.class)} {...rest} />
+            );
+        };
+    } else {
+        return (props) => {
+            return <IoHeartOutline {...props} />;
+        };
+    }
+}
+
+async function toggleLike(
+    client: MegalodonInterface,
+    status: Status
+): Promise<Status> {
+    let res;
+    if (status.favourited) {
+        res = await client.unfavouriteStatus(status.id);
+    } else {
+        res = await client.favouriteStatus(status.id);
+    }
+
+    if (res.status != 200) {
+        throw new Error(res.statusText);
+    }
+
+    return res.data;
+}
+
 const Post: Component<PostProps> = (postData) => {
-    const status = postData.status;
+    const authContext = useAuthContext();
+    const [status, updateStatus] = createSignal(postData.status);
 
     const [showRaw, setShowRaw] = createSignal<boolean>(false);
+    const isLiked = createMemo(() => status().favourited ?? false);
 
-    const userHref = `/user/${status.account.acct}`;
-    const postHref = `/post/${status.id}`;
+    const userHref = `/user/${status().account.acct}`;
+    const postHref = `/post/${status().id}`;
 
     return (
         <div class="flex flex-row px-8 py-1">
@@ -145,9 +195,9 @@ const Post: Component<PostProps> = (postData) => {
                 <div class="w-16 flex-none">
                     <A href={userHref} class="m-2 size-16 aspect-square">
                         <img
-                            src={status.account.avatar}
+                            src={status().account.avatar}
                             class="aspect-square"
-                            alt={`the avatar of ${status.account.acct}`}
+                            alt={`the avatar of ${status().account.acct}`}
                         />
                     </A>
                 </div>
@@ -157,22 +207,47 @@ const Post: Component<PostProps> = (postData) => {
                         fetchShareParent={postData.fetchShareParent}
                         showRaw={showRaw()}
                     />
-                    <ContextMenu>
-                        <ContextMenuTrigger>
-                            <div class="p-3 border-t">
+                    <PostFooter>
+                        <ContextMenu>
+                            <ContextMenuTrigger class="flex-grow">
                                 <A href={postHref}>
-                                    {status.replies_count} replies
+                                    {status().replies_count} replies
                                 </A>
-                            </div>
-                        </ContextMenuTrigger>
-                        <ContextMenuContent>
-                            <ContextMenuItem
-                                onClick={() => setShowRaw(!showRaw())}
-                            >
-                                Show raw status
-                            </ContextMenuItem>
-                        </ContextMenuContent>
-                    </ContextMenu>
+                            </ContextMenuTrigger>
+                            <ContextMenuContent>
+                                <ContextMenuItem
+                                    onClick={() => setShowRaw(!showRaw())}
+                                >
+                                    Show raw status
+                                </ContextMenuItem>
+                            </ContextMenuContent>
+                        </ContextMenu>
+                        <Button
+                            variant="ghost"
+                            class="hover:bg-transparent py-0"
+                            aria-label="Like Post"
+                            onClick={async () => {
+                                if (!authContext.authState.signedIn) {
+                                    throw new Error("Not logged in");
+                                }
+
+                                const client =
+                                    authContext.authState.signedIn
+                                        .authenticatedClient;
+
+                                const updated = await toggleLike(
+                                    client,
+                                    status()
+                                );
+                                updateStatus(updated);
+                            }}
+                        >
+                            <Dynamic
+                                component={favButton(isLiked())}
+                                class="size-6"
+                            />
+                        </Button>
+                    </PostFooter>
                 </Card>
             </ErrorBoundary>
         </div>
