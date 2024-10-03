@@ -36,6 +36,7 @@ import {
 } from "~/components/ui/dropdown-menu";
 import { PolymorphicProps } from "@kobalte/core/polymorphic";
 import { cn } from "~/lib/utils";
+import { useEditOverlayContext } from "~/lib/edit-overlay-context";
 
 export interface EditDialogProps extends DialogRootProps {
     returnRoute?: string;
@@ -83,12 +84,10 @@ function isValidVisibility(value: string): value is Entity.StatusVisibility {
 
 const EditDialog: Component<EditDialogProps> = (props) => {
     const authContext = useAuthContext();
+    const editingOverlayContext = useEditOverlayContext();
     const navigate = useNavigate();
 
     const [posted, setPosted] = createSignal(false);
-    const open = createMemo(() => {
-        return posted() ? false : props.open;
-    });
     // bubble up submit
     createEffect(() => {
         if (posted()) {
@@ -120,11 +119,14 @@ const EditDialog: Component<EditDialogProps> = (props) => {
     const [visibility, setVisibility] =
         createSignal<Entity.StatusVisibility>("unlisted");
 
-    const sendPost = async (client: MegalodonInterface): Promise<boolean> => {
+    // Submits the post. Returns the post ID, or null if an error occurred
+    const sendPost = async (
+        client: MegalodonInterface
+    ): Promise<string | null> => {
         const imminentStatus = status().trim();
         if (imminentStatus.length == 0) {
             pushError("No status provided");
-            return false;
+            return null;
         }
         const cw = cwContent();
 
@@ -135,127 +137,136 @@ const EditDialog: Component<EditDialogProps> = (props) => {
             spoiler_text: cw,
         };
         try {
-            await client.postStatus(imminentStatus, options);
+            const status = await client.postStatus(imminentStatus, options);
+            return status.data.id;
         } catch (ex) {
             if (ex != null) {
                 pushError(ex.toString());
-                return false;
+                return null;
             } else {
                 pushError("Unknown error while trying to post");
-                return false;
+                return null;
             }
         }
-
-        return true;
     };
 
     return (
-        <Dialog open={open()} onOpenChange={props.onOpenChange}>
+        <Dialog open={props.open} onOpenChange={props.onOpenChange}>
             <DialogContent class="flex-grow flex-1 w-full">
-                <DialogHeader>
-                    <DialogTitle>New post</DialogTitle>
-                </DialogHeader>
-                <div class="flex flex-col py-3 gap-3">
-                    <TextField class="border-none w-full flex-grow py-0 items-start justify-between min-h-24">
-                        <TextFieldTextArea
-                            tabindex="0"
-                            placeholder="write your cool post"
-                            class="resize-none overflow-hidden px-3 py-2 text-md"
-                            disabled={busy()}
-                            onInput={(e) => {
-                                setStatus(e.currentTarget.value);
-                            }}
-                        ></TextFieldTextArea>
-                    </TextField>
-                    <TextField
-                        class="border-none w-full flex-shrink"
-                        hidden={!cwVisible()}
-                    >
-                        <TextFieldInput
-                            type="text"
-                            class="resize-none h-6 px-3 py-0 text-sm border-none rounded-none focus-visible:ring-0"
-                            placeholder="content warnings"
-                            disabled={busy()}
-                            onInput={(e) => {
-                                setCwContent(e.currentTarget.value);
-                            }}
-                        ></TextFieldInput>
-                    </TextField>
-                </div>
-                <DialogFooter>
-                    <div class="flex-grow flex flex-row gap-2">
-                        <MenuButton
-                            onClick={() => {
-                                setCwVisible(!cwVisible());
-                            }}
-                        >
-                            CW
-                        </MenuButton>
-                        <DropdownMenu>
-                            <DropdownMenuTrigger
-                                as={MenuButton<"button">}
-                                type="button"
-                            >
-                                VIS
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent class="w-48">
-                                <DropdownMenuRadioGroup
-                                    value={visibility()}
-                                    onChange={(val) => {
-                                        if (isValidVisibility(val)) {
-                                            setVisibility(val);
-                                        } // TODO: ignore it for now, but otherwise uh, explode or something
-                                    }}
-                                >
-                                    <DropdownMenuRadioItem value="unlisted">
-                                        Unlisted
-                                    </DropdownMenuRadioItem>
-                                    <DropdownMenuRadioItem value="private">
-                                        Private
-                                    </DropdownMenuRadioItem>
-                                    <DropdownMenuRadioItem value="direct">
-                                        Mentioned Only
-                                    </DropdownMenuRadioItem>
-                                </DropdownMenuRadioGroup>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-                    </div>
-                    <Button
-                        onClick={async () => {
-                            if (!authContext.authState.signedIn) {
-                                pushError(
-                                    "Can't post if you're not logged in!"
-                                );
-                                return;
-                            }
+                <form
+                    onsubmit={async (ev) => {
+                        ev.preventDefault();
+                        if (!authContext.authState.signedIn) {
+                            pushError("Can't post if you're not logged in!");
+                            return;
+                        }
 
-                            setBusy(true);
-                            const client =
-                                authContext.authState.signedIn
-                                    .authenticatedClient;
-                            if (await sendPost(client)) {
-                                console.log("Posted! navigating...");
-                                if (props.returnRoute) {
-                                    // If provided a route, send us there
-                                    navigate(props.returnRoute);
-                                } else {
-                                    // Return to feed page
-                                    navigate("/feed");
-                                }
-                                // If we're on the same route, the dialog won't
-                                // close. So force it to close
-                                setPosted(true);
+                        setBusy(true);
+                        const client =
+                            authContext.authState.signedIn.authenticatedClient;
+                        const post_id = await sendPost(client);
+                        if (post_id) {
+                            console.log("Posted! navigating...");
+                            if (props.returnRoute) {
+                                // If provided a route, send us there
+                                navigate(props.returnRoute);
                             } else {
-                                // TODO: show errors
-                                console.error(postErrors().join("\n"));
+                                // Return to feed page
+                                navigate("/feed", {
+                                    state: { newPost: post_id },
+                                });
                             }
-                        }}
-                        type="submit"
-                        disabled={busy()}
-                    >
-                        Post
-                    </Button>
-                </DialogFooter>
+                            setPosted(true);
+                            editingOverlayContext.setShowingEditorOverlay(
+                                false
+                            );
+                            // Reset the form
+                            ev.currentTarget.form?.reset();
+                            setBusy(false);
+                        } else {
+                            // TODO: show errors
+                            console.error(postErrors().join("\n"));
+                        }
+                        return false;
+                    }}
+                >
+                    <DialogHeader>
+                        <DialogTitle>New post</DialogTitle>
+                    </DialogHeader>
+                    <div class="flex flex-col py-3 gap-3">
+                        <TextField class="border-none w-full flex-grow py-0 items-start justify-between min-h-24">
+                            <TextFieldTextArea
+                                tabindex="0"
+                                placeholder="write your cool post"
+                                class="resize-none overflow-hidden px-3 py-2 text-md"
+                                disabled={busy()}
+                                onInput={(e) => {
+                                    setStatus(e.currentTarget.value);
+                                }}
+                            ></TextFieldTextArea>
+                        </TextField>
+                        <TextField
+                            class="border-none w-full flex-shrink"
+                            hidden={!cwVisible()}
+                        >
+                            <TextFieldInput
+                                type="text"
+                                class="resize-none h-6 px-3 py-0 text-sm border-none rounded-none focus-visible:ring-0"
+                                placeholder="content warnings"
+                                disabled={busy()}
+                                onInput={(e) => {
+                                    setCwContent(e.currentTarget.value);
+                                }}
+                            ></TextFieldInput>
+                        </TextField>
+                    </div>
+                    <DialogFooter>
+                        <div class="flex-grow flex flex-row gap-2">
+                            <MenuButton
+                                onClick={() => {
+                                    setCwVisible(!cwVisible());
+                                }}
+                            >
+                                CW
+                            </MenuButton>
+                            <DropdownMenu>
+                                <DropdownMenuTrigger
+                                    as={MenuButton<"button">}
+                                    type="button"
+                                >
+                                    VIS
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent class="w-48">
+                                    <DropdownMenuRadioGroup
+                                        value={visibility()}
+                                        onChange={(val) => {
+                                            if (isValidVisibility(val)) {
+                                                setVisibility(val);
+                                            } // TODO: ignore it for now, but otherwise uh, explode or something
+                                        }}
+                                    >
+                                        <DropdownMenuRadioItem value="unlisted">
+                                            Unlisted
+                                        </DropdownMenuRadioItem>
+                                        <DropdownMenuRadioItem value="private">
+                                            Private
+                                        </DropdownMenuRadioItem>
+                                        <DropdownMenuRadioItem value="direct">
+                                            Mentioned Only
+                                        </DropdownMenuRadioItem>
+                                    </DropdownMenuRadioGroup>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        </div>
+                        <Button
+                            onSubmit={async (ev) => {}}
+                            type="submit"
+                            disabled={busy()}
+                        >
+                            Post
+                        </Button>
+                    </DialogFooter>
+                </form>
             </DialogContent>
         </Dialog>
     );
