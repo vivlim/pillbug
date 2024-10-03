@@ -37,6 +37,8 @@ import {
 import { PolymorphicProps } from "@kobalte/core/polymorphic";
 import { cn } from "~/lib/utils";
 import { useEditOverlayContext } from "~/lib/edit-overlay-context";
+import { VisibilityIcon } from "~/components/visibility-icon";
+import { IoWarningOutline } from "solid-icons/io";
 
 export interface EditDialogProps extends DialogRootProps {
     returnRoute?: string;
@@ -227,14 +229,17 @@ const EditDialog: Component<EditDialogProps> = (props) => {
                                     setCwVisible(!cwVisible());
                                 }}
                             >
-                                CW
+                                <IoWarningOutline class="size-5" />
                             </MenuButton>
                             <DropdownMenu>
                                 <DropdownMenuTrigger
                                     as={MenuButton<"button">}
                                     type="button"
                                 >
-                                    VIS
+                                    <VisibilityIcon
+                                        value={visibility()}
+                                        class="size-4"
+                                    />
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent class="w-48">
                                     <DropdownMenuRadioGroup

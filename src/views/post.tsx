@@ -30,6 +30,7 @@ import {
 import { TextField, TextFieldTextArea } from "~/components/ui/text-field";
 import { FaSolidArrowsRotate } from "solid-icons/fa";
 import createUrlRegExp from "url-regex-safe";
+import { VisibilityIcon } from "~/components/visibility-icon";
 
 export type PostWithSharedProps = {
     status: Status;
@@ -93,15 +94,18 @@ const PostUserBar: Component<{
     const shared = props.sharedStatus ?? status.reblog ?? null;
 
     return (
-        <div class="border-b flex flex-row items-center gap-4 p-2">
+        <div class="border-b flex flex-row items-center gap-4 p-2 flex-1">
             <img
                 src={status.account.avatar}
                 class="aspect-square h-8 inline"
                 alt={`the avatar of ${status.account.acct}`}
             />
-            <A href={userHref} class="whitespace-nowrap">
-                {status.account.display_name}
-            </A>
+            <div class="flex flex-row gap-2 items-center">
+                <A href={userHref} class="whitespace-nowrap">
+                    {status.account.display_name}
+                </A>
+                <VisibilityIcon class="size-4" value={status.visibility} />
+            </div>
             <A href={userHref} class="text-neutral-500">
                 {status.account.acct}
             </A>
