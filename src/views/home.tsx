@@ -16,14 +16,11 @@ const HomeView: Component = () => {
 
     if (authContext.authState.signedIn) {
         navigate("/feed");
+    } else {
+        navigate("/about");
     }
 
-    return (
-        <>
-            {!authContext.authState.signedIn && <NotSignedInLandingView />}
-            {authContext.authState.signedIn && <div>redirecting to feed</div>}
-        </>
-    );
+    return <>{authContext.authState.signedIn && <div>redirecting...</div>}</>;
 };
 
 export default HomeView;

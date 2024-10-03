@@ -148,13 +148,19 @@ const AppFrame: Component<{ children: JSX.Element }> = (props) => {
 
                                                     <MenubarItem
                                                         onClick={() => {
-                                                            logOut(authContext);
                                                             navigate(
                                                                 "/dev/editDialog"
                                                             );
                                                         }}
                                                     >
                                                         Dev tools: edit dialog
+                                                    </MenubarItem>
+                                                    <MenubarItem
+                                                        onClick={() => {
+                                                            navigate("/about");
+                                                        }}
+                                                    >
+                                                        About pillbug
                                                     </MenubarItem>
                                                 </MenubarContent>
                                             </MenubarMenu>

@@ -11,6 +11,7 @@ import UserProfile from "./views/userprofile";
 import PostPage from "./views/postpage";
 import DevEditDialogPage from "./views/dev/editdialogpage";
 import Feed from "./views/feed";
+import NotSignedInLandingView from "./views/notsignedin";
 
 const root = document.getElementById("root");
 
@@ -25,6 +26,7 @@ render(
         <Router root={App}>
             <Route path="/" component={HomeView} />
             <Route path="/feed" component={Feed} />
+            <Route path="/about" component={NotSignedInLandingView} />
             <Route path="/login" component={LoginView} />
             <Route path="/user/:username" component={UserProfile} />
             <Route path="/post/:postId" component={PostPage} />
