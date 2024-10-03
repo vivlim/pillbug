@@ -1,6 +1,12 @@
-import { A, useNavigate, useParams, useSearchParams } from "@solidjs/router";
+import {
+    useLocation,
+    useNavigate,
+    useParams,
+    useSearchParams,
+} from "@solidjs/router";
 import { Entity } from "megalodon";
 import {
+    createEffect,
     createResource,
     createSignal,
     ErrorBoundary,
@@ -16,9 +22,9 @@ import { Grid, Col } from "~/components/ui/grid";
 import Post from "./post";
 import { Status } from "megalodon/lib/src/entities/status";
 
-type FeedProps = {
-    before_id?: string | null;
-};
+export interface SubmitFeedState {
+    new_id: string;
+}
 
 interface GetTimelineOptionsApi {
     local?: boolean;
@@ -57,8 +63,9 @@ const fetchPostList = async (
 
 const Feed: Component = () => {
     const authContext = useAuthContext();
+    const location = useLocation<SubmitFeedState>();
     const [searchParams, setSearchParams] = useSearchParams();
-    const [postList] = createResource(
+    const [postList, { mutate, refetch }] = createResource(
         () => {
             return {
                 local: false,
@@ -68,7 +75,13 @@ const Feed: Component = () => {
         }, // If this returns null or undefined, resource won't be loaded.
         (options) => fetchPostList(authContext, options)
     );
-    const navigate = useNavigate();
+    createEffect(() => {
+        if (location.state?.new_id) {
+            console.log("new_id updated! updating search params");
+            setSearchParams({ after: null }, { scroll: true });
+            refetch();
+        }
+    });
 
     return (
         <>
@@ -76,7 +89,12 @@ const Feed: Component = () => {
                 <ErrorBoundary fallback={<div>ouch!</div>}>
                     <div class="grow w-max md:w-1/2 place-self">
                         <For each={postList()}>
-                            {(status, index) => <Post status={status} />}
+                            {(status, index) => (
+                                <Post
+                                    status={status}
+                                    fetchShareParent={false}
+                                />
+                            )}
                         </For>
                     </div>
                 </ErrorBoundary>

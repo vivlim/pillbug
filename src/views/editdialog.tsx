@@ -42,7 +42,7 @@ import { IoWarningOutline } from "solid-icons/io";
 
 export interface EditDialogProps extends DialogRootProps {
     returnRoute?: string;
-    onSubmit?: () => void;
+    onSubmit?: (new_id: string) => void;
 }
 
 interface PostOptions {
@@ -90,10 +90,19 @@ const EditDialog: Component<EditDialogProps> = (props) => {
     const navigate = useNavigate();
 
     const [posted, setPosted] = createSignal(false);
+    const [postId, setPostId] = createSignal<string | null>(null);
     // bubble up submit
     createEffect(() => {
+        console.log("posted() changed?");
         if (posted()) {
-            props.onSubmit?.();
+            console.log("bubbling up...");
+            const new_id = postId();
+            if (new_id) {
+                props.onSubmit?.(new_id);
+            }
+            // TODO: technically not supposed to do this due to infinite loops.
+            // should be fine :x
+            setPosted(false);
         }
     });
 
@@ -168,16 +177,7 @@ const EditDialog: Component<EditDialogProps> = (props) => {
                             authContext.authState.signedIn.authenticatedClient;
                         const post_id = await sendPost(client);
                         if (post_id) {
-                            console.log("Posted! navigating...");
-                            if (props.returnRoute) {
-                                // If provided a route, send us there
-                                navigate(props.returnRoute);
-                            } else {
-                                // Return to feed page
-                                navigate("/feed", {
-                                    state: { newPost: post_id },
-                                });
-                            }
+                            setPostId(post_id);
                             setPosted(true);
                             editingOverlayContext.setShowingEditorOverlay(
                                 false
@@ -263,11 +263,7 @@ const EditDialog: Component<EditDialogProps> = (props) => {
                                 </DropdownMenuContent>
                             </DropdownMenu>
                         </div>
-                        <Button
-                            onSubmit={async (ev) => {}}
-                            type="submit"
-                            disabled={busy()}
-                        >
+                        <Button type="submit" disabled={busy()}>
                             Post
                         </Button>
                     </DialogFooter>
