@@ -39,6 +39,7 @@ import { IconProps } from "solid-icons";
 import { cn } from "~/lib/utils";
 import { Dynamic } from "solid-js/web";
 import { ContentGuard } from "~/components/content-guard";
+import { ImageBox } from "~/components/image-box";
 
 export type PostWithSharedProps = {
     status: Status;
@@ -148,6 +149,7 @@ const PostBody: Component<PostBodyProps> = (props) => {
     return (
         <CardContent class={cn("p-3", props.class)} {...rest}>
             <ContentGuard warnings={props.status.spoiler_text}>
+                <ImageBox attachments={props.status.media_attachments} />
                 <HtmlSandbox html={props.status.content} />
             </ContentGuard>
         </CardContent>
