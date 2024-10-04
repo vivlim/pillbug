@@ -39,7 +39,7 @@ import { IconProps } from "solid-icons";
 import { cn } from "~/lib/utils";
 import { Dynamic } from "solid-js/web";
 import { ContentGuard } from "~/components/content-guard";
-import { ImageBox } from "~/components/image-box";
+import { ImageBox } from "~/components/post/image-box";
 
 export type PostWithSharedProps = {
     status: Status;
