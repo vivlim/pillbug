@@ -29,7 +29,7 @@ export const CommentPostComponent: Component<CommentProps> = (postData) => {
 
     return (
         <>
-            <div class="flex flex-row">
+            <div class="flex flex-row flex-wrap border-b">
                 <div class="w-12 flex-none aspect-square">
                     <A href={userHref} class="aspect-square">
                         <img
@@ -39,22 +39,18 @@ export const CommentPostComponent: Component<CommentProps> = (postData) => {
                         />
                     </A>
                 </div>
-                <div class="flex-1 grow">
-                    <div class="px-3">
-                        <A href={userHref} class="m-2">
-                            {status.account.display_name}
-                        </A>
-                        <A href={userHref} class="m-1 text-neutral-500">
-                            {status.account.acct}
-                        </A>
-                        <A href={postHref} class="m-1 text-neutral-500">
-                            {status.created_at}
-                        </A>
-                    </div>
-                    <div class="px-3">
-                        <HtmlSandbox html={status.content} />
-                    </div>
-                </div>
+                <A href={userHref} class="m-2">
+                    {status.account.display_name}
+                </A>
+                <A href={userHref} class="m-1 text-neutral-500">
+                    {status.account.acct}
+                </A>
+                <A href={postHref} class="m-1 text-neutral-500">
+                    {status.created_at}
+                </A>
+            </div>
+            <div class="md:px-3">
+                <HtmlSandbox html={status.content} />
             </div>
         </>
     );

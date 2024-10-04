@@ -12,6 +12,8 @@ import PostPage from "./views/postpage";
 import DevEditDialogPage from "./views/dev/editdialogpage";
 import Feed from "./views/feed";
 import NotSignedInLandingView from "./views/notsignedin";
+import { FacetNavigationFrame } from "./views/facetnavigation";
+import { NotificationsFacet } from "./views/facets/notifications";
 
 const root = document.getElementById("root");
 
@@ -25,7 +27,56 @@ render(
     () => (
         <Router root={App}>
             <Route path="/" component={HomeView} />
-            <Route path="/feed" component={Feed} />
+            <Route
+                path="/feed"
+                component={() => {
+                    return (
+                        <FacetNavigationFrame>
+                            <Feed />
+                        </FacetNavigationFrame>
+                    );
+                }}
+            />
+            <Route
+                path="/notifications"
+                component={() => {
+                    return (
+                        <FacetNavigationFrame>
+                            <NotificationsFacet />
+                        </FacetNavigationFrame>
+                    );
+                }}
+            />
+            <Route
+                path="/search"
+                component={() => {
+                    return (
+                        <FacetNavigationFrame>
+                            placeholder for search
+                        </FacetNavigationFrame>
+                    );
+                }}
+            />
+            <Route
+                path="/profile"
+                component={() => {
+                    return (
+                        <FacetNavigationFrame>
+                            placeholder for profile
+                        </FacetNavigationFrame>
+                    );
+                }}
+            />
+            <Route
+                path="/settings"
+                component={() => {
+                    return (
+                        <FacetNavigationFrame>
+                            placeholder for settings
+                        </FacetNavigationFrame>
+                    );
+                }}
+            />
             <Route path="/about" component={NotSignedInLandingView} />
             <Route path="/login" component={LoginView} />
             <Route path="/user/:username" component={UserProfile} />
