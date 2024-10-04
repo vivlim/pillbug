@@ -101,7 +101,7 @@ const PostUserBar: Component<{
     const shared = props.sharedStatus ?? status.reblog ?? null;
 
     return (
-        <div class="border-b flex flex-row flex-wrap items-center gap-4 p-2 flex-1">
+        <div class="border-b flex flex-row flex-wrap items-center gap-x-2 p-2 flex-auto">
             <img
                 src={status.account.avatar}
                 class="aspect-square h-8 inline"
@@ -120,16 +120,16 @@ const PostUserBar: Component<{
                 {status.created_at}
             </A>
             <Show when={shared !== null}>
-                <FaSolidArrowsRotate class="m-1" />
+                <FaSolidArrowsRotate />
                 <A
                     href={`/user/${shared!.account.acct}`}
-                    class="m-2 whitespace-nowrap"
+                    class="whitespace-nowrap"
                 >
                     {shared!.account.display_name}
                 </A>
                 <A
                     href={`/user/${shared!.account.acct}`}
-                    class="m-1 text-neutral-500 whitespace-nowrap"
+                    class="text-neutral-500 whitespace-nowrap"
                 >
                     {shared!.account.acct}
                 </A>
@@ -190,7 +190,7 @@ const Post: Component<PostProps> = (postData) => {
     const postHref = `/post/${status().id}`;
 
     return (
-        <div class="flex flex-row md:px-8 py-1">
+        <div class="flex flex-row flex-auto  md:px-8 py-1">
             <ErrorBoundary fallback={(err) => err}>
                 <div class="w-16 flex-none hidden md:block">
                     <A href={userHref} class="m-2 size-16 aspect-square">
@@ -201,7 +201,7 @@ const Post: Component<PostProps> = (postData) => {
                         />
                     </A>
                 </div>
-                <Card class="m-4 flex-1 grow ">
+                <Card class="m-1 md:m-4 flex-auto">
                     <PostWithShared
                         status={postData.status}
                         fetchShareParent={postData.fetchShareParent}
@@ -209,7 +209,7 @@ const Post: Component<PostProps> = (postData) => {
                     />
                     <PostFooter>
                         <ContextMenu>
-                            <ContextMenuTrigger class="flex-grow">
+                            <ContextMenuTrigger class="flex-auto">
                                 <A href={postHref}>
                                     {status().replies_count} replies
                                 </A>
@@ -282,7 +282,7 @@ const StatusPostBlock: Component<StatusPostBlockProps> = (postData) => {
                                 status={status}
                                 sharedStatus={postData.shareParent!()}
                             />
-                            <CardContent class="p-3 border-b">
+                            <CardContent class="p-3 border-b ">
                                 <HtmlSandbox html={status.content} />
                             </CardContent>
                         </Match>

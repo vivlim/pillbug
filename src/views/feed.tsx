@@ -85,18 +85,13 @@ const Feed: Component = () => {
 
     return (
         <>
-            <div class="flex flex-row p-8 size-full">
+            <div>
                 <ErrorBoundary fallback={<div>ouch!</div>}>
-                    <div class="grow w-max md:w-1/2 place-self">
-                        <For each={postList()}>
-                            {(status, index) => (
-                                <Post
-                                    status={status}
-                                    fetchShareParent={false}
-                                />
-                            )}
-                        </For>
-                    </div>
+                    <For each={postList()}>
+                        {(status, index) => (
+                            <Post status={status} fetchShareParent={false} />
+                        )}
+                    </For>
                 </ErrorBoundary>
             </div>
             <div>

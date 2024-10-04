@@ -112,6 +112,7 @@
     @apply px-4;
   }
 }
+
 a {
     /*text-decoration: underline;*/
 }
@@ -120,6 +121,14 @@ a {
     display: inline-block;
     margin-right: 0.7em;
 }
+.post-content p:not(:first-child):not(:last-child) {
+    margin-top: 1em;
+    margin-bottom: 1em;
+}
 .post-content * {
-    overflow-wrap: break-word;
+    overflow-wrap: anywhere;
+    }
+    
+    .post-content a {
+        text-decoration: underline;
 }

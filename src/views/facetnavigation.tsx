@@ -72,7 +72,7 @@ export const FacetNavigationFrame: Component<{ children: JSX.Element }> = (
 
     return (
         <div class="flex flex-row mx-4 gap-4">
-            <div class="flex-initial w-72 rounded-lg border bg-card text-card-foreground shadow-sm">
+            <div class="flex-initial w-72 rounded-lg border bg-card text-card-foreground shadow-sm hidden md:flex">
                 <ul id="facet-menu" class="flex flex-col list-none p-6 gap-1">
                     <FacetNavigationItem href="/notifications">
                         <FaRegularBell />
@@ -97,7 +97,7 @@ export const FacetNavigationFrame: Component<{ children: JSX.Element }> = (
                 </ul>
             </div>
 
-            <div class="grow">{props.children}</div>
+            <div class="overflow-auto">{props.children}</div>
         </div>
     );
 };
