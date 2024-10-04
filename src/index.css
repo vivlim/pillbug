@@ -120,3 +120,6 @@ a {
     display: inline-block;
     margin-right: 0.7em;
 }
+.post-content * {
+    overflow-wrap: break-word;
+}

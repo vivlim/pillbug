@@ -101,7 +101,7 @@ const PostUserBar: Component<{
     const shared = props.sharedStatus ?? status.reblog ?? null;
 
     return (
-        <div class="border-b flex flex-row items-center gap-4 p-2 flex-1">
+        <div class="border-b flex flex-row flex-wrap items-center gap-4 p-2 flex-1">
             <img
                 src={status.account.avatar}
                 class="aspect-square h-8 inline"
@@ -140,7 +140,7 @@ const PostUserBar: Component<{
 
 const PostFooter: Component<{ children: JSX.Element }> = (props) => {
     return (
-        <div class="m-2 flex flex-row items-center justify-stretch">
+        <div class="m-2 flex flex-row flex-wrap items-center justify-stretch">
             {props.children}
         </div>
     );
@@ -190,9 +190,9 @@ const Post: Component<PostProps> = (postData) => {
     const postHref = `/post/${status().id}`;
 
     return (
-        <div class="flex flex-row px-8 py-1">
+        <div class="flex flex-row md:px-8 py-1">
             <ErrorBoundary fallback={(err) => err}>
-                <div class="w-16 flex-none">
+                <div class="w-16 flex-none hidden md:block">
                     <A href={userHref} class="m-2 size-16 aspect-square">
                         <img
                             src={status().account.avatar}

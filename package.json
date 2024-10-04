@@ -31,10 +31,14 @@
         "digraph-js": "^2.2.3",
         "get-urls": "^12.1.0",
         "megalodon": "^10.0.3",
+        "rehype-parse": "^9.0.1",
+        "rehype-sanitize": "^6.0.0",
+        "rehype-stringify": "^10.0.1",
         "solid-icons": "^1.1.0",
         "solid-js": "^1.8.11",
         "tailwind-merge": "^2.5.2",
         "tailwindcss-animate": "^1.0.7",
+        "unified": "^11.0.5",
         "url-regex-safe": "^4.0.0"
     }
 }

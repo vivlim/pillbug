@@ -183,7 +183,7 @@ function statusNode(status: Status): VertexDefinition<Status> {
 const TopNestedComment: Component<{ node: StatusNode }> = (props) => {
     return (
         <ErrorBoundary fallback={(err) => err}>
-            <Card class="m-4 mx-20 my-1 py-4 px-4">
+            <Card class="m-4 md:mx-20 my-1 py-4 px-4">
                 <div>
                     <Switch>
                         <Match when={props.node instanceof NestedStatus}>
@@ -198,7 +198,7 @@ const TopNestedComment: Component<{ node: StatusNode }> = (props) => {
                         </Match>
                     </Switch>
                 </div>
-                <div class="ml-8 border-l pl-4 pr-4">
+                <div class="ml-4 md:ml-8 border-l pl-4 pr-4">
                     <For each={props.node.children}>
                         {(node, index) => <InnerNestedComment node={node} />}
                     </For>
@@ -245,28 +245,38 @@ const PostPage: Component = () => {
     );
 
     return (
-        <ErrorBoundary fallback={(err) => err}>
-            <Switch>
-                <Match when={threadInfo.loading}>
-                    <div>loading post</div>
-                </Match>
-                <Match when={threadInfo.state === "ready"}>
-                    <Post
-                        status={
-                            threadInfo()
-                                ?.status as Status /* i don't think a placeholder should ever become root? */
-                        }
-                        fetchShareParent={true}
-                    />
-                    <For each={threadInfo()?.children}>
-                        {(node, index) => <TopNestedComment node={node} />}
-                    </For>
-                </Match>
-                <Match when={threadInfo.error}>
-                    <div>error: {threadInfo.error}</div>
-                </Match>
-            </Switch>
-        </ErrorBoundary>
+        <div class="flex flex-col md:flex-row mx-1 md:mx-4 gap-4">
+            <div class="flex-initial w-72 rounded-lg border bg-card text-card-foreground shadow-sm">
+                this is where the user info would go.
+            </div>
+
+            <div class="grow">
+                <ErrorBoundary fallback={(err) => err}>
+                    <Switch>
+                        <Match when={threadInfo.loading}>
+                            <div>loading post</div>
+                        </Match>
+                        <Match when={threadInfo.state === "ready"}>
+                            <Post
+                                status={
+                                    threadInfo()
+                                        ?.status as Status /* i don't think a placeholder should ever become root? */
+                                }
+                                fetchShareParent={true}
+                            />
+                            <For each={threadInfo()?.children}>
+                                {(node, index) => (
+                                    <TopNestedComment node={node} />
+                                )}
+                            </For>
+                        </Match>
+                        <Match when={threadInfo.error}>
+                            <div>error: {threadInfo.error}</div>
+                        </Match>
+                    </Switch>
+                </ErrorBoundary>
+            </div>
+        </div>
     );
 };
 
