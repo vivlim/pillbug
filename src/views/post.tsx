@@ -38,6 +38,8 @@ import { IoHeart, IoHeartOutline } from "solid-icons/io";
 import { IconProps } from "solid-icons";
 import { cn } from "~/lib/utils";
 import { Dynamic } from "solid-js/web";
+import { ContentGuard } from "~/components/content-guard";
+import { ImageBox } from "~/components/post/image-box";
 
 export type PostWithSharedProps = {
     status: Status;
@@ -135,6 +137,22 @@ const PostUserBar: Component<{
                 </A>
             </Show>
         </div>
+    );
+};
+
+interface PostBodyProps extends JSX.HTMLAttributes<HTMLDivElement> {
+    status: Status;
+}
+
+const PostBody: Component<PostBodyProps> = (props) => {
+    const [, rest] = splitProps(props, ["status", "class"]);
+    return (
+        <CardContent class={cn("p-3", props.class)} {...rest}>
+            <ContentGuard warnings={props.status.spoiler_text}>
+                <ImageBox attachments={props.status.media_attachments} />
+                <HtmlSandbox html={props.status.content} />
+            </ContentGuard>
+        </CardContent>
     );
 };
 
@@ -282,9 +300,7 @@ const StatusPostBlock: Component<StatusPostBlockProps> = (postData) => {
                                 status={status}
                                 sharedStatus={postData.shareParent!()}
                             />
-                            <CardContent class="p-3 border-b ">
-                                <HtmlSandbox html={status.content} />
-                            </CardContent>
+                            <PostBody class="border-b" status={status} />
                         </Match>
                         <Match
                             when={
@@ -294,9 +310,7 @@ const StatusPostBlock: Component<StatusPostBlockProps> = (postData) => {
                             }
                         >
                             <PostUserBar status={status} />
-                            <CardContent class="p-3 border-b">
-                                <HtmlSandbox html={status.content} />
-                            </CardContent>
+                            <PostBody class="border-b" status={status} />
                         </Match>
                     </Switch>
                 </Match>
@@ -304,9 +318,7 @@ const StatusPostBlock: Component<StatusPostBlockProps> = (postData) => {
                     <PostUserBar status={status} />
                     <PostUserBar status={status.reblog!} />
 
-                    <CardContent class="p-3 border-b">
-                        <HtmlSandbox html={status.reblog!.content} />
-                    </CardContent>
+                    <PostBody class="border-b" status={status.reblog!} />
                 </Match>
             </Switch>
             <Show when={postData.showRaw}>

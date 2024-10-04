@@ -164,5 +164,6 @@ export {
     DialogHeader,
     DialogFooter,
     DialogTitle,
+    DialogOverlay,
     DialogDescription,
 };
