@@ -10,6 +10,7 @@ import {
     FaSolidQuestion,
 } from "solid-icons/fa";
 import { Component, For, JSX } from "solid-js";
+import { useExpandMenuSignalContext } from "~/Frame";
 import { useAuthContext } from "~/lib/auth-context";
 import { cn } from "~/lib/utils";
 
@@ -21,6 +22,7 @@ const FacetNavigationItem: Component<{
     children: JSX.Element;
     href: string;
 }> = (props) => {
+    const expandMenuContext = useExpandMenuSignalContext();
     const activeClasses = ["active-facet", "font-bold"];
     const classes = [
         "facet-navigation-item",
@@ -41,7 +43,11 @@ const FacetNavigationItem: Component<{
 
     return (
         <li class="flex flex-initial">
-            <a class={cn(classes)} href={props.href}>
+            <a
+                class={cn(classes)}
+                href={props.href}
+                onClick={() => expandMenuContext.setMenuOpen(false)}
+            >
                 {props.children}
             </a>
         </li>
@@ -61,6 +67,7 @@ export const FacetNavigationFrame: Component<{ children: JSX.Element }> = (
 
     const location = useLocation();
     const navigate = useNavigate();
+    const expandMenuContext = useExpandMenuSignalContext();
 
     const facets = [
         new FacetDefinition("notifications", "/notifications"),
@@ -72,7 +79,22 @@ export const FacetNavigationFrame: Component<{ children: JSX.Element }> = (
 
     return (
         <div class="flex flex-row mx-4 gap-4">
-            <div class="flex-initial w-72 rounded-lg border bg-card text-card-foreground shadow-sm hidden md:flex">
+            <div
+                classList={{
+                    "flex-initial": true,
+                    "w-72": true,
+                    "rounded-lg": true,
+                    border: true,
+                    "bg-card": true,
+                    "text-card-foreground": true,
+                    "shadow-sm": true,
+                    fixed: true,
+                    "z-40": true,
+                    hidden: !expandMenuContext.menuOpen(),
+                    "md:flex": true,
+                    "md:static": true,
+                }}
+            >
                 <ul id="facet-menu" class="flex flex-col list-none p-6 gap-1">
                     <FacetNavigationItem href="/notifications">
                         <FaRegularBell />

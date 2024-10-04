@@ -14,5 +14,5 @@ export const NotificationsFacet: Component = () => {
     const location = useLocation();
     const navigate = useNavigate();
 
-    return <div class="border-2">notification list</div>;
+    return <div class="border-2">placeholder for notification list</div>;
 };
