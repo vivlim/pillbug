@@ -112,3 +112,11 @@
     @apply px-4;
   }
 }
+a {
+    /*text-decoration: underline;*/
+}
+
+.facet-navigation-item svg {
+    display: inline-block;
+    margin-right: 0.7em;
+}
