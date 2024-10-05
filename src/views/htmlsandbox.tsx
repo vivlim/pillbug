@@ -1,5 +1,5 @@
 import rehypeParse from "rehype-parse";
-import rehypeSanitize from "rehype-sanitize";
+import rehypeSanitize, { defaultSchema } from "rehype-sanitize";
 import rehypeStringify from "rehype-stringify";
 import { createResource, JSX, Match, Switch, type Component } from "solid-js";
 import { unified } from "unified";
@@ -8,9 +8,20 @@ export type HtmlSandboxProps = {
     html: string;
 };
 
+export interface HtmlPreviewSpanProps
+    extends JSX.HTMLAttributes<HTMLSpanElement> {
+    html: string;
+    numChars: number;
+}
+
 const rehypeParser = await unified()
     .use(rehypeParse, { fragment: true })
     .use(rehypeSanitize)
+    .use(rehypeStringify);
+
+const previewParser = await unified()
+    .use(rehypeParse, { fragment: true })
+    .use(rehypeSanitize, { ...defaultSchema, tagNames: [] }) // Replaces all tags with their contents, since we allow no tag names.
     .use(rehypeStringify);
 
 const HtmlSandbox: Component<HtmlSandboxProps> = (props) => {
@@ -45,6 +56,19 @@ const HtmlSandbox: Component<HtmlSandboxProps> = (props) => {
 
     return container;
     */
+};
+
+export const HtmlPreviewSpan: Component<HtmlPreviewSpanProps> = (props) => {
+    const [sanitizedHtml] = createResource(props.html, async (fragment) => {
+        const vfile = await previewParser.process(fragment);
+        const previewstr = String(vfile);
+        if (previewstr.length > props.numChars) {
+            return previewstr.substring(0, props.numChars) + "...";
+        }
+        return previewstr;
+    });
+
+    return <span>{sanitizedHtml()}</span>;
 };
 
 export default HtmlSandbox;

@@ -128,7 +128,20 @@ const AppFrame: Component<{ children: JSX.Element }> = (props) => {
                                             <Menubar>
                                                 <MenubarMenu>
                                                     <MenubarTrigger>
-                                                        {`${authContext.authState.signedIn.accountData.username}@${authContext.authState.signedIn.domain}`}
+                                                        <img
+                                                            src={
+                                                                authContext
+                                                                    .authState
+                                                                    .signedIn
+                                                                    .accountData
+                                                                    .avatar
+                                                            }
+                                                            class="aspect-square h-6 inline sm:mr-2"
+                                                            alt="your avatar"
+                                                        />
+                                                        <span class="hidden sm:inline overflow-hidden text-ellipsis">
+                                                            {`${authContext.authState.signedIn.accountData.username}@${authContext.authState.signedIn.domain}`}
+                                                        </span>
                                                     </MenubarTrigger>
                                                     <MenubarContent>
                                                         {authContext.authState
@@ -199,15 +212,6 @@ const AppFrame: Component<{ children: JSX.Element }> = (props) => {
                                                         >
                                                             Dev tools: edit
                                                             dialog
-                                                        </MenubarItem>
-                                                        <MenubarItem
-                                                            onClick={() => {
-                                                                navigate(
-                                                                    "/about"
-                                                                );
-                                                            }}
-                                                        >
-                                                            About pillbug
                                                         </MenubarItem>
                                                     </MenubarContent>
                                                 </MenubarMenu>
