@@ -112,7 +112,7 @@ export const FacetNavigationFrame: Component<{ children: JSX.Element }> = (
                     </FacetNavigationItem>
                     <FacetNavigationItem href="/settings">
                         <FaSolidGear />
-                        search
+                        settings
                     </FacetNavigationItem>
                     <FacetNavigationItem href="/about">
                         <FaSolidQuestion />
