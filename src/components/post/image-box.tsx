@@ -75,9 +75,6 @@ const ImageBoxRow: Component<ImageBoxRowProps> = (props) => {
         aspectRatio = defaultAspect;
     }
 
-    console.log(`onImageClick = ${props.onImageClick}`);
-
-    // TODO: clickable lightbox per image
     return (
         <div class={cn("flex flex-row content-start", props.class)} {...rest}>
             <For each={props.images}>
