@@ -40,6 +40,8 @@ import { cn } from "~/lib/utils";
 import { Dynamic } from "solid-js/web";
 import { ContentGuard } from "~/components/content-guard";
 import { ImageBox } from "~/components/post/image-box";
+import { Timestamp } from "~/components/post/timestamp";
+import { DateTime } from "luxon";
 
 export type PostWithSharedProps = {
     status: Status;
@@ -118,8 +120,8 @@ const PostUserBar: Component<{
             <A href={userHref} class="text-neutral-500">
                 {status.account.acct}
             </A>
-            <A href={postHref} class="text-neutral-500">
-                {status.created_at}
+            <A href={postHref} class="text-neutral-500 text-xs">
+                <Timestamp ts={DateTime.fromISO(status.created_at)} />
             </A>
             <Show when={shared !== null}>
                 <FaSolidArrowsRotate />
