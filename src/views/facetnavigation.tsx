@@ -121,7 +121,7 @@ export const FacetNavigationFrame: Component<{ children: JSX.Element }> = (
                 </ul>
             </div>
 
-            <div class="overflow-auto">{props.children}</div>
+            <div class="overflow-auto flex-grow">{props.children}</div>
         </div>
     );
 };
