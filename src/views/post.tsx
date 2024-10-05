@@ -51,6 +51,7 @@ export type PostWithSharedProps = {
 };
 
 export type PostProps = {
+    class?: string;
     status: Status;
     fetchShareParent: boolean;
     shareParent?: Resource<Status | undefined> | undefined;
@@ -210,7 +211,9 @@ const Post: Component<PostProps> = (postData) => {
     const postHref = `/post/${status().id}`;
 
     return (
-        <div class="flex flex-row flex-auto  md:px-8 py-1">
+        <div
+            class={cn("flex flex-row flex-auto  md:px-8 py-1", postData.class)}
+        >
             <ErrorBoundary fallback={(err) => err}>
                 <div class="w-16 flex-none hidden md:block">
                     <A href={userHref} class="m-2 size-16 aspect-square">

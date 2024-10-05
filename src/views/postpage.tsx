@@ -183,7 +183,7 @@ function statusNode(status: Status): VertexDefinition<Status> {
 const TopNestedComment: Component<{ node: StatusNode }> = (props) => {
     return (
         <ErrorBoundary fallback={(err) => err}>
-            <Card class="m-4 md:mx-20 my-1 py-4 px-4">
+            <Card class="my-1 py-4 px-4 md:mr-4 md:ml-20">
                 <div>
                     <Switch>
                         <Match when={props.node instanceof NestedStatus}>
@@ -250,7 +250,7 @@ const PostPage: Component = () => {
                 this is where the user info would go.
             </div>
 
-            <div class="grow">
+            <div class="grow flex flex-col jusitfy-end">
                 <ErrorBoundary fallback={(err) => err}>
                     <Switch>
                         <Match when={threadInfo.loading}>
@@ -258,6 +258,7 @@ const PostPage: Component = () => {
                         </Match>
                         <Match when={threadInfo.state === "ready"}>
                             <Post
+                                class="md:px-0"
                                 status={
                                     threadInfo()
                                         ?.status as Status /* i don't think a placeholder should ever become root? */

@@ -15,6 +15,8 @@ import { Flex } from "~/components/ui/flex";
 import { Grid, Col } from "~/components/ui/grid";
 import HtmlSandbox from "./htmlsandbox";
 import { useAuthContext } from "~/lib/auth-context";
+import { Timestamp } from "~/components/post/timestamp";
+import { DateTime } from "luxon";
 
 export type CommentProps = {
     status: Status;
@@ -29,8 +31,8 @@ export const CommentPostComponent: Component<CommentProps> = (postData) => {
 
     return (
         <>
-            <div class="flex flex-row flex-wrap border-b">
-                <div class="w-12 flex-none aspect-square">
+            <div class="flex flex-row items-center flex-wrap border-b">
+                <div class="size-10 flex-none aspect-square">
                     <A href={userHref} class="aspect-square">
                         <img
                             src={status.account.avatar}
@@ -42,11 +44,11 @@ export const CommentPostComponent: Component<CommentProps> = (postData) => {
                 <A href={userHref} class="m-2">
                     {status.account.display_name}
                 </A>
-                <A href={userHref} class="m-1 text-neutral-500">
+                <A href={userHref} class="m-1 text-neutral-500 text-sm">
                     {status.account.acct}
                 </A>
-                <A href={postHref} class="m-1 text-neutral-500">
-                    {status.created_at}
+                <A href={postHref} class="m-1 text-neutral-500 text-xs">
+                    <Timestamp ts={DateTime.fromISO(status.created_at)} />
                 </A>
             </div>
             <div class="md:px-3">
