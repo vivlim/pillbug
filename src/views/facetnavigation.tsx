@@ -78,11 +78,10 @@ export const FacetNavigationFrame: Component<{ children: JSX.Element }> = (
     ];
 
     return (
-        <div class="flex flex-row mx-4 gap-4">
+        <div class="flex flex-grow flex-row mx-4 gap-4">
             <div
                 classList={{
-                    "flex-initial": true,
-                    "w-72": true,
+                    "w-64": true,
                     "rounded-lg": true,
                     border: true,
                     "bg-card": true,
@@ -91,8 +90,11 @@ export const FacetNavigationFrame: Component<{ children: JSX.Element }> = (
                     fixed: true,
                     "z-40": true,
                     hidden: !expandMenuContext.menuOpen(),
+                    "md:flex-none": true,
+                    "md:mt-4": true,
                     "md:flex": true,
                     "md:static": true,
+                    "md:h-fit": true,
                 }}
             >
                 <ul id="facet-menu" class="flex flex-col list-none p-6 gap-1">
