@@ -5,6 +5,7 @@ import {
     createSignal,
     For,
     Setter,
+    Show,
     type Component,
 } from "solid-js";
 import { tryGetAuthenticatedClient } from "~/App";
@@ -14,6 +15,7 @@ import { Flex } from "~/components/ui/flex";
 import { Grid, Col } from "~/components/ui/grid";
 import Post from "./post";
 import { AuthProviderProps, useAuthContext } from "~/lib/auth-context";
+import { ProfileZone } from "~/components/user/profile-zone";
 
 type FeedProps = {
     firstPost?: number | null;
@@ -54,22 +56,15 @@ const UserProfile: Component = () => {
     );
 
     return (
-        <div class="flex flex-row p-8 size-full">
-            <div class="md:grow"></div>
-            <div class="grow w-max md:w-1/2 place-self">
-                {userInfo.loading && <div>loading user</div>}
-                <Card class="m-4">
-                    <CardHeader>{userInfo()?.display_name}</CardHeader>
-                    <CardContent>
-                        <div>{userInfo()?.acct}</div>
-                        <div>
-                            <a href={userInfo()?.url}>{userInfo()?.url}</a>
-                        </div>
-                    </CardContent>
-                </Card>
+        <Show
+            when={userInfo() != null}
+            fallback={<div>Loading user profile</div>}
+        >
+            <div class="flex flex-col md:flex-row mx-1 md:mx-4 gap-4">
+                <ProfileZone userInfo={userInfo()!} />
+                <div class="grow flex flex-col justify-start"></div>
             </div>
-            <div class="md:grow"></div>
-        </div>
+        </Show>
     );
 };
 
