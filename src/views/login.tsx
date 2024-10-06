@@ -35,12 +35,14 @@ const LoginView: Component = () => {
         }
         setBusy(true);
         try {
-            try {
-                new URL(instance());
-            } catch (_) {
-                // assume a URL without protocol was entered, and add HTTPS
-                setInstance("https://" + instance());
+           // Normalize Instance URL.
+           // Check for https:// or http:// at the beginning of the instance string, and add it if it's not there (assume https)
+            if(!instance().startsWith('https://') && !instance().startsWith('http://')) {
+                setInstance(`https://${instance()}`)
             }
+            // Trim trailing forward slashes.
+            setInstance(instance().replace(/\/+$/, ''))
+            // TODO: Additional normalization? I'm not sure what other ways a URL can be malformed.
             let software = await detector(instance());
             console.log(`detected software '${software}' on ${instance()}`);
 
@@ -147,12 +149,6 @@ const LoginView: Component = () => {
                                 }
                                 readOnly={busy()}
                             />
-                            <Show when={!instance().startsWith("http")}>
-                                <div>
-                                    The url must start with either https:// or
-                                    http://
-                                </div>
-                            </Show>
                         </TextField>
                         <Button onClick={doOAuth} disabled={busy()}>
                             Log in
