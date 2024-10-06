@@ -22,6 +22,7 @@ import { Status } from "megalodon/lib/src/entities/status";
 import { DiGraph, VertexDefinition } from "digraph-js";
 import { CommentPostComponent } from "./comment";
 import { AuthProviderProps, useAuthContext } from "~/lib/auth-context";
+import { ProfileZone } from "~/components/user/profile-zone";
 
 type FeedProps = {
     firstPost?: number | null;
@@ -246,11 +247,10 @@ const PostPage: Component = () => {
 
     return (
         <div class="flex flex-col md:flex-row mx-1 md:mx-4 gap-4">
-            <div class="flex-initial w-72 rounded-lg border bg-card text-card-foreground shadow-sm">
-                this is where the user info would go.
-            </div>
-
-            <div class="grow flex flex-col jusitfy-end">
+            <Show when={threadInfo()} fallback={<div>Loading</div>}>
+                <ProfileZone userInfo={threadInfo()!.status.account} />
+            </Show>
+            <div class="grow flex flex-col justify-start">
                 <ErrorBoundary fallback={(err) => err}>
                     <Switch>
                         <Match when={threadInfo.loading}>
