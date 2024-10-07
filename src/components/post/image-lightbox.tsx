@@ -19,7 +19,7 @@ const InnerImage: Component<{ image: Attachment }> = (props) => {
     return (
         <img
             class="max-h-[calc(100vh-8rem)] object-scale-down mb-2 mx-auto pointer-events-auto"
-            src={props.image.text_url!}
+            src={props.image.url!}
             alt={props.image.description!}
         />
     );
