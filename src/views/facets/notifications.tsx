@@ -102,12 +102,10 @@ export const SingleLinePostPreviewLink: Component<{
                         href={`/post/${props.status?.id}`}
                         class="underline flex overflow-hidden text-ellipsis"
                     >
-                        "
                         <HtmlPreviewSpan
                             html={props.status!.content}
                             numChars={80}
                         />
-                        "
                     </a>
                 </Match>
                 <Match when={props.status === undefined}>
@@ -121,11 +119,6 @@ export const SingleLinePostPreviewLink: Component<{
 export const GroupedNotificationComponent: Component<{
     kindGroup: NotificationKindGroups;
 }> = (props) => {
-    const authContext = useAuthContext();
-
-    const location = useLocation();
-    const navigate = useNavigate();
-
     const group = props.kindGroup.group;
     const notifications = props.kindGroup.items;
     const [showRaw, setShowRaw] = createSignal<boolean>(false);
@@ -152,7 +145,7 @@ export const GroupedNotificationComponent: Component<{
         <>
             <ContextMenu>
                 <ContextMenuTrigger class="flex-auto" disabled>
-                    <a class="flex flex-wrap w-full p-3 border-2 rounded-xl gap-2 my-2">
+                    <a class="flex flex-wrap w-full p-3 border-2 rounded-xl gap-1 my-2">
                         <Switch>
                             <Match when={notifications.length === 1}>
                                 <a
@@ -167,21 +160,46 @@ export const GroupedNotificationComponent: Component<{
                                     />
                                 </a>
                                 <a
-                                    href={`/user/${firstNotification.account?.id}`}
+                                    href={`/user/${firstNotification.account?.acct}`}
                                     class="underline"
                                 >
                                     {firstNotification.account?.acct}
                                 </a>
-                                {typeLabel}
-                                <Show when={status !== undefined}>
-                                    <SingleLinePostPreviewLink
-                                        status={status}
-                                    />
-                                </Show>
+                                <Switch>
+                                    <Match when={status === undefined}>
+                                        {typeLabel}
+                                    </Match>
+                                    <Match when={status !== undefined}>
+                                        <a
+                                            href={`/post/${status?.id}`}
+                                            class="flex"
+                                        >
+                                            {typeLabel}
+                                        </a>
+                                        <SingleLinePostPreviewLink
+                                            status={status}
+                                        />
+                                    </Match>
+                                </Switch>
                             </Match>
                             <Match when={notifications.length > 1}>
-                                <div>Several pages {typeLabel}</div>
-                                <SingleLinePostPreviewLink status={status} />
+                                <div>Several pages</div>
+                                <Switch>
+                                    <Match when={status === undefined}>
+                                        {typeLabel}
+                                    </Match>
+                                    <Match when={status !== undefined}>
+                                        <a
+                                            href={`/post/${status?.id}`}
+                                            class="flex"
+                                        >
+                                            {typeLabel}
+                                        </a>
+                                        <SingleLinePostPreviewLink
+                                            status={status}
+                                        />
+                                    </Match>
+                                </Switch>
                                 <div class="w-full flex flex-row gap-1">
                                     <For each={notifications}>
                                         {(n, i) => (
