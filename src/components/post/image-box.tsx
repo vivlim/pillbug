@@ -11,7 +11,7 @@ interface ImageAttachmentProps {
 }
 
 const ImageAttachment: Component<ImageAttachmentProps> = (props) => {
-    let src = props.attachment.text_url;
+    let src = props.attachment.preview_url;
     let srcset = "";
     let sizes = "";
     if (props.attachment.preview_url && props.attachment.meta) {
@@ -19,7 +19,7 @@ const ImageAttachment: Component<ImageAttachmentProps> = (props) => {
         const small_width = props.attachment.meta.small?.width ?? 400;
         srcset += `${props.attachment.preview_url} ${small_width}px `;
         const orig_width = props.attachment.meta.original?.width;
-        srcset += `${props.attachment.text_url} ${orig_width}px `;
+        srcset += `${props.attachment.url} ${orig_width}px `;
         sizes += `(max-width: ${small_width}px) ${small_width}px, ${orig_width}px`;
     }
 
