@@ -33,7 +33,7 @@ export const CommentPostComponent: Component<CommentProps> = (postData) => {
     return (
         <>
             <div class="flex flex-row items-center flex-wrap border-b">
-                <AvatarLink user={status.account} twSize="6" />
+                <AvatarLink user={status.account} imgClass="size-6" />
                 <A href={userHref} class="m-2">
                     {status.account.display_name}
                 </A>

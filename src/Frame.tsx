@@ -136,7 +136,7 @@ const AppFrame: Component<{ children: JSX.Element }> = (props) => {
                                                                     .signedIn
                                                                     .accountData
                                                             }
-                                                            twSize="6"
+                                                            imgClass="size-6"
                                                             class="inline sm:mr-2"
                                                             alt="Your avatar"
                                                         />

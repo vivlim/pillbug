@@ -111,7 +111,7 @@ export const ProfileZone: Component<ProfileZoneProps> = (props) => {
             <div class="flex flex-row md:flex-col md:items-center gap-4">
                 <AvatarLink
                     user={props.userInfo}
-                    twSize="24"
+                    imgClass="size-24"
                     class="shadow-md"
                 />
                 <div class="flex flex-col md:items-center">
