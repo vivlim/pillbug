@@ -25,6 +25,7 @@ import {
 import { AuthProviderProps, useAuthContext } from "~/lib/auth-context";
 import { HtmlPreviewSpan } from "../htmlsandbox";
 import { Timestamp } from "~/components/post/timestamp";
+import { AvatarLink } from "~/components/user/avatar";
 
 type NotificationDayGroups = {
     created_day: DateTime<true> | DateTime<false>;
@@ -148,17 +149,13 @@ export const GroupedNotificationComponent: Component<{
                     <a class="flex flex-wrap w-full p-3 border-2 rounded-xl gap-1 my-2">
                         <Switch>
                             <Match when={notifications.length === 1}>
-                                <a
-                                    href={`/user/${firstNotification.account?.acct}`}
-                                    class="underline"
-                                    title={firstNotification.account?.acct}
-                                >
-                                    <img
-                                        src={firstNotification.account?.avatar}
-                                        alt={`${firstNotification.account?.display_name}`}
-                                        class="aspect-square h-6 inline"
+                                <Show when={firstNotification.account != null}>
+                                    <AvatarLink
+                                        user={firstNotification.account!}
+                                        twSize="6"
+                                        class="inline-block underline"
                                     />
-                                </a>
+                                </Show>
                                 <a
                                     href={`/user/${firstNotification.account?.acct}`}
                                     class="underline"
@@ -209,10 +206,10 @@ export const GroupedNotificationComponent: Component<{
                                                     class="flex"
                                                     title={`${n.account?.acct}`}
                                                 >
-                                                    <img
-                                                        src={n.account?.avatar}
-                                                        alt={`${n.account?.display_name}`}
-                                                        class="aspect-square h-6 inline"
+                                                    <AvatarLink
+                                                        user={n.account!}
+                                                        twSize="6"
+                                                        class="inline-block"
                                                     />
                                                 </a>
                                             </>

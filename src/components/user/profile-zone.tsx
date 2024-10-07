@@ -16,6 +16,7 @@ import {
 import HtmlSandbox from "~/views/htmlsandbox";
 import { useAuthContext } from "~/lib/auth-context";
 import { FaSolidLock } from "solid-icons/fa";
+import { AvatarLink } from "./avatar";
 
 /// Button that shows "Follow"/"Request to Follow"/"Unfollow"/"Cancel Request"
 /// and acts accordingly when clicked
@@ -108,18 +109,11 @@ export const ProfileZone: Component<ProfileZoneProps> = (props) => {
     return (
         <div class="md:w-72 p-8 md:flex-shrink-0 flex gap-4 min-h-max flex-col md:items-center justify-start bg-secondary text-secondary-foreground">
             <div class="flex flex-row md:flex-col md:items-center gap-4">
-                <picture class="aspect-square shadow-md size-24 object-fill">
-                    <source
-                        class="w-full h-full rounded-md"
-                        srcset={props.userInfo.avatar_static}
-                        media="(prefers-reduced-motion)"
-                    />
-                    <img
-                        class="w-full h-full rounded-md"
-                        src={props.userInfo.avatar}
-                        alt={`User avatar for ${props.userInfo.username}`}
-                    />
-                </picture>
+                <AvatarLink
+                    user={props.userInfo}
+                    twSize="24"
+                    class="shadow-md"
+                />
                 <div class="flex flex-col md:items-center">
                     <div class="flex flex-row items-center gap-2">
                         <h2 class="text-xl font-bold">
