@@ -152,7 +152,7 @@ export const GroupedNotificationComponent: Component<{
                                 <Show when={firstNotification.account != null}>
                                     <AvatarLink
                                         user={firstNotification.account!}
-                                        twSize="6"
+                                        imgClass="size-6"
                                         class="inline-block underline"
                                     />
                                 </Show>

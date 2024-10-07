@@ -102,7 +102,11 @@ const PostUserBar: Component<{
 
     return (
         <div class="border-b flex flex-row flex-wrap items-center gap-x-2 p-2 flex-auto">
-            <AvatarLink user={status.account} twSize="8" class="inline-block" />
+            <AvatarLink
+                user={status.account}
+                imgClass="size-8"
+                class="inline-block"
+            />
             <div class="flex flex-row gap-2 items-center">
                 <A href={userHref} class="whitespace-nowrap">
                     {status.account.display_name}
@@ -208,7 +212,7 @@ const Post: Component<PostProps> = (postData) => {
             <ErrorBoundary fallback={(err) => err}>
                 <AvatarLink
                     user={status().account}
-                    twSize="16"
+                    imgClass="size-16"
                     class="hidden md:block md:m-4"
                 />
                 <Card class="m-1 md:m-4 flex-auto">
