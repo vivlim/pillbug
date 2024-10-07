@@ -17,6 +17,7 @@ import HtmlSandbox from "./htmlsandbox";
 import { useAuthContext } from "~/lib/auth-context";
 import { Timestamp } from "~/components/post/timestamp";
 import { DateTime } from "luxon";
+import { AvatarLink } from "~/components/user/avatar";
 
 export type CommentProps = {
     status: Status;
@@ -32,15 +33,7 @@ export const CommentPostComponent: Component<CommentProps> = (postData) => {
     return (
         <>
             <div class="flex flex-row items-center flex-wrap border-b">
-                <div class="size-10 flex-none aspect-square">
-                    <A href={userHref} class="aspect-square">
-                        <img
-                            src={status.account.avatar}
-                            class="aspect-square"
-                            alt={`the avatar of ${status.account.acct}`}
-                        />
-                    </A>
-                </div>
+                <AvatarLink user={status.account} twSize="6" />
                 <A href={userHref} class="m-2">
                     {status.account.display_name}
                 </A>

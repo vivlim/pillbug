@@ -25,6 +25,7 @@ import EditOverlay from "./views/editoverlay";
 import { AuthProviderProps, useAuthContext } from "./lib/auth-context";
 import { useEditOverlayContext } from "./lib/edit-overlay-context";
 import { FaSolidBars } from "solid-icons/fa";
+import { AvatarImage } from "./components/user/avatar";
 
 export const initAppFrameAsync = async (authContext: AuthProviderProps) => {
     try {
@@ -128,16 +129,16 @@ const AppFrame: Component<{ children: JSX.Element }> = (props) => {
                                             <Menubar>
                                                 <MenubarMenu>
                                                     <MenubarTrigger>
-                                                        <img
-                                                            src={
+                                                        <AvatarImage
+                                                            user={
                                                                 authContext
                                                                     .authState
                                                                     .signedIn
                                                                     .accountData
-                                                                    .avatar
                                                             }
-                                                            class="aspect-square h-6 inline sm:mr-2"
-                                                            alt="your avatar"
+                                                            twSize="6"
+                                                            class="inline sm:mr-2"
+                                                            alt="Your avatar"
                                                         />
                                                         <span class="hidden sm:inline overflow-hidden text-ellipsis">
                                                             {`${authContext.authState.signedIn.accountData.username}@${authContext.authState.signedIn.domain}`}

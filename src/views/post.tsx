@@ -6,28 +6,22 @@ import {
     createResource,
     createSignal,
     ErrorBoundary,
-    For,
     JSX,
     Match,
     Resource,
-    Setter,
     Show,
     splitProps,
     Switch,
     type Component,
 } from "solid-js";
-import { tryGetAuthenticatedClient } from "~/App";
 import { AuthProviderProps, useAuthContext } from "~/lib/auth-context";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
-import { Flex } from "~/components/ui/flex";
-import { Grid, Col } from "~/components/ui/grid";
 import HtmlSandbox from "./htmlsandbox";
 import {
     ContextMenu,
     ContextMenuContent,
     ContextMenuItem,
-    ContextMenuSeparator,
     ContextMenuTrigger,
 } from "~/components/ui/context-menu";
 import { TextField, TextFieldTextArea } from "~/components/ui/text-field";
@@ -42,6 +36,7 @@ import { ContentGuard } from "~/components/content-guard";
 import { ImageBox } from "~/components/post/image-box";
 import { Timestamp } from "~/components/post/timestamp";
 import { DateTime } from "luxon";
+import { AvatarLink } from "~/components/user/avatar";
 
 export type PostWithSharedProps = {
     status: Status;
@@ -107,11 +102,7 @@ const PostUserBar: Component<{
 
     return (
         <div class="border-b flex flex-row flex-wrap items-center gap-x-2 p-2 flex-auto">
-            <img
-                src={status.account.avatar}
-                class="aspect-square h-8 inline"
-                alt={`the avatar of ${status.account.acct}`}
-            />
+            <AvatarLink user={status.account} twSize="8" class="inline-block" />
             <div class="flex flex-row gap-2 items-center">
                 <A href={userHref} class="whitespace-nowrap">
                     {status.account.display_name}
@@ -215,15 +206,11 @@ const Post: Component<PostProps> = (postData) => {
             class={cn("flex flex-row flex-auto  md:px-8 py-1", postData.class)}
         >
             <ErrorBoundary fallback={(err) => err}>
-                <div class="w-16 flex-none hidden md:block">
-                    <A href={userHref} class="m-2 size-16 aspect-square">
-                        <img
-                            src={status().account.avatar}
-                            class="aspect-square"
-                            alt={`the avatar of ${status().account.acct}`}
-                        />
-                    </A>
-                </div>
+                <AvatarLink
+                    user={status().account}
+                    twSize="16"
+                    class="hidden md:block md:m-4"
+                />
                 <Card class="m-1 md:m-4 flex-auto">
                     <PostWithShared
                         status={postData.status}
@@ -279,8 +266,6 @@ const Post: Component<PostProps> = (postData) => {
 
 const StatusPostBlock: Component<StatusPostBlockProps> = (postData) => {
     const status = postData.status;
-
-    const [showRaw, setShowRaw] = createSignal<boolean>(false);
 
     return (
         <>
