@@ -5,6 +5,7 @@ import {
     Component,
     createEffect,
     createResource,
+    createSignal,
     ErrorBoundary,
     For,
 } from "solid-js";
@@ -31,6 +32,7 @@ type RequestHandler = (
 
 export interface PostFeedProps {
     onRequest: RequestHandler;
+    lastRefresh?: number;
 }
 
 async function fetchPostList(
@@ -73,6 +75,17 @@ export const PostFeed: Component<PostFeedProps> = (props) => {
         },
         (options) => fetchPostList(props.onRequest, authContext, options)
     );
+
+    const [lastRefresh, setLastRefresh] = createSignal(
+        props.lastRefresh ?? Date.now()
+    );
+
+    createEffect(() => {
+        if (props.lastRefresh != null && props.lastRefresh != lastRefresh()) {
+            console.log("[PostFeed] refresh requested");
+            listActions.refetch();
+        }
+    });
 
     const feedContext = {
         postList: postList,
