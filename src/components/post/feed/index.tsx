@@ -28,7 +28,7 @@ export interface GetTimelineOptions extends GetTimelineOptionsApi {}
 type RequestHandler = (
     authContext: AuthProviderProps,
     timelineOptions: GetTimelineOptions
-) => Promise<Response<Array<Status>>> | undefined;
+) => Promise<Response<Array<Status>> | undefined> | undefined;
 
 export interface PostFeedProps {
     onRequest: RequestHandler;

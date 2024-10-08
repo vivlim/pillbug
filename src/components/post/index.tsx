@@ -29,6 +29,7 @@ import { FaSolidArrowsRotate } from "solid-icons/fa";
 import createUrlRegExp from "url-regex-safe";
 import { VisibilityIcon } from "~/components/visibility-icon";
 import { IoHeart, IoHeartOutline } from "solid-icons/io";
+import { BsPinAngleFill } from "solid-icons/bs";
 import { IconProps } from "solid-icons";
 import { cn } from "~/lib/utils";
 import { Dynamic } from "solid-js/web";
@@ -102,6 +103,9 @@ const PostUserBar: Component<{
 
     return (
         <div class="border-b flex flex-row flex-wrap items-center gap-x-2 p-2 flex-auto">
+            <Show when={status.pinned}>
+                <BsPinAngleFill aria-label="Pinned post" class="size-4" />
+            </Show>
             <AvatarLink
                 user={status.account}
                 imgClass="size-8"

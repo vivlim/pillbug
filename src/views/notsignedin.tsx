@@ -62,10 +62,7 @@ const features: Feature[] = [
     ]),
     new Feature("Viewing notifications", false),
     new Feature("Searching for posts and users", false),
-    new Feature("Viewing profiles", true, [
-        "posts and profile information are viewable",
-        "pinned posts don't show up yet",
-    ]),
+    new Feature("Viewing profiles", true),
     new Feature("Writing new posts", true),
     new Feature("Favoriting posts", true),
     new Feature("Sharing posts", false),
