@@ -23,7 +23,7 @@ interface GetTimelineOptionsApi {
     min_id?: string;
 }
 
-interface GetTimelineOptions extends GetTimelineOptionsApi {}
+export interface GetTimelineOptions extends GetTimelineOptionsApi {}
 
 type RequestHandler = (
     authContext: AuthProviderProps,
