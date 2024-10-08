@@ -1,19 +1,6 @@
 import { A, useParams } from "@solidjs/router";
 import { Entity } from "megalodon";
-import {
-    createResource,
-    createSignal,
-    For,
-    Setter,
-    Show,
-    type Component,
-} from "solid-js";
-import { tryGetAuthenticatedClient } from "~/App";
-import { Button } from "~/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
-import { Flex } from "~/components/ui/flex";
-import { Grid, Col } from "~/components/ui/grid";
-import Post from "./post";
+import { createResource, createSignal, Show, type Component } from "solid-js";
 import { AuthProviderProps, useAuthContext } from "~/lib/auth-context";
 import { ProfileZone } from "~/components/user/profile-zone";
 
