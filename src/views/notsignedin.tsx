@@ -62,8 +62,9 @@ const features: Feature[] = [
     ]),
     new Feature("Viewing notifications", false),
     new Feature("Searching for posts and users", false),
-    new Feature("Viewing profiles", false, [
-        "barely implemented at the moment. need to combine this with the view for individual posts",
+    new Feature("Viewing profiles", true, [
+        "posts and profile information are viewable",
+        "pinned posts don't show up yet",
     ]),
     new Feature("Writing new posts", true),
     new Feature("Favoriting posts", true),
