@@ -210,7 +210,7 @@ const Post: Component<PostProps> = (postData) => {
     const postHref = `/post/${status().id}`;
 
     return (
-        <div class={cn("flex flex-row flex-auto md:px-8 py-1 max-w-4xl", postData.class)}>
+        <div class={cn("flex flex-row flex-auto md:px-8 py-1", postData.class)}>
             <ErrorBoundary fallback={(err) => err}>
                 <AvatarLink
                     user={status().account}

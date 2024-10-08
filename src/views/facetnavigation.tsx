@@ -75,7 +75,7 @@ export const FacetNavigationFrame: Component<{ children: JSX.Element }> = (
     }
 
     return (
-        <div class="flex flex-grow flex-row mx-4 gap-4">
+        <div class="flex flex-grow flex-row mx-4 gap-4 justify-center">
             <div
                 classList={{
                     "w-64": true,
@@ -86,6 +86,7 @@ export const FacetNavigationFrame: Component<{ children: JSX.Element }> = (
                     "shadow-sm": true,
                     fixed: true,
                     "z-40": true,
+                    "mr-auto": true,
                     hidden: !expandMenuContext.menuOpen(),
                     "md:flex-none": true,
                     "md:mt-4": true,
@@ -120,7 +121,7 @@ export const FacetNavigationFrame: Component<{ children: JSX.Element }> = (
                 </ul>
             </div>
 
-            <div class="overflow-auto flex-grow">{props.children}</div>
+            <div class="overflow-auto flex-grow max-w-4xl mr-auto ">{props.children}</div>
         </div>
     );
 };
