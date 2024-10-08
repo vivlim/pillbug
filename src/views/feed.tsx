@@ -28,7 +28,15 @@ export interface SubmitFeedState {
 }
 
 const Feed: Component = () => {
-    // const location = useLocation<SubmitFeedState>();
+    const location = useLocation<SubmitFeedState>();
+
+    const [lastRefresh, setLastRefresh] = createSignal(Date.now());
+
+    createEffect(() => {
+        if (location.state?.new_id != null) {
+            setLastRefresh(Date.now());
+        }
+    });
 
     return (
         <PostFeed
@@ -41,6 +49,7 @@ const Feed: Component = () => {
                     authContext.authState.signedIn.authenticatedClient;
                 return client.getHomeTimeline(timelineOptions);
             }}
+            lastRefresh={lastRefresh()}
         />
     );
 };
