@@ -16,8 +16,8 @@ import {
 } from "solid-js";
 import { AuthProviderProps, useAuthContext } from "~/lib/auth-context";
 import { Button } from "~/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
-import HtmlSandbox from "./htmlsandbox";
+import { Card, CardContent } from "~/components/ui/card";
+import HtmlSandbox from "../../views/htmlsandbox";
 import {
     ContextMenu,
     ContextMenuContent,
@@ -156,7 +156,7 @@ const PostBody: Component<PostBodyProps> = (props) => {
 
 const PostFooter: Component<{ children: JSX.Element }> = (props) => {
     return (
-        <div class="m-2 flex flex-row flex-wrap items-center justify-stretch">
+        <div class="my-1 mx-2 flex flex-row flex-wrap items-center justify-stretch">
             {props.children}
         </div>
     );
@@ -206,9 +206,7 @@ const Post: Component<PostProps> = (postData) => {
     const postHref = `/post/${status().id}`;
 
     return (
-        <div
-            class={cn("flex flex-row flex-auto  md:px-8 py-1", postData.class)}
-        >
+        <div class={cn("flex flex-row flex-auto md:px-8 py-1", postData.class)}>
             <ErrorBoundary fallback={(err) => err}>
                 <AvatarLink
                     user={status().account}
@@ -238,7 +236,7 @@ const Post: Component<PostProps> = (postData) => {
                         </ContextMenu>
                         <Button
                             variant="ghost"
-                            class="hover:bg-transparent py-0"
+                            class="hover:bg-transparent p-0"
                             aria-label="Like Post"
                             onClick={async () => {
                                 if (!authContext.authState.signedIn) {

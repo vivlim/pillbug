@@ -17,7 +17,7 @@ import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Flex } from "~/components/ui/flex";
 import { Grid, Col } from "~/components/ui/grid";
-import Post, { PostWithShared } from "./post";
+import Post, { PostWithShared } from "~/components/post";
 import { Status } from "megalodon/lib/src/entities/status";
 import { DiGraph, VertexDefinition } from "digraph-js";
 import { CommentPostComponent } from "./comment";
