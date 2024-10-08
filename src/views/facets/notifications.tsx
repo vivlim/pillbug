@@ -208,7 +208,7 @@ export const GroupedNotificationComponent: Component<{
                                                 >
                                                     <AvatarLink
                                                         user={n.account!}
-                                                        twSize="6"
+                                                        imgClass="size-6"
                                                         class="inline-block"
                                                     />
                                                 </a>
