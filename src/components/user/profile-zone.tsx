@@ -13,7 +13,10 @@ import {
     Show,
     Switch,
 } from "solid-js";
-import HtmlSandbox from "~/views/htmlsandbox";
+import HtmlSandbox, {
+    HtmlPreviewSpan,
+    HtmlSandboxSpan,
+} from "~/views/htmlsandbox";
 import { useAuthContext } from "~/lib/auth-context";
 import { FaSolidLock } from "solid-icons/fa";
 import { AvatarLink } from "./avatar";
@@ -82,11 +85,16 @@ const FollowButton: Component<{ account: Entity.Account }> = (props) => {
     );
 };
 
-const ProfileField: Component<{ field: Entity.Field }> = (props) => {
+const ProfileField: Component<{
+    field: Entity.Field;
+    emoji?: Entity.Emoji[];
+}> = (props) => {
     return (
         <div class="mb-2">
-            <div class="font-bold text-sm">{props.field.name}</div>
-            <HtmlSandbox html={props.field.value} />
+            <div class="font-bold text-sm">
+                <HtmlSandboxSpan html={props.field.name} emoji={props.emoji} />
+            </div>
+            <HtmlSandboxSpan html={props.field.value} emoji={props.emoji} />
         </div>
     );
 };
@@ -117,7 +125,10 @@ export const ProfileZone: Component<ProfileZoneProps> = (props) => {
                 <div class="flex flex-col md:items-center">
                     <div class="flex flex-row items-center gap-2">
                         <h2 class="text-xl font-bold">
-                            {props.userInfo.display_name}
+                            <HtmlSandboxSpan
+                                html={props.userInfo.display_name}
+                                emoji={props.userInfo.emojis}
+                            />
                         </h2>
                         <Show when={props.userInfo.locked}>
                             <FaSolidLock
@@ -142,12 +153,20 @@ export const ProfileZone: Component<ProfileZoneProps> = (props) => {
             >
                 <FollowButton account={props.userInfo} />
             </Show>
-            <HtmlSandbox html={props.userInfo.note} />
+            <HtmlSandbox
+                html={props.userInfo.note}
+                emoji={props.userInfo.emojis}
+            />
             <Show when={props.userInfo.fields.length > 0}>
                 <hr class="border-accent-foreground w-full" />
                 <div class="flex flex-col justify-start w-full">
                     <For each={props.userInfo.fields}>
-                        {(field, index) => <ProfileField field={field} />}
+                        {(field, index) => (
+                            <ProfileField
+                                field={field}
+                                emoji={props.userInfo.emojis}
+                            />
+                        )}
                     </For>
                 </div>
             </Show>

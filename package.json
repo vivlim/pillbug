@@ -12,6 +12,7 @@
     },
     "license": "MIT",
     "devDependencies": {
+        "@types/hast": "^3.0.4",
         "@types/luxon": "^3.4.2",
         "@types/node": "^22.5.5",
         "@types/url-regex-safe": "^1.0.2",
@@ -31,6 +32,8 @@
         "clsx": "^2.1.1",
         "digraph-js": "^2.2.3",
         "get-urls": "^12.1.0",
+        "hast-util-find-and-replace": "^5.0.1",
+        "hastscript": "^9.0.0",
         "luxon": "^3.5.0",
         "megalodon": "^10.0.3",
         "rehype-parse": "^9.0.1",

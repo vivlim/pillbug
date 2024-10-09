@@ -152,7 +152,10 @@ const PostBody: Component<PostBodyProps> = (props) => {
         <CardContent class={cn("p-3", props.class)} {...rest}>
             <ContentGuard warnings={props.status.spoiler_text}>
                 <ImageBox attachments={props.status.media_attachments} />
-                <HtmlSandbox html={props.status.content} />
+                <HtmlSandbox
+                    html={props.status.content}
+                    emoji={props.status.emojis}
+                />
             </ContentGuard>
         </CardContent>
     );
