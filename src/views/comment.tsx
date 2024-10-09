@@ -13,7 +13,7 @@ import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Flex } from "~/components/ui/flex";
 import { Grid, Col } from "~/components/ui/grid";
-import HtmlSandbox from "./htmlsandbox";
+import HtmlSandbox, { HtmlSandboxSpan } from "./htmlsandbox";
 import { useAuthContext } from "~/lib/auth-context";
 import { Timestamp } from "~/components/post/timestamp";
 import { DateTime } from "luxon";
@@ -35,7 +35,10 @@ export const CommentPostComponent: Component<CommentProps> = (postData) => {
             <div class="flex flex-row items-center flex-wrap border-b">
                 <AvatarLink user={status.account} imgClass="size-6" />
                 <A href={userHref} class="m-2">
-                    {status.account.display_name}
+                    <HtmlSandboxSpan
+                        html={status.account.display_name}
+                        emoji={status.account.emojis}
+                    />
                 </A>
                 <A href={userHref} class="m-1 text-neutral-500 text-sm">
                     {status.account.acct}
@@ -45,7 +48,7 @@ export const CommentPostComponent: Component<CommentProps> = (postData) => {
                 </A>
             </div>
             <div class="md:px-3">
-                <HtmlSandbox html={status.content} />
+                <HtmlSandbox html={status.content} emoji={status.emojis} />
             </div>
         </>
     );
