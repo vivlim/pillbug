@@ -112,7 +112,7 @@ const PostUserBar: Component<{
                 class="inline-block"
             />
             <div class="flex flex-row gap-2 items-center">
-                <A href={userHref} class="whitespace-nowrap">
+                <A href={userHref} class="font-bold whitespace-nowrap">
                     {status.account.display_name}
                 </A>
                 <VisibilityIcon class="size-4" value={status.visibility} />
@@ -127,7 +127,7 @@ const PostUserBar: Component<{
                 <FaSolidArrowsRotate />
                 <A
                     href={`/user/${shared!.account.acct}`}
-                    class="whitespace-nowrap"
+                    class="font-bold whitespace-nowrap"
                 >
                     {shared!.account.display_name}
                 </A>
