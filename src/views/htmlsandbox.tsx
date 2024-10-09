@@ -60,7 +60,9 @@ const HtmlSandbox: Component<HtmlSandboxProps> = (props) => {
     */
 };
 
-export interface StrictHtmlSandboxProps extends HtmlSandboxProps {}
+export interface StrictHtmlSandboxProps extends HtmlSandboxProps {
+    class?: string;
+}
 
 /**
  * Component similar to {@link HtmlSandbox}, but provides a span.
@@ -84,31 +86,13 @@ export const HtmlSandboxSpan: Component<StrictHtmlSandboxProps> = (props) => {
     return (
         <Switch>
             <Match when={sanitizedHtml.state === "ready"}>
-                <span innerHTML={sanitizedHtml()} />
+                <span innerHTML={sanitizedHtml()} class={props.class} />
             </Match>
             <Match when={sanitizedHtml.loading}>
                 <span>sanitizing html...</span>
             </Match>
         </Switch>
     );
-};
-
-export const HtmlPreviewSpan: Component<HtmlPreviewSpanProps> = (props) => {
-    const previewParser = unified()
-        .use(rehypeParse, { fragment: true })
-        .use(rehypeSanitize, { ...defaultSchema, tagNames: [] }) // Replaces all tags with their contents, since we allow no tag names.
-        .use(rehypeStringify);
-
-    const [sanitizedHtml] = createResource(props.html, async (fragment) => {
-        const vfile = await previewParser.process(fragment);
-        const previewstr = String(vfile);
-        if (previewstr.length > props.numChars) {
-            return previewstr.substring(0, props.numChars) + "...";
-        }
-        return previewstr;
-    });
-
-    return <span>{sanitizedHtml()}</span>;
 };
 
 export default HtmlSandbox;
