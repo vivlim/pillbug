@@ -13,7 +13,7 @@ import Post from "~/components/post";
 import { Status } from "megalodon/lib/src/entities/status";
 import { AuthProviderProps, useAuthContext } from "~/lib/auth-context";
 import { ProfileZone } from "~/components/user/profile-zone";
-import { Comment } from "~/components/post/comments";
+import { Comment, NewCommentEditor } from "~/components/post/comments";
 
 /** Fetch the info for a post and arrange its context in a nested tree structure before returning. */
 export async function fetchPostInfoTree(
@@ -228,6 +228,7 @@ const PostPage: Component = () => {
                         </Match>
                     </Switch>
                 </ErrorBoundary>
+                <NewCommentEditor></NewCommentEditor>
             </div>
         </div>
     );

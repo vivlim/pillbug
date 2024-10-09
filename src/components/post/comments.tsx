@@ -1,5 +1,7 @@
 import {
     Component,
+    createMemo,
+    createSignal,
     ErrorBoundary,
     For,
     JSX,
@@ -14,6 +16,22 @@ import {
     PostTreePlaceholderNode,
 } from "~/views/postpage";
 import { Card } from "../ui/card";
+import { useAuthContext } from "~/lib/auth-context";
+import { Entity, MegalodonInterface } from "megalodon";
+import { isValidVisibility, PostOptions } from "~/views/editdialog";
+import { IoWarningOutline } from "solid-icons/io";
+import { DialogHeader, DialogTitle, DialogFooter } from "../ui/dialog";
+import {
+    DropdownMenuTrigger,
+    DropdownMenuContent,
+    DropdownMenuRadioGroup,
+    DropdownMenuRadioItem,
+    DropdownMenu,
+} from "../ui/dropdown-menu";
+import { TextFieldTextArea, TextFieldInput, TextField } from "../ui/text-field";
+import { VisibilityIcon } from "../visibility-icon";
+import { MenuButton } from "../ui/menubutton";
+import { Button } from "../ui/button";
 
 /** A root comment appearing underneath a post. */
 export const Comment: Component<{ node: IPostTreeNode }> = (props) => {
@@ -73,5 +91,172 @@ const NestedComment: Component<{ node: IPostTreeNode }> = (props) => {
                 </For>
             </div>
         </ErrorBoundary>
+    );
+};
+
+export interface NewCommentEditorProps {}
+
+export const NewCommentEditor: Component<NewCommentEditorProps> = (props) => {
+    const authContext = useAuthContext();
+
+    const [posted, setPosted] = createSignal(false);
+    const [postId, setPostId] = createSignal<string | null>(null);
+
+    const [busy, setBusy] = createSignal(false);
+    const [cwVisible, setCwVisible] = createSignal(false);
+    const [rawCwContent, setCwContent] = createSignal("");
+    /// Gets the content warning in a way that can be transferred to Megalodon
+    const cwContent = createMemo(() => {
+        if (cwVisible()) {
+            const rawCw = rawCwContent().trim();
+            return rawCw == "" ? null : rawCw;
+        } else {
+            return null;
+        }
+    });
+    // TODO: meaningfully hook this up
+    const [postErrors, setErrors] = createSignal<Array<string>>([]);
+    const pushError = (error: string) => {
+        const errors = postErrors();
+        errors.push(error);
+        setErrors(errors);
+    };
+    const hasErrors = createMemo(() => postErrors().length > 0);
+    const [status, setStatus] = createSignal("");
+    const [visibility, setVisibility] =
+        createSignal<Entity.StatusVisibility>("unlisted");
+
+    // Submits the post. Returns the post ID, or null if an error occurred
+    const sendPost = async (
+        client: MegalodonInterface
+    ): Promise<string | null> => {
+        const imminentStatus = status().trim();
+        if (imminentStatus.length == 0) {
+            pushError("No status provided");
+            return null;
+        }
+        const cw = cwContent();
+
+        let options: PostOptions = {
+            visibility: visibility(),
+            sensitive: cw != null,
+            /* @ts-expect-error: 'string | null' */
+            spoiler_text: cw,
+        };
+        try {
+            const status = await client.postStatus(imminentStatus, options);
+            return status.data.id;
+        } catch (ex) {
+            if (ex != null) {
+                pushError(ex.toString());
+                return null;
+            } else {
+                pushError("Unknown error while trying to post");
+                return null;
+            }
+        }
+    };
+
+    return (
+        <Card class="p-4 m-4">
+            <form
+                onsubmit={async (ev) => {
+                    ev.preventDefault();
+                    if (!authContext.authState.signedIn) {
+                        pushError("Can't post if you're not logged in!");
+                        return;
+                    }
+
+                    setBusy(true);
+                    const client =
+                        authContext.authState.signedIn.authenticatedClient;
+                    const post_id = await sendPost(client);
+                    if (post_id) {
+                        setPostId(post_id);
+                        setPosted(true);
+                        // Reset the form
+                        ev.currentTarget.form?.reset();
+                        setBusy(false);
+                    } else {
+                        // TODO: show errors
+                        console.error(postErrors().join("\n"));
+                    }
+                    return false;
+                }}
+            >
+                <div class="flex flex-col py-3 gap-3">
+                    <TextField class="border-none w-full flex-grow py-0 items-start justify-between min-h-24">
+                        <TextFieldTextArea
+                            tabindex="0"
+                            placeholder="write your cool post"
+                            class="resize-none overflow-hidden px-3 py-2 text-md"
+                            disabled={busy()}
+                            onInput={(e) => {
+                                setStatus(e.currentTarget.value);
+                            }}
+                        ></TextFieldTextArea>
+                    </TextField>
+                    <TextField
+                        class="border-none w-full flex-shrink"
+                        hidden={!cwVisible()}
+                    >
+                        <TextFieldInput
+                            type="text"
+                            class="resize-none h-6 px-3 py-0 text-sm border-none rounded-none focus-visible:ring-0"
+                            placeholder="content warnings"
+                            disabled={busy()}
+                            onInput={(e) => {
+                                setCwContent(e.currentTarget.value);
+                            }}
+                        ></TextFieldInput>
+                    </TextField>
+                </div>
+                <div>
+                    <div class="flex-grow flex flex-row gap-2">
+                        <MenuButton
+                            onClick={() => {
+                                setCwVisible(!cwVisible());
+                            }}
+                        >
+                            <IoWarningOutline class="size-5" />
+                        </MenuButton>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger
+                                as={MenuButton<"button">}
+                                type="button"
+                            >
+                                <VisibilityIcon
+                                    value={visibility()}
+                                    class="size-4"
+                                />
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent class="w-48">
+                                <DropdownMenuRadioGroup
+                                    value={visibility()}
+                                    onChange={(val) => {
+                                        if (isValidVisibility(val)) {
+                                            setVisibility(val);
+                                        } // TODO: ignore it for now, but otherwise uh, explode or something
+                                    }}
+                                >
+                                    <DropdownMenuRadioItem value="unlisted">
+                                        Unlisted
+                                    </DropdownMenuRadioItem>
+                                    <DropdownMenuRadioItem value="private">
+                                        Private
+                                    </DropdownMenuRadioItem>
+                                    <DropdownMenuRadioItem value="direct">
+                                        Mentioned Only
+                                    </DropdownMenuRadioItem>
+                                </DropdownMenuRadioGroup>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </div>
+                    <Button type="submit" disabled={busy()}>
+                        Post
+                    </Button>
+                </div>
+            </form>
+        </Card>
     );
 };
