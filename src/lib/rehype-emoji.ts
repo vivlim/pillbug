@@ -29,7 +29,6 @@ export default function rehypeEmoji(options: RehypeEmojiOptions) {
     };
 
     return function (tree: Root) {
-        console.log("it's parsing time");
         findAndReplace(tree, [[/:([\p{Letter}\d_]+):/gu, replacer]]);
     };
 }
