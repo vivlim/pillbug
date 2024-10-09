@@ -200,7 +200,7 @@ export const GroupedNotificationComponent: Component<{
                                         />
                                     </Match>
                                 </Switch>
-                                <div class="w-full flex flex-row gap-1">
+                                <div class="w-full flex flex-row gap-1 overflow-hidden">
                                     <For each={notifications}>
                                         {(n, i) => (
                                             <>
