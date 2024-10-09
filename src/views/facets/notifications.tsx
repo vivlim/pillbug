@@ -101,7 +101,7 @@ export const SingleLinePostPreviewLink: Component<{
                 <Match when={props.status !== undefined}>
                     <a
                         href={`/post/${props.status?.id}`}
-                        class="underline flex flex-1 overflow-hidden"
+                        class="underline flex flex-1 truncate min-w-16"
                     >
                         <HtmlSandboxSpan
                             class="truncate"
