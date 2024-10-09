@@ -136,6 +136,9 @@ export const GroupedNotificationComponent: Component<{
         case "mention":
             typeLabel = "mentioned you";
             break;
+        case "reblog":
+            typeLabel = "shared your post";
+            break;
         default:
             break;
     }
