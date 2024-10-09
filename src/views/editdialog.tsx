@@ -39,13 +39,14 @@ import { cn } from "~/lib/utils";
 import { useEditOverlayContext } from "~/lib/edit-overlay-context";
 import { VisibilityIcon } from "~/components/visibility-icon";
 import { IoWarningOutline } from "solid-icons/io";
+import { MenuButton } from "~/components/ui/menubutton";
 
 export interface EditDialogProps extends DialogRootProps {
     returnRoute?: string;
     onSubmit?: (new_id: string) => void;
 }
 
-interface PostOptions {
+export interface PostOptions {
     media_ids?: Array<string>;
     poll?: {
         options: Array<string>;
@@ -62,23 +63,9 @@ interface PostOptions {
     quote_id?: string;
 }
 
-const MenuButton = <T extends ValidComponent = "button">(
-    props: PolymorphicProps<T, ButtonProps>
-) => {
-    const [, rest] = splitProps(props as ButtonProps, ["class"]);
-    return (
-        <Button
-            class={cn(
-                "rounded-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-                props.class
-            )}
-            variant="ghost"
-            {...rest}
-        />
-    );
-};
-
-function isValidVisibility(value: string): value is Entity.StatusVisibility {
+export function isValidVisibility(
+    value: string
+): value is Entity.StatusVisibility {
     return ["public", "unlisted", "private", "direct"].includes(
         value as Entity.StatusVisibility
     );
