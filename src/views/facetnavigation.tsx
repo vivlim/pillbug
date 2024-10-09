@@ -9,7 +9,7 @@ import {
     FaSolidPerson,
     FaSolidQuestion,
 } from "solid-icons/fa";
-import { Component, For, JSX } from "solid-js";
+import { Component, For, JSX, Show } from "solid-js";
 import { useExpandMenuSignalContext } from "~/Frame";
 import { useAuthContext } from "~/lib/auth-context";
 import { cn } from "~/lib/utils";
@@ -69,13 +69,10 @@ export const FacetNavigationFrame: Component<{ children: JSX.Element }> = (
     const navigate = useNavigate();
     const expandMenuContext = useExpandMenuSignalContext();
 
-    const facets = [
-        new FacetDefinition("notifications", "/notifications"),
-        new FacetDefinition("notifications", "/notifications"),
-        new FacetDefinition("notifications", "/notifications"),
-        new FacetDefinition("notifications", "/notifications"),
-        new FacetDefinition("notifications", "/notifications"),
-    ];
+    let profileUrl = undefined;
+    if (authContext.authState.signedIn) {
+        profileUrl = `/user/${authContext.authState.signedIn.accountData.acct}`;
+    }
 
     return (
         <div class="flex flex-grow flex-row mx-4 gap-4">
@@ -106,10 +103,12 @@ export const FacetNavigationFrame: Component<{ children: JSX.Element }> = (
                         <FaSolidMagnifyingGlass />
                         search
                     </FacetNavigationItem>
-                    <FacetNavigationItem href="/profile">
-                        <FaSolidPerson />
-                        profile
-                    </FacetNavigationItem>
+                    <Show when={profileUrl !== undefined}>
+                        <FacetNavigationItem href={profileUrl!}>
+                            <FaSolidPerson />
+                            profile
+                        </FacetNavigationItem>
+                    </Show>
                     <FacetNavigationItem href="/settings">
                         <FaSolidGear />
                         settings
