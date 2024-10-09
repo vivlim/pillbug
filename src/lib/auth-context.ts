@@ -20,15 +20,16 @@ export interface PersistentAuthState {
 }
 
 export interface EphemeralAuthState {
-    signedIn:
-    | {
-        authenticatedClient: MegalodonInterface;
-        instanceData: Instance;
-        accountData: Account;
-        domain: string;
-    }
-    | false
-    | null;
+    signedIn: EphemeralMaybeSignedInState;
+}
+
+export type EphemeralMaybeSignedInState = EphemeralSignedInState | false | null;
+
+export interface EphemeralSignedInState {
+    authenticatedClient: MegalodonInterface;
+    instanceData: Instance;
+    accountData: Account;
+    domain: string;
 }
 
 export interface TokenState {

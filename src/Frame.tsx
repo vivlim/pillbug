@@ -22,10 +22,20 @@ import {
 } from "./components/ui/menubar";
 import { Button } from "./components/ui/button";
 import EditOverlay from "./views/editoverlay";
-import { AuthProviderProps, useAuthContext } from "./lib/auth-context";
+import {
+    AuthProviderProps,
+    EphemeralAuthState,
+    useAuthContext,
+} from "./lib/auth-context";
 import { useEditOverlayContext } from "./lib/edit-overlay-context";
 import { FaSolidBars } from "solid-icons/fa";
 import { AvatarImage } from "./components/user/avatar";
+import { Dynamic } from "solid-js/web";
+import { Instance } from "megalodon/lib/src/entities/instance";
+import {
+    InstanceBanner,
+    UserInstanceBanner,
+} from "./components/instance-banner";
 
 export const initAppFrameAsync = async (authContext: AuthProviderProps) => {
     try {
@@ -105,27 +115,27 @@ const AppFrame: Component<{ children: JSX.Element }> = (props) => {
         >
             <div>
                 <EditOverlay></EditOverlay>
-                <div class="sticky top-0 z-40 w-full backdrop-blur flex-none">
-                    <div class="max-w-8xl mx-auto">
-                        <div class="border-b border-slate-900/10 lg:px-8 lg:border-0 dark:border-slate-300/10 mx-4 lg:mx-0 flex flex-row">
+                <div class="sticky top-0 z-40 w-full backdrop-blur flex-none overflow-clip">
+                    <div class="mx-auto">
+                        <div class="border-b-2 border-slate-950/10 lg:px-8 dark:border-slate-300/10 px-3 lg:mx-0 flex flex-row items-center h-16 w-full overflow-clip">
                             <a
                                 class="flex-0 p-4 md:hidden cursor-pointer select-none"
                                 onClick={() => setExpandMenu(!expandMenu())}
                             >
                                 <FaSolidBars class="mt-2" />
                             </a>
+                            <div class="flex-1 sm:hidden" />
                             <div
-                                class="flex-0 p-4 cursor-pointer select-none"
+                                class="flex-shrink flex cursor-pointer select-none h-full overflow-hidden"
                                 onClick={() => navigate("/")}
                             >
-                                <span class="text-lg">pillbug</span>{" "}
-                                <span class="text-xs">pre-alpha</span>
+                                <UserInstanceBanner />
                             </div>
-                            <div class="flex-1 py-4"></div>
+                            <div class="flex-1" />
                             {authContext.authState.signedIn !== null &&
                                 authContext.authState.signedIn !== false && (
                                     <>
-                                        <div class="flex-0 py-4">
+                                        <div class="flex-0">
                                             <Menubar>
                                                 <MenubarMenu>
                                                     <MenubarTrigger>
