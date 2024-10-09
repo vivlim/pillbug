@@ -23,7 +23,7 @@ import {
     ContextMenuTrigger,
 } from "~/components/ui/context-menu";
 import { AuthProviderProps, useAuthContext } from "~/lib/auth-context";
-import { HtmlPreviewSpan } from "../htmlsandbox";
+import { HtmlSandboxSpan } from "../htmlsandbox";
 import { Timestamp } from "~/components/post/timestamp";
 import { AvatarLink } from "~/components/user/avatar";
 
@@ -101,11 +101,12 @@ export const SingleLinePostPreviewLink: Component<{
                 <Match when={props.status !== undefined}>
                     <a
                         href={`/post/${props.status?.id}`}
-                        class="underline flex overflow-hidden text-ellipsis"
+                        class="underline flex flex-1 overflow-hidden"
                     >
-                        <HtmlPreviewSpan
+                        <HtmlSandboxSpan
+                            class="truncate"
                             html={props.status!.content}
-                            numChars={80}
+                            emoji={props.status!.emojis}
                         />
                     </a>
                 </Match>

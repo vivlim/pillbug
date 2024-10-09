@@ -13,10 +13,7 @@ import {
     Show,
     Switch,
 } from "solid-js";
-import HtmlSandbox, {
-    HtmlPreviewSpan,
-    HtmlSandboxSpan,
-} from "~/views/htmlsandbox";
+import HtmlSandbox, { HtmlSandboxSpan } from "~/views/htmlsandbox";
 import { useAuthContext } from "~/lib/auth-context";
 import { FaSolidLock } from "solid-icons/fa";
 import { AvatarLink } from "./avatar";
