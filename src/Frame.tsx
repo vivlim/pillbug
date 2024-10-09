@@ -22,10 +22,16 @@ import {
 } from "./components/ui/menubar";
 import { Button } from "./components/ui/button";
 import EditOverlay from "./views/editoverlay";
-import { AuthProviderProps, useAuthContext } from "./lib/auth-context";
+import {
+    AuthProviderProps,
+    EphemeralAuthState,
+    useAuthContext,
+} from "./lib/auth-context";
 import { useEditOverlayContext } from "./lib/edit-overlay-context";
 import { FaSolidBars } from "solid-icons/fa";
 import { AvatarImage } from "./components/user/avatar";
+import { Dynamic } from "solid-js/web";
+import { Instance } from "megalodon/lib/src/entities/instance";
 
 export const initAppFrameAsync = async (authContext: AuthProviderProps) => {
     try {
@@ -82,6 +88,44 @@ export function useExpandMenuSignalContext(): {
     return value;
 }
 
+function getInstanceHeaderComponent(
+    ephemeralAuthState: EphemeralAuthState
+): JSX.Element {
+    if (ephemeralAuthState.signedIn) {
+        const instance = ephemeralAuthState.signedIn!.instanceData;
+        if (instance.thumbnail) {
+            return (
+                <>
+                    <img
+                        src={instance.thumbnail}
+                        alt={`Logo for ${instance.title}`}
+                    />
+                    <span class="text-lg self-center hidden sm:block shrink overflow-clip">
+                        {instance.title}
+                        {instance.title}
+                        {instance.title}
+                        {instance.title}
+                        {instance.title}
+                        {instance.title}
+                        {instance.title}
+                    </span>
+                </>
+            );
+        }
+        return (
+            <>
+                <span class="text-lg">{instance.title}</span>
+            </>
+        );
+    }
+    return (
+        <div class="p-4">
+            <span class="text-lg">pillbug</span>
+            <span class="text-xs">pre-alpha</span>
+        </div>
+    );
+}
+
 const AppFrame: Component<{ children: JSX.Element }> = (props) => {
     const authContext = useAuthContext();
     const editingOverlayContext = useEditOverlayContext();
@@ -107,7 +151,7 @@ const AppFrame: Component<{ children: JSX.Element }> = (props) => {
                 <EditOverlay></EditOverlay>
                 <div class="sticky top-0 z-40 w-full backdrop-blur flex-none">
                     <div class="max-w-8xl mx-auto">
-                        <div class="border-b border-slate-900/10 lg:px-8 lg:border-0 dark:border-slate-300/10 mx-4 lg:mx-0 flex flex-row">
+                        <div class="border-b border-slate-900/10 lg:px-8 lg:border-0 dark:border-slate-300/10 mx-4 lg:mx-0 flex flex-row h-16">
                             <a
                                 class="flex-0 p-4 md:hidden cursor-pointer select-none"
                                 onClick={() => setExpandMenu(!expandMenu())}
@@ -115,11 +159,12 @@ const AppFrame: Component<{ children: JSX.Element }> = (props) => {
                                 <FaSolidBars class="mt-2" />
                             </a>
                             <div
-                                class="flex-0 p-4 cursor-pointer select-none"
+                                class="flex-0 cursor-pointer select-none h-full overflow-clip"
                                 onClick={() => navigate("/")}
                             >
-                                <span class="text-lg">pillbug</span>{" "}
-                                <span class="text-xs">pre-alpha</span>
+                                {getInstanceHeaderComponent(
+                                    authContext.authState
+                                )}
                             </div>
                             <div class="flex-1 py-4"></div>
                             {authContext.authState.signedIn !== null &&
