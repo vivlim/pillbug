@@ -60,7 +60,7 @@ const features: Feature[] = [
     new Feature("Viewing home feed with pagination", true, [
         "an inconsistent number of posts are shown on each page, because replies are hidden",
     ]),
-    new Feature("Viewing notifications", false),
+    new Feature("Viewing notifications", true),
     new Feature("Searching for posts and users", false),
     new Feature("Viewing profiles", true),
     new Feature("Writing new posts", true),
@@ -68,14 +68,14 @@ const features: Feature[] = [
     new Feature("Sharing posts", false),
     new Feature("Replying to 'comments'", false),
     new Feature("Attaching images to new posts", false),
-    new Feature("Viewing images attached to posts", false),
-    new Feature("Content warnings shown when viewing posts", false),
+    new Feature("Viewing images attached to posts", true),
+    new Feature("Content warnings shown when viewing posts", true),
     new Feature("Custom emoji shown", false),
     new Feature("Multiple accounts", false),
     new Feature(
         "Right clicking the bottom of a post to see its raw json",
         true,
-        ["doesn't work on comments yet"]
+        ["doesn't work on comments yet, seems to also not work on mobile"]
     ),
 ];
 
@@ -96,7 +96,10 @@ const NotSignedInLandingView: Component = () => {
                             servers.
                         </p>
                         <p>
-                            <a href="https://github.com/vivlim/pillbug">
+                            <a
+                                href="https://github.com/vivlim/pillbug"
+                                class="underline"
+                            >
                                 it's a work in progress under active development
                                 on GitHub.
                             </a>
