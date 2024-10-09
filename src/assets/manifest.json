@@ -3,7 +3,7 @@
     "name": "pillbug",
     "icons": [
         {
-            "src": "/favicon-128.png",
+            "src": "favicon-128.png",
             "sizes": "128x128",
             "type": "image/png"
         }
