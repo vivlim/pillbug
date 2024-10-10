@@ -25,6 +25,7 @@
         "vite-plugin-solid": "^2.8.2"
     },
     "dependencies": {
+        "@fontsource/atkinson-hyperlegible": "^5.1.0",
         "@kobalte/core": "^0.13.6",
         "@solid-primitives/storage": "^4.2.1",
         "@solidjs/router": "^0.14.5",

@@ -113,6 +113,9 @@
   }
 }
 
+* {
+    font-family: "Atkinson Hyperlegible", system-ui, sans-serif;
+}
 a {
     /*text-decoration: underline;*/
 }
