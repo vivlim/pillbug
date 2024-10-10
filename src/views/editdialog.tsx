@@ -79,7 +79,7 @@ const MenuButton = <T extends ValidComponent = "button">(
 };
 
 function isValidVisibility(value: string): value is Entity.StatusVisibility {
-    return ["unlisted", "private", "direct"].includes(
+    return ["public", "unlisted", "private", "direct"].includes(
         value as Entity.StatusVisibility
     );
 }
@@ -247,9 +247,12 @@ const EditDialog: Component<EditDialogProps> = (props) => {
                                         onChange={(val) => {
                                             if (isValidVisibility(val)) {
                                                 setVisibility(val);
-                                            } // TODO: ignore it for now, but otherwise uh, explode or something
+                                            }
                                         }}
                                     >
+                                        <DropdownMenuRadioItem value="public">
+                                            Public
+                                        </DropdownMenuRadioItem>
                                         <DropdownMenuRadioItem value="unlisted">
                                             Unlisted
                                         </DropdownMenuRadioItem>
