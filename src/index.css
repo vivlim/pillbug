@@ -124,9 +124,11 @@ a {
     display: inline-block;
     margin-right: 0.7em;
 }
-.post-content p:not(:first-child):not(:last-child) {
-    margin-top: 1em;
-    margin-bottom: 1em;
+.post-content p:not(:first-child) {
+  margin-top: 1em;
+}
+.post-content p:not(:last-child) {
+  margin-bottom: 1em;
 }
 .post-content * {
     overflow-wrap: anywhere;
