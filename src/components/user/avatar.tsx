@@ -53,7 +53,7 @@ export const AvatarLink: Component<AvatarProps> = (props) => {
     const profileRoute = `/user/${props.user.acct}`;
 
     return (
-        <A href={profileRoute} class="max-h-max">
+        <A href={profileRoute} class="h-max">
             <AvatarImage {...props} />
         </A>
     );
