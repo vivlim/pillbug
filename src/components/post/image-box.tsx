@@ -25,6 +25,7 @@ const ImageAttachment: Component<ImageAttachmentProps> = (props) => {
 
     return (
         <button
+            class="w-full"
             onClick={() => {
                 console.log(`Hello! onClick = ${props.onClick}`);
                 props.onClick?.(props.imageIndex);
