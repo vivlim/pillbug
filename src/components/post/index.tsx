@@ -152,10 +152,12 @@ const PostBody: Component<PostBodyProps> = (props) => {
         <CardContent class={cn(props.class)} {...rest}>
             <ContentGuard warnings={props.status.spoiler_text}>
                 <ImageBox attachments={props.status.media_attachments} />
-                <HtmlSandbox
-                    html={props.status.content}
-                    emoji={props.status.emojis}
-                />
+                <div class="p-3">
+                    <HtmlSandbox
+                        html={props.status.content}
+                        emoji={props.status.emojis}
+                    />
+                </div>
             </ContentGuard>
         </CardContent>
     );
@@ -163,7 +165,7 @@ const PostBody: Component<PostBodyProps> = (props) => {
 
 const PostFooter: Component<{ children: JSX.Element }> = (props) => {
     return (
-        <div class="my-1 mx-2 flex flex-row flex-wrap items-center justify-stretch">
+        <div class="my-1 mx-3 flex flex-row flex-wrap items-center justify-stretch">
             {props.children}
         </div>
     );

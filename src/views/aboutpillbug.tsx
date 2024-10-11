@@ -81,7 +81,7 @@ const AboutPillbugView: Component = () => {
                     <CardHeader>
                         <CardTitle>pillbug</CardTitle>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent class="p-6 pt-0">
                         <p>
                             pillbug is a cohost-inspired client for GoToSocial
                             and other Mastodon API-compatible ActivityPub
@@ -103,8 +103,10 @@ const AboutPillbugView: Component = () => {
                 </Card>
                 <Show when={!auth.signedIn}>
                     <Card>
-                        <CardContent>
-                            <CardTitle>log in</CardTitle>
+                        <CardContent class="p-6">
+                            <CardHeader>
+                                <CardTitle>log in</CardTitle>
+                            </CardHeader>
                         </CardContent>
                         <CardContent>
                             <p>you aren't logged in.</p>
@@ -124,7 +126,7 @@ const AboutPillbugView: Component = () => {
                     <CardHeader>
                         <CardTitle>current features</CardTitle>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent class="p-6 pt-0">
                         <p>
                             this is not an exhaustive list of planned features,
                             and it is subject to change. also, a feature may be

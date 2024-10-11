@@ -104,7 +104,7 @@ const LoginView: Component = () => {
                             <CardTitle>add another account</CardTitle>
                         </Show>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent class="p-6">
                         <form
                             onSubmit={async (ev) => {
                                 ev.preventDefault();
@@ -112,8 +112,8 @@ const LoginView: Component = () => {
                             }}
                             noValidate={true}
                         >
-                            <TextField>
-                                <TextFieldLabel for="instanceUrl">
+                            <TextField class="pb-3">
+                                <TextFieldLabel class="pb-3 block" for="instanceUrl">
                                     Instance URL
                                 </TextFieldLabel>
                                 <TextFieldInput
@@ -128,6 +128,7 @@ const LoginView: Component = () => {
                             </TextField>
                             <Button
                                 onClick={() => doOAuth(auth)}
+                                class="mb-6"
                                 disabled={busy()}
                             >
                                 Log in
