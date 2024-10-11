@@ -8,12 +8,14 @@ import {
     createSignal,
     ErrorBoundary,
     For,
+    Show,
 } from "solid-js";
 import { AuthProviderProps, useAuthContext } from "~/lib/auth-context";
 import Post from "..";
 import { PageNav } from "~/components/ui/page-footer";
 import { Button } from "~/components/ui/button";
 import { FeedContext } from "./feed-context";
+import { FeedChecker } from "./feed-checker";
 
 interface GetTimelineOptionsApi {
     local?: boolean;
@@ -25,7 +27,7 @@ interface GetTimelineOptionsApi {
 
 export interface GetTimelineOptions extends GetTimelineOptionsApi {}
 
-type RequestHandler = (
+export type RequestHandler = (
     authContext: AuthProviderProps,
     timelineOptions: GetTimelineOptions
 ) => Promise<Response<Array<Status>> | undefined> | undefined;
@@ -100,6 +102,12 @@ export const PostFeed: Component<PostFeedProps> = (props) => {
         <FeedContext.Provider value={feedContext}>
             <div>
                 <ErrorBoundary fallback={<div>Failed to load posts.</div>}>
+                    <Show when={searchParams.after == null}>
+                        <FeedChecker
+                            delayMs={60000}
+                            checkHandler={props.onRequest}
+                        />
+                    </Show>
                     <For each={postList()}>
                         {(status, index) => (
                             <Post status={status} fetchShareParent={false} />
