@@ -85,7 +85,6 @@ export const FacetNavigationFrame: Component<{ children: JSX.Element }> = (
                     "text-card-foreground": true,
                     "shadow-sm": true,
                     fixed: true,
-                    "z-40": true,
                     hidden: !expandMenuContext.menuOpen(),
                     "md:flex-none": true,
                     "md:mt-4": true,
