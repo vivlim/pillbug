@@ -89,7 +89,7 @@ const NotSignedInLandingView: Component = () => {
                     <CardHeader>
                         <CardTitle>pillbug</CardTitle>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent class="p-6 pt-0">
                         <p>
                             pillbug is a cohost-inspired client for GoToSocial
                             and other Mastodon API-compatible ActivityPub
@@ -110,7 +110,7 @@ const NotSignedInLandingView: Component = () => {
                 </Card>
                 <Show when={!authContext.authState.signedIn}>
                     <Card>
-                        <CardContent>
+                        <CardContent class="p-6">
                             <p>you aren't logged in.</p>
                             <p>
                                 <A href="/login" class="underline">
@@ -124,7 +124,7 @@ const NotSignedInLandingView: Component = () => {
                     <CardHeader>
                         <CardTitle>current features</CardTitle>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent class="p-6 pt-0">
                         <p>
                             this is not an exhaustive list of planned features,
                             and it is subject to change. also, a feature may be

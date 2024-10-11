@@ -135,9 +135,9 @@ const LoginView: Component = () => {
                     <CardHeader>
                         <CardTitle>log in</CardTitle>
                     </CardHeader>
-                    <CardContent>
-                        <TextField>
-                            <TextFieldLabel for="instanceUrl">
+                    <CardContent class="p-6">
+                        <TextField class="pb-3">
+                            <TextFieldLabel class="pb-3 block" for="instanceUrl">
                                 Instance URL
                             </TextFieldLabel>
                             <TextFieldInput
@@ -150,7 +150,7 @@ const LoginView: Component = () => {
                                 readOnly={busy()}
                             />
                         </TextField>
-                        <Button onClick={doOAuth} disabled={busy()}>
+                        <Button class="mb-6" onClick={doOAuth} disabled={busy()}>
                             Log in
                             {busy() && (
                                 <span class="animate-spin ml-3">🤔</span>
