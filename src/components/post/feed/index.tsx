@@ -8,14 +8,16 @@ import {
     createSignal,
     ErrorBoundary,
     For,
+    Show,
 } from "solid-js";
-import { useAuth } from "~/auth/auth-manager";
+import { SessionAuthManager, useAuth } from "~/auth/auth-manager";
 import Post from "..";
 import { PageNav } from "~/components/ui/page-footer";
 import { Button } from "~/components/ui/button";
 import { FeedContext } from "./feed-context";
 import { ErrorBox } from "~/components/error";
 import { MaybeSignedInState } from "~/auth/auth-types";
+import { FeedChecker } from "./feed-checker";
 
 interface GetTimelineOptionsApi {
     local?: boolean;
@@ -27,8 +29,8 @@ interface GetTimelineOptionsApi {
 
 export interface GetTimelineOptions extends GetTimelineOptionsApi {}
 
-type RequestHandler = (
-    signedInState: MaybeSignedInState,
+export type RequestHandler = (
+    auth: SessionAuthManager,
     timelineOptions: GetTimelineOptions
 ) => Promise<Response<Array<Status>> | undefined> | undefined;
 
@@ -39,7 +41,7 @@ export interface PostFeedProps {
 
 async function fetchPostList(
     handler: RequestHandler,
-    signedInState: MaybeSignedInState,
+    auth: SessionAuthManager,
     timelineOptions: GetTimelineOptions
 ) {
     console.log(
@@ -47,7 +49,7 @@ async function fetchPostList(
     );
 
     const posts: Status[] = [];
-    const result = await handler(signedInState, timelineOptions);
+    const result = await handler(auth, timelineOptions);
     if (result == undefined) {
         console.log("Got no response from handler");
         return;
@@ -70,7 +72,7 @@ export const PostFeed: Component<PostFeedProps> = (props) => {
     const [postList, listActions] = createResource(
         () => {
             return {
-                signedInState: auth.state,
+                auth,
                 options: {
                     local: false,
                     limit: 25,
@@ -78,8 +80,7 @@ export const PostFeed: Component<PostFeedProps> = (props) => {
                 },
             };
         },
-        (args) =>
-            fetchPostList(props.onRequest, args.signedInState, args.options)
+        (args) => fetchPostList(props.onRequest, args.auth, args.options)
     );
 
     const [lastRefresh, setLastRefresh] = createSignal(
@@ -113,6 +114,12 @@ export const PostFeed: Component<PostFeedProps> = (props) => {
                         />
                     )}
                 >
+                    <Show when={searchParams.after == null}>
+                        <FeedChecker
+                            delayMs={60000}
+                            checkHandler={props.onRequest}
+                        />
+                    </Show>
                     <For each={postList()}>
                         {(status, index) => (
                             <Post status={status} fetchShareParent={false} />

@@ -19,9 +19,9 @@ const Feed: Component = () => {
 
     return (
         <PostFeed
-            onRequest={async (signedInState, timelineOptions) => {
-                if (signedInState?.signedIn) {
-                    return await signedInState.authenticatedClient.getHomeTimeline(
+            onRequest={async (auth, timelineOptions) => {
+                if (auth.signedIn) {
+                    return await auth.assumeSignedIn.client.getHomeTimeline(
                         timelineOptions
                     );
                 }
