@@ -89,7 +89,7 @@ export function getShareParentUrl(status: Status): string | undefined {
     if (urls === null) {
         return undefined;
     }
-    return urls.find((u) => u.match(/statuses/)) ?? undefined;
+    return urls.find((u) => u.match(/statuses|objects|\d{18}/)) ?? undefined;
 }
 
 const PostUserBar: Component<{
