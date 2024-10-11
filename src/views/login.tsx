@@ -35,13 +35,16 @@ const LoginView: Component = () => {
         }
         setBusy(true);
         try {
-           // Normalize Instance URL.
-           // Check for https:// or http:// at the beginning of the instance string, and add it if it's not there (assume https)
-            if(!instance().startsWith('https://') && !instance().startsWith('http://')) {
-                setInstance(`https://${instance()}`)
+            // Normalize Instance URL.
+            // Check for https:// or http:// at the beginning of the instance string, and add it if it's not there (assume https)
+            if (
+                !instance().startsWith("https://") &&
+                !instance().startsWith("http://")
+            ) {
+                setInstance(`https://${instance()}`);
             }
             // Trim trailing forward slashes.
-            setInstance(instance().replace(/\/+$/, ''))
+            setInstance(instance().replace(/\/+$/, ""));
             // TODO: Additional normalization? I'm not sure what other ways a URL can be malformed.
             let software = await detector(instance());
             console.log(`detected software '${software}' on ${instance()}`);
@@ -136,31 +139,35 @@ const LoginView: Component = () => {
                         <CardTitle>log in</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <TextField>
-                            <TextFieldLabel for="instanceUrl">
-                                Instance URL
-                            </TextFieldLabel>
-                            <TextFieldInput
-                                type="url"
-                                id="instanceUrl"
-                                value={instance()}
-                                onInput={(e) =>
-                                    setInstance(e.currentTarget.value)
-                                }
-                                readOnly={busy()}
-                            />
-                        </TextField>
-                        <Button onClick={doOAuth} disabled={busy()}>
-                            Log in
-                            {busy() && (
-                                <span class="animate-spin ml-3">🤔</span>
-                            )}
-                        </Button>
-                        <div>
-                            (you need to click the button right now, the enter
-                            key isn't hooked up)
-                        </div>
-                        {error() !== undefined && <p>{error()}</p>}
+                        <form
+                            onSubmit={async (ev) => {
+                                ev.preventDefault();
+                                await doOAuth();
+                            }}
+                            noValidate={true}
+                        >
+                            <TextField>
+                                <TextFieldLabel for="instanceUrl">
+                                    Instance URL
+                                </TextFieldLabel>
+                                <TextFieldInput
+                                    type="url"
+                                    id="instanceUrl"
+                                    value={instance()}
+                                    onInput={(e) =>
+                                        setInstance(e.currentTarget.value)
+                                    }
+                                    readOnly={busy()}
+                                />
+                            </TextField>
+                            <Button onClick={doOAuth} disabled={busy()}>
+                                Log in
+                                {busy() && (
+                                    <span class="animate-spin ml-3">🤔</span>
+                                )}
+                            </Button>
+                            {error() !== undefined && <p>{error()}</p>}
+                        </form>
                     </CardContent>
                 </Card>
             </div>
