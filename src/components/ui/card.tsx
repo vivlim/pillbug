@@ -32,7 +32,7 @@ const CardDescription: Component<ComponentProps<"p">> = (props) => {
 
 const CardContent: Component<ComponentProps<"div">> = (props) => {
   const [local, others] = splitProps(props, ["class"])
-  return <div class={cn("p-6 pt-0", local.class)} {...others} />
+  return <div class={cn(local.class)} {...others} />
 }
 
 const CardFooter: Component<ComponentProps<"div">> = (props) => {

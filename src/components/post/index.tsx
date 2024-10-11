@@ -149,7 +149,7 @@ interface PostBodyProps extends JSX.HTMLAttributes<HTMLDivElement> {
 const PostBody: Component<PostBodyProps> = (props) => {
     const [, rest] = splitProps(props, ["status", "class"]);
     return (
-        <CardContent class={cn("p-3", props.class)} {...rest}>
+        <CardContent class={cn(props.class)} {...rest}>
             <ContentGuard warnings={props.status.spoiler_text}>
                 <ImageBox attachments={props.status.media_attachments} />
                 <HtmlSandbox

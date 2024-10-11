@@ -36,7 +36,7 @@ const HtmlSandbox: Component<HtmlSandboxProps> = (props) => {
         <Switch>
             <Match when={sanitizedHtml.state === "ready"}>
                 <div
-                    class="post-content overflow-auto break-words"
+                    class="post-content p-3 overflow-auto break-words"
                     innerHTML={sanitizedHtml()}
                 />
             </Match>
