@@ -1,7 +1,12 @@
 import { A, useParams } from "@solidjs/router";
 import { Entity } from "megalodon";
 import { createResource, createSignal, Show, type Component } from "solid-js";
-import { AuthProviderProps, useAuthContext } from "~/lib/auth-context";
+import {
+    AuthProviderProps,
+    SessionAuthManager,
+    useAuthContext,
+    useSessionAuthManager,
+} from "~/lib/auth-context";
 import { ProfileZone } from "~/components/user/profile-zone";
 import { GetTimelineOptions, PostFeed } from "~/components/post/feed";
 
@@ -13,14 +18,14 @@ interface GetAccountFeedOptions extends Omit<GetTimelineOptions, "local"> {
 }
 
 const fetchUserInfo = async (
-    authContext: AuthProviderProps,
+    authManager: SessionAuthManager,
     username: string
 ) => {
-    if (!authContext.authState.signedIn) {
+    if (!authManager.checkSignedIn()) {
         return;
     }
 
-    const client = authContext.authState.signedIn.authenticatedClient;
+    const client = await authManager.getAuthenticatedClientAsync();
     console.log(`getting account ${username}`);
 
     const result = await client.lookupAccount(username);
@@ -31,11 +36,11 @@ const fetchUserInfo = async (
 };
 
 const UserProfile: Component = () => {
-    const authContext = useAuthContext();
+    const authManager = useSessionAuthManager();
     const params = useParams();
     const [username, setUserName] = createSignal<string>(params.username);
     const [userInfo] = createResource(username, (u) =>
-        fetchUserInfo(authContext, u)
+        fetchUserInfo(authManager, u)
     );
 
     return (
@@ -52,13 +57,12 @@ const UserProfile: Component = () => {
                                 exclude_replies: true,
                                 ...timelineOptions,
                             };
-                            if (!authContext.authState.signedIn) {
+                            if (!authManager.checkSignedIn()) {
                                 return;
                             }
 
                             const client =
-                                authContext.authState.signedIn
-                                    .authenticatedClient;
+                                await authManager.getAuthenticatedClientAsync();
                             let posts = await client.getAccountStatuses(
                                 userInfo()!.id,
                                 acctFeedProps

@@ -25,7 +25,7 @@ export const UserInstanceBanner: Component = () => {
             return undefined;
         }
         const signedInState = await authManager.getSignedInState();
-        if (signedInState.instanceData !== undefined) {
+        if (signedInState?.signedIn) {
             return signedInState.instanceData;
         }
 

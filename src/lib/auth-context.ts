@@ -97,6 +97,18 @@ export class SessionAuthManager {
         return true;
     }
 
+    public checkSignedIn(): boolean {
+        if (!this.checkAccountsExist()) {
+            return false;
+        }
+
+        if (!this.context.sessionStore.signedIn?.signedIn) {
+            return false;
+        }
+
+        return true;
+    }
+
     public async getAuthenticatedClientAsync(): Promise<MegalodonInterface> {
         const state = await this.getSignedInState();
         if (!state?.signedIn) {

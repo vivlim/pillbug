@@ -14,7 +14,11 @@ import {
     Switch,
     type Component,
 } from "solid-js";
-import { AuthProviderProps, useAuthContext } from "~/lib/auth-context";
+import {
+    AuthProviderProps,
+    useAuthContext,
+    useSessionAuthManager,
+} from "~/lib/auth-context";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
 import HtmlSandbox from "../../views/htmlsandbox";
@@ -204,7 +208,7 @@ async function toggleLike(
 }
 
 const Post: Component<PostProps> = (postData) => {
-    const authContext = useAuthContext();
+    const authManager = useSessionAuthManager();
     const [status, updateStatus] = createSignal(postData.status);
 
     const [showRaw, setShowRaw] = createSignal<boolean>(false);
@@ -242,31 +246,28 @@ const Post: Component<PostProps> = (postData) => {
                                 </ContextMenuItem>
                             </ContextMenuContent>
                         </ContextMenu>
-                        <Button
-                            variant="ghost"
-                            class="hover:bg-transparent p-0"
-                            aria-label="Like Post"
-                            onClick={async () => {
-                                if (!authContext.authState.signedIn) {
-                                    throw new Error("Not logged in");
-                                }
+                        <Show when={authManager.checkSignedIn()}>
+                            <Button
+                                variant="ghost"
+                                class="hover:bg-transparent p-0"
+                                aria-label="Like Post"
+                                onClick={async () => {
+                                    const client =
+                                        await authManager.getAuthenticatedClientAsync();
 
-                                const client =
-                                    authContext.authState.signedIn
-                                        .authenticatedClient;
-
-                                const updated = await toggleLike(
-                                    client,
-                                    status()
-                                );
-                                updateStatus(updated);
-                            }}
-                        >
-                            <Dynamic
-                                component={favButton(isLiked())}
-                                class="size-6"
-                            />
-                        </Button>
+                                    const updated = await toggleLike(
+                                        client,
+                                        status()
+                                    );
+                                    updateStatus(updated);
+                                }}
+                            >
+                                <Dynamic
+                                    component={favButton(isLiked())}
+                                    class="size-6"
+                                />
+                            </Button>
+                        </Show>
                     </PostFooter>
                 </Card>
             </ErrorBoundary>

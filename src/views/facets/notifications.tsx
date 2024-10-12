@@ -40,7 +40,7 @@ type NotificationKindGroups = {
 async function getNotificationsAsync(
     authContext: AuthProviderProps
 ): Promise<NotificationDayGroups[]> {
-    if (!authContext.authState.signedIn) {
+    if (!authContext.authState.signedIn?.signedIn) {
         throw new Error("not signed in");
     }
 
