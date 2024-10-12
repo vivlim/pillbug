@@ -9,9 +9,9 @@ import {
     FaSolidPerson,
     FaSolidQuestion,
 } from "solid-icons/fa";
-import { Component, For, JSX, Show } from "solid-js";
+import { Component, createResource, For, JSX, Show } from "solid-js";
 import { useExpandMenuSignalContext } from "~/Frame";
-import { useAuthContext } from "~/lib/auth-context";
+import { useAuth } from "~/auth/auth-manager";
 import { cn } from "~/lib/utils";
 
 class FacetDefinition {
@@ -57,22 +57,16 @@ const FacetNavigationItem: Component<{
 export const FacetNavigationFrame: Component<{ children: JSX.Element }> = (
     props
 ) => {
-    const authContext = useAuthContext();
+    const auth = useAuth();
 
-    const init = async () => {
-        const authContext = useAuthContext();
+    const profileUrl = () => {
+        if (auth.signedIn) {
+            return `/user/${auth.assumeSignedIn.state.accountData.acct}`;
+        }
+        return undefined;
     };
 
-    init();
-
-    const location = useLocation();
-    const navigate = useNavigate();
     const expandMenuContext = useExpandMenuSignalContext();
-
-    let profileUrl = undefined;
-    if (authContext.authState.signedIn) {
-        profileUrl = `/user/${authContext.authState.signedIn.accountData.acct}`;
-    }
 
     return (
         <div class="flex flex-grow flex-row mx-4 gap-4 md:justify-center">
@@ -103,8 +97,8 @@ export const FacetNavigationFrame: Component<{ children: JSX.Element }> = (
                         <FaSolidMagnifyingGlass />
                         search
                     </FacetNavigationItem>
-                    <Show when={profileUrl !== undefined}>
-                        <FacetNavigationItem href={profileUrl!}>
+                    <Show when={profileUrl() !== undefined}>
+                        <FacetNavigationItem href={profileUrl()!}>
                             <FaSolidPerson />
                             profile
                         </FacetNavigationItem>
@@ -120,7 +114,9 @@ export const FacetNavigationFrame: Component<{ children: JSX.Element }> = (
                 </ul>
             </div>
 
-            <div class="overflow-auto flex-grow max-w-4xl ">{props.children}</div>
+            <div class="overflow-auto flex-grow max-w-4xl ">
+                {props.children}
+            </div>
         </div>
     );
 };

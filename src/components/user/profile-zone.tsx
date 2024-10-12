@@ -14,21 +14,21 @@ import {
     Switch,
 } from "solid-js";
 import HtmlSandbox, { HtmlSandboxSpan } from "~/views/htmlsandbox";
-import { useAuthContext } from "~/lib/auth-context";
+import { useAuth } from "~/auth/auth-manager";
 import { FaSolidLock } from "solid-icons/fa";
 import { AvatarLink } from "./avatar";
 
 /// Button that shows "Follow"/"Request to Follow"/"Unfollow"/"Cancel Request"
 /// and acts accordingly when clicked
 const FollowButton: Component<{ account: Entity.Account }> = (props) => {
-    const authContext = useAuthContext();
+    const auth = useAuth();
 
-    if (!authContext.authState.signedIn) {
+    if (!auth.signedIn) {
         // Nothing to request to follow/unfollow
         return <></>;
     }
 
-    const client = authContext.authState.signedIn.authenticatedClient;
+    const client = auth.assumeSignedIn.client;
 
     const [busy, setBusy] = createSignal(false);
     const [userRel, relActions] = createResource(
@@ -102,10 +102,10 @@ export interface ProfileZoneProps {
 
 /// The profile sidebar/header that appears on user profile and post pages
 export const ProfileZone: Component<ProfileZoneProps> = (props) => {
-    const authContext = useAuthContext();
+    const auth = useAuth();
     const currentUser = createMemo(() => {
-        if (authContext.authState.signedIn) {
-            return authContext.authState.signedIn.accountData;
+        if (auth.signedIn) {
+            return auth.assumeSignedIn.state.accountData;
         } else {
             return null;
         }

@@ -1,19 +1,7 @@
 import { A } from "@solidjs/router";
-import {
-    createResource,
-    createSignal,
-    For,
-    Match,
-    Show,
-    Switch,
-    type Component,
-} from "solid-js";
-import { tryGetAuthenticatedClient } from "~/App";
-import { Button } from "~/components/ui/button";
+import { For, Match, Show, Switch, type Component } from "solid-js";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
-import { Flex } from "~/components/ui/flex";
-import { Grid, Col } from "~/components/ui/grid";
-import { useAuthContext } from "~/lib/auth-context";
+import { useAuth } from "~/auth/auth-manager";
 
 class Feature {
     public constructor(
@@ -47,6 +35,13 @@ const FeatureListItem: Component<{ feature: Feature }> = (props) => {
 };
 
 const features: Feature[] = [
+    new Feature("Sharing posts", false),
+    new Feature("Searching for posts and users", false),
+    new Feature("Tagging other users in posts", false),
+    new Feature("Attaching images to new posts", false),
+    new Feature("Using custom emoji in posts", false),
+    new Feature("Previewing posts", false),
+    new Feature("Content filtering rules", false),
     new Feature("Interpreting replies as 'comments'", true),
     new Feature(
         "Interpreting boosts as shares without additional content",
@@ -61,17 +56,14 @@ const features: Feature[] = [
         "an inconsistent number of posts are shown on each page, because replies are hidden",
     ]),
     new Feature("Viewing notifications", true),
-    new Feature("Searching for posts and users", false),
     new Feature("Viewing profiles", true),
     new Feature("Writing new posts", true),
     new Feature("Favoriting posts", true),
-    new Feature("Sharing posts", false),
-    new Feature("Replying to 'comments'", false),
-    new Feature("Attaching images to new posts", false),
+    new Feature("Replying to 'comments'", true),
     new Feature("Viewing images attached to posts", true),
     new Feature("Content warnings shown when viewing posts", true),
-    new Feature("Custom emoji shown", false),
-    new Feature("Multiple accounts", false),
+    new Feature("Custom emoji shown", true),
+    new Feature("Multiple accounts", true),
     new Feature(
         "Right clicking the bottom of a post to see its raw json",
         true,
@@ -80,7 +72,7 @@ const features: Feature[] = [
 ];
 
 const NotSignedInLandingView: Component = () => {
-    const authContext = useAuthContext();
+    const auth = useAuth();
     return (
         <div class="flex flex-row p-8 size-full">
             <div class="md:grow"></div>
@@ -99,6 +91,7 @@ const NotSignedInLandingView: Component = () => {
                             <a
                                 href="https://github.com/vivlim/pillbug"
                                 class="underline"
+                                target="_blank"
                             >
                                 it's a work in progress under active development
                                 on GitHub.
@@ -108,10 +101,17 @@ const NotSignedInLandingView: Component = () => {
                         </p>
                     </CardContent>
                 </Card>
-                <Show when={!authContext.authState.signedIn}>
+                <Show when={!auth.signedIn}>
                     <Card>
                         <CardContent>
+                            <CardTitle>log in</CardTitle>
+                        </CardContent>
+                        <CardContent>
                             <p>you aren't logged in.</p>
+                            <p>
+                                ℹ️ note: following the addition of multiple
+                                accounts, you will have to log in again. sorry!
+                            </p>
                             <p>
                                 <A href="/login" class="underline">
                                     Log in

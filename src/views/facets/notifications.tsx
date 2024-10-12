@@ -22,10 +22,10 @@ import {
     ContextMenuItem,
     ContextMenuTrigger,
 } from "~/components/ui/context-menu";
-import { AuthProviderProps, useAuthContext } from "~/lib/auth-context";
 import { HtmlSandboxSpan } from "../htmlsandbox";
 import { Timestamp } from "~/components/post/timestamp";
 import { AvatarLink } from "~/components/user/avatar";
+import { SessionAuthManager, useAuth } from "~/auth/auth-manager";
 
 type NotificationDayGroups = {
     created_day: DateTime<true> | DateTime<false>;
@@ -38,13 +38,9 @@ type NotificationKindGroups = {
 };
 
 async function getNotificationsAsync(
-    authContext: AuthProviderProps
+    auth: SessionAuthManager
 ): Promise<NotificationDayGroups[]> {
-    if (!authContext.authState.signedIn) {
-        throw new Error("not signed in");
-    }
-
-    const client = authContext.authState.signedIn.authenticatedClient;
+    const client = auth.assumeSignedIn.client;
     const notifications = await client.getNotifications({
         limit: 40,
     });
@@ -236,9 +232,9 @@ export const GroupedNotificationComponent: Component<{
 };
 
 export const NotificationsFacet: Component = () => {
-    const authContext = useAuthContext();
+    const auth = useAuth();
 
-    const [notifications] = createResource(authContext, (ac) => {
+    const [notifications] = createResource(auth, (ac) => {
         return getNotificationsAsync(ac);
     });
 

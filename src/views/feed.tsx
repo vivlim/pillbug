@@ -1,26 +1,5 @@
-import {
-    useLocation,
-    useNavigate,
-    useParams,
-    useSearchParams,
-} from "@solidjs/router";
-import { Entity } from "megalodon";
-import {
-    createEffect,
-    createResource,
-    createSignal,
-    ErrorBoundary,
-    For,
-    Setter,
-    type Component,
-} from "solid-js";
-import { AuthProviderProps, useAuthContext } from "~/lib/auth-context";
-import { Button } from "~/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
-import { Flex } from "~/components/ui/flex";
-import { Grid, Col } from "~/components/ui/grid";
-import Post from "~/components/post";
-import { Status } from "megalodon/lib/src/entities/status";
+import { useLocation } from "@solidjs/router";
+import { createEffect, createSignal, type Component } from "solid-js";
 import { PostFeed } from "~/components/post/feed";
 
 export interface SubmitFeedState {
@@ -40,14 +19,13 @@ const Feed: Component = () => {
 
     return (
         <PostFeed
-            onRequest={(authContext, timelineOptions) => {
-                if (!authContext.authState.signedIn) {
-                    return;
+            onRequest={async (signedInState, timelineOptions) => {
+                if (signedInState?.signedIn) {
+                    return await signedInState.authenticatedClient.getHomeTimeline(
+                        timelineOptions
+                    );
                 }
-
-                const client =
-                    authContext.authState.signedIn.authenticatedClient;
-                return client.getHomeTimeline(timelineOptions);
+                return undefined;
             }}
             lastRefresh={lastRefresh()}
         />

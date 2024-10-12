@@ -48,14 +48,14 @@ const ContextMenuItem = <T extends ValidComponent = "div">(
 ) => {
   const [local, others] = splitProps(props as ContextMenuItemProps, ["class"])
   return (
-    <ContextMenuPrimitive.Item
-      class={cn(
-        "relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
-        local.class
-      )}
-      {...others}
-    />
-  )
+      <ContextMenuPrimitive.Item
+          class={cn(
+              "relative flex cursor-default select-none items-center rounded-sm px-2 py-4 sm:py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+              local.class
+          )}
+          {...others}
+      />
+  );
 }
 
 const ContextMenuShortcut: Component<ComponentProps<"span">> = (props) => {

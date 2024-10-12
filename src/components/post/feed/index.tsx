@@ -1,5 +1,5 @@
 import { useSearchParams } from "@solidjs/router";
-import { Entity, Response } from "megalodon";
+import { Response } from "megalodon";
 import { Status } from "megalodon/lib/src/entities/status";
 import {
     Component,
@@ -9,11 +9,13 @@ import {
     ErrorBoundary,
     For,
 } from "solid-js";
-import { AuthProviderProps, useAuthContext } from "~/lib/auth-context";
+import { useAuth } from "~/auth/auth-manager";
 import Post from "..";
 import { PageNav } from "~/components/ui/page-footer";
 import { Button } from "~/components/ui/button";
 import { FeedContext } from "./feed-context";
+import { ErrorBox } from "~/components/error";
+import { MaybeSignedInState } from "~/auth/auth-types";
 
 interface GetTimelineOptionsApi {
     local?: boolean;
@@ -26,7 +28,7 @@ interface GetTimelineOptionsApi {
 export interface GetTimelineOptions extends GetTimelineOptionsApi {}
 
 type RequestHandler = (
-    authContext: AuthProviderProps,
+    signedInState: MaybeSignedInState,
     timelineOptions: GetTimelineOptions
 ) => Promise<Response<Array<Status>> | undefined> | undefined;
 
@@ -37,7 +39,7 @@ export interface PostFeedProps {
 
 async function fetchPostList(
     handler: RequestHandler,
-    authContext: AuthProviderProps,
+    signedInState: MaybeSignedInState,
     timelineOptions: GetTimelineOptions
 ) {
     console.log(
@@ -45,7 +47,7 @@ async function fetchPostList(
     );
 
     const posts: Status[] = [];
-    const result = await handler(authContext, timelineOptions);
+    const result = await handler(signedInState, timelineOptions);
     if (result == undefined) {
         console.log("Got no response from handler");
         return;
@@ -63,17 +65,21 @@ async function fetchPostList(
 }
 
 export const PostFeed: Component<PostFeedProps> = (props) => {
-    const authContext = useAuthContext();
+    const auth = useAuth();
     const [searchParams, setSearchParams] = useSearchParams();
     const [postList, listActions] = createResource(
         () => {
             return {
-                local: false,
-                limit: 25,
-                max_id: searchParams.after,
+                signedInState: auth.state,
+                options: {
+                    local: false,
+                    limit: 25,
+                    max_id: searchParams.after,
+                },
             };
         },
-        (options) => fetchPostList(props.onRequest, authContext, options)
+        (args) =>
+            fetchPostList(props.onRequest, args.signedInState, args.options)
     );
 
     const [lastRefresh, setLastRefresh] = createSignal(
@@ -99,7 +105,14 @@ export const PostFeed: Component<PostFeedProps> = (props) => {
     return (
         <FeedContext.Provider value={feedContext}>
             <div>
-                <ErrorBoundary fallback={<div>Failed to load posts.</div>}>
+                <ErrorBoundary
+                    fallback={(e) => (
+                        <ErrorBox
+                            error={e}
+                            description="Failed to load posts"
+                        />
+                    )}
+                >
                     <For each={postList()}>
                         {(status, index) => (
                             <Post status={status} fetchShareParent={false} />
