@@ -106,7 +106,7 @@ export const FeedChecker: Component<FeedCheckerProps> = (props) => {
         <Show when={newPosts()}>
             <div class="md:px-12">
                 <Button
-                    type="secondary"
+                    variant="secondary"
                     class="w-full my-4"
                     onClick={() => {
                         feedContext.resetFeed();
