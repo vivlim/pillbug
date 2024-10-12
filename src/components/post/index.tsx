@@ -284,12 +284,7 @@ const StatusPostBlock: Component<StatusPostBlockProps> = (postData) => {
                         <Match when={postData.shareParent?.loading}>
                             <div>fetching shared post...</div>
                         </Match>
-                        <Match
-                            when={
-                                postData.shareParent !== undefined &&
-                                postData.shareParent() !== undefined
-                            }
-                        >
+                        <Match when={postData.shareParent?.() != null}>
                             <PostWithShared
                                 status={postData.shareParent!() as Status}
                                 showRaw={postData.showRaw}
@@ -301,13 +296,7 @@ const StatusPostBlock: Component<StatusPostBlockProps> = (postData) => {
                             />
                             <PostBody class="border-b" status={status} />
                         </Match>
-                        <Match
-                            when={
-                                postData.shareParent === undefined ||
-                                (postData.shareParent !== undefined &&
-                                    postData.shareParent() === undefined)
-                            }
-                        >
+                        <Match when={postData.shareParent?.() == null}>
                             <PostUserBar status={status} />
                             <PostBody class="border-b" status={status} />
                         </Match>
