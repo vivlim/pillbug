@@ -40,9 +40,13 @@ const Feed: Component = () => {
 
     return (
         <PostFeed
-            onRequest={async (authManager, timelineOptions) => {
-                const client = await authManager.getAuthenticatedClientAsync();
-                return await client.getHomeTimeline(timelineOptions);
+            onRequest={async (signedInState, timelineOptions) => {
+                if (signedInState?.signedIn) {
+                    return await signedInState.authenticatedClient.getHomeTimeline(
+                        timelineOptions
+                    );
+                }
+                return undefined;
             }}
             lastRefresh={lastRefresh()}
         />

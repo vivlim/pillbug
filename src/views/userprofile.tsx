@@ -1,14 +1,22 @@
 import { A, useParams } from "@solidjs/router";
 import { Entity } from "megalodon";
-import { createResource, createSignal, Show, type Component } from "solid-js";
+import {
+    createResource,
+    createSignal,
+    ErrorBoundary,
+    Show,
+    type Component,
+} from "solid-js";
 import {
     AuthProviderProps,
+    EphemeralMaybeSignedInState,
     SessionAuthManager,
     useAuthContext,
     useSessionAuthManager,
 } from "~/lib/auth-context";
 import { ProfileZone } from "~/components/user/profile-zone";
 import { GetTimelineOptions, PostFeed } from "~/components/post/feed";
+import { ErrorBox } from "~/components/error";
 
 interface GetAccountFeedOptions extends Omit<GetTimelineOptions, "local"> {
     pinned?: boolean;
@@ -18,14 +26,14 @@ interface GetAccountFeedOptions extends Omit<GetTimelineOptions, "local"> {
 }
 
 const fetchUserInfo = async (
-    authManager: SessionAuthManager,
+    signedInState: EphemeralMaybeSignedInState,
     username: string
 ) => {
-    if (!authManager.checkSignedIn()) {
+    if (!signedInState?.signedIn) {
         return;
     }
 
-    const client = await authManager.getAuthenticatedClientAsync();
+    const client = signedInState.authenticatedClient;
     console.log(`getting account ${username}`);
 
     const result = await client.lookupAccount(username);
@@ -39,70 +47,87 @@ const UserProfile: Component = () => {
     const authManager = useSessionAuthManager();
     const params = useParams();
     const [username, setUserName] = createSignal<string>(params.username);
-    const [userInfo] = createResource(username, (u) =>
-        fetchUserInfo(authManager, u)
+    const [userInfo] = createResource(
+        () => {
+            return {
+                username: username,
+                signedInState: authManager.getSignedInState(),
+            };
+        },
+        (args) => fetchUserInfo(args.signedInState, args.username())
     );
 
     return (
-        <Show
-            when={userInfo() != null}
-            fallback={<div>Loading user profile</div>}
+        <ErrorBoundary
+            fallback={(e) => (
+                <ErrorBox error={e} description="Failed to load profile" />
+            )}
         >
-            <div class="flex flex-col md:flex-row mx-1 md:mx-4 gap-4">
-                <ProfileZone userInfo={userInfo()!} />
-                <div class="grow flex flex-col justify-start">
-                    <PostFeed
-                        onRequest={async (authContext, timelineOptions) => {
-                            const acctFeedProps: GetAccountFeedOptions = {
-                                exclude_replies: true,
-                                ...timelineOptions,
-                            };
-                            if (!authManager.checkSignedIn()) {
-                                return;
-                            }
-
-                            const client =
-                                await authManager.getAuthenticatedClientAsync();
-                            let posts = await client.getAccountStatuses(
-                                userInfo()!.id,
-                                acctFeedProps
-                            );
-
-                            // If we're on the front page, get pinned posts
-                            if (acctFeedProps.max_id == undefined) {
-                                let pinnedPostProps = {
-                                    pinned: true,
-                                    ...acctFeedProps,
+            <Show
+                when={userInfo() != null}
+                fallback={<div>Loading user profile</div>}
+            >
+                <div class="flex flex-col md:flex-row mx-1 md:mx-4 gap-4">
+                    <ProfileZone userInfo={userInfo()!} />
+                    <div class="grow flex flex-col justify-start">
+                        <PostFeed
+                            onRequest={async (
+                                signedInState,
+                                timelineOptions
+                            ) => {
+                                const acctFeedProps: GetAccountFeedOptions = {
+                                    exclude_replies: true,
+                                    ...timelineOptions,
                                 };
-                                let pinnedPosts =
-                                    await client.getAccountStatuses(
-                                        userInfo()!.id,
-                                        pinnedPostProps
-                                    );
-                                // HACK: this whole thing is kinda jank.
-                                // "pinned" is supposed to only apply for posts
-                                // *the requestor* pinned; for other profiles,
-                                // it's expected to be null.
-                                //
-                                // That said, we at least know there's no
-                                // situation where we're clobbering an otherwise
-                                // valid value.
-                                if (pinnedPosts.data.length > 0) {
-                                    posts.data.unshift(
-                                        ...pinnedPosts.data.map((status) => {
-                                            status.pinned = true;
-                                            return status;
-                                        })
-                                    );
+                                if (!signedInState?.signedIn) {
+                                    return undefined;
                                 }
-                            }
 
-                            return posts;
-                        }}
-                    />
+                                const client =
+                                    signedInState.authenticatedClient;
+                                let posts = await client.getAccountStatuses(
+                                    userInfo()!.id,
+                                    acctFeedProps
+                                );
+
+                                // If we're on the front page, get pinned posts
+                                if (acctFeedProps.max_id == undefined) {
+                                    let pinnedPostProps = {
+                                        pinned: true,
+                                        ...acctFeedProps,
+                                    };
+                                    let pinnedPosts =
+                                        await client.getAccountStatuses(
+                                            userInfo()!.id,
+                                            pinnedPostProps
+                                        );
+                                    // HACK: this whole thing is kinda jank.
+                                    // "pinned" is supposed to only apply for posts
+                                    // *the requestor* pinned; for other profiles,
+                                    // it's expected to be null.
+                                    //
+                                    // That said, we at least know there's no
+                                    // situation where we're clobbering an otherwise
+                                    // valid value.
+                                    if (pinnedPosts.data.length > 0) {
+                                        posts.data.unshift(
+                                            ...pinnedPosts.data.map(
+                                                (status) => {
+                                                    status.pinned = true;
+                                                    return status;
+                                                }
+                                            )
+                                        );
+                                    }
+                                }
+
+                                return posts;
+                            }}
+                        />
+                    </div>
                 </div>
-            </div>
-        </Show>
+            </Show>
+        </ErrorBoundary>
     );
 };
 

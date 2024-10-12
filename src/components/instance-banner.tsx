@@ -20,17 +20,19 @@ export interface InstanceBannerProps {
 export const UserInstanceBanner: Component = () => {
     const authManager = useSessionAuthManager();
 
-    const [instance] = createResource(async () => {
-        if (!authManager.checkAccountsExist()) {
+    const [instance] = createResource(
+        () => authManager.getSignedInState(),
+        async (authState) => {
+            if (!authManager.checkAccountsExist()) {
+                return undefined;
+            }
+            if (authState?.signedIn) {
+                return authState.instanceData;
+            }
+
             return undefined;
         }
-        const signedInState = await authManager.getSignedInState();
-        if (signedInState?.signedIn) {
-            return signedInState.instanceData;
-        }
-
-        return undefined;
-    });
+    );
 
     return (
         <Switch>

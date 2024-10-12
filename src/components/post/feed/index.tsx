@@ -11,6 +11,7 @@ import {
 } from "solid-js";
 import {
     AuthProviderProps,
+    EphemeralMaybeSignedInState,
     SessionAuthManager,
     useAuthContext,
     useSessionAuthManager,
@@ -32,7 +33,7 @@ interface GetTimelineOptionsApi {
 export interface GetTimelineOptions extends GetTimelineOptionsApi {}
 
 type RequestHandler = (
-    authManager: SessionAuthManager,
+    signedInState: EphemeralMaybeSignedInState,
     timelineOptions: GetTimelineOptions
 ) => Promise<Response<Array<Status>> | undefined> | undefined;
 
@@ -43,7 +44,7 @@ export interface PostFeedProps {
 
 async function fetchPostList(
     handler: RequestHandler,
-    authManager: SessionAuthManager,
+    signedInState: EphemeralMaybeSignedInState,
     timelineOptions: GetTimelineOptions
 ) {
     console.log(
@@ -51,7 +52,7 @@ async function fetchPostList(
     );
 
     const posts: Status[] = [];
-    const result = await handler(authManager, timelineOptions);
+    const result = await handler(signedInState, timelineOptions);
     if (result == undefined) {
         console.log("Got no response from handler");
         return;
@@ -74,12 +75,16 @@ export const PostFeed: Component<PostFeedProps> = (props) => {
     const [postList, listActions] = createResource(
         () => {
             return {
-                local: false,
-                limit: 25,
-                max_id: searchParams.after,
+                signedInState: authManager.getSignedInState(),
+                options: {
+                    local: false,
+                    limit: 25,
+                    max_id: searchParams.after,
+                },
             };
         },
-        (options) => fetchPostList(props.onRequest, authManager, options)
+        (args) =>
+            fetchPostList(props.onRequest, args.signedInState, args.options)
     );
 
     const [lastRefresh, setLastRefresh] = createSignal(

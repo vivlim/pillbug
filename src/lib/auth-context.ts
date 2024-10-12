@@ -109,10 +109,10 @@ export class SessionAuthManager {
         return true;
     }
 
-    public async getAuthenticatedClientAsync(): Promise<MegalodonInterface> {
-        const state = await this.getSignedInState();
+    public getAuthenticatedClientAsync(): MegalodonInterface | undefined {
+        const state = this.getSignedInState();
         if (!state?.signedIn) {
-            throw new Error("Can't get authenticated client, not signed in.")
+            return undefined;
         }
         return state.authenticatedClient;
     }
