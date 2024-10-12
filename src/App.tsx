@@ -1,6 +1,8 @@
 import {
     Accessor,
     createContext,
+    createMemo,
+    createResource,
     createSignal,
     Setter,
     useContext,
@@ -24,6 +26,7 @@ import {
     EphemeralAuthState,
     PersistentAuthState,
     TokenState,
+    updateAuthStateForActiveAccount,
 } from "./lib/auth-context";
 import { EditingOverlayContext } from "./lib/edit-overlay-context";
 import {
@@ -73,11 +76,20 @@ const App: Component<RouteSectionProps> = (props: RouteSectionProps) => {
         )
     );
     const [sessionStore, setSessionStore] = createStore<PillbugSessionStore>({
-        signedIn: null,
-        currentAccountIndex: undefined,
+        currentAccountIndex: persistentStore.lastUsedAccount ?? 0,
     });
 
     const [showingEditorOverlay, setShowingEditorOverlay] = createSignal(false);
+
+    const [authState, setCurrentAccountIndex] = createResource(
+        () => sessionStore.currentAccountIndex,
+        (i) =>
+            updateAuthStateForActiveAccount(
+                i,
+                persistentStore,
+                setPersistentStore
+            )
+    );
 
     return (
         <SessionContext.Provider
@@ -86,6 +98,7 @@ const App: Component<RouteSectionProps> = (props: RouteSectionProps) => {
                 setSessionStore,
                 persistentStore,
                 setPersistentStore,
+                authState,
             }}
         >
             <EditingOverlayContext.Provider

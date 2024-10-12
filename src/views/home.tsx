@@ -12,22 +12,14 @@ import { useAuthContext, useSessionAuthManager } from "~/lib/auth-context";
 const HomeView: Component = () => {
     const [busy, setBusy] = createSignal(true);
     const navigate = useNavigate();
-    const [signedOut] = createResource(async () => {
-        const authManager = useSessionAuthManager();
-        if (authManager.checkAccountsExist()) {
-            // Initialize the auth manager before bringing in other components
-            const signedInState = await authManager.getSignedInState();
-            if (signedInState?.signedIn) {
-                navigate("/feed");
-                return false;
-            }
-        }
+    const authManager = useSessionAuthManager();
 
-        navigate("/about");
-        return true;
-    });
-
-    return <div>redirecting... signed out: {signedOut()}</div>;
+    return (
+        <div>
+            redirecting... signed in:{" "}
+            {authManager.checkSignedIn() ? "yes" : "no"}
+        </div>
+    );
 };
 
 export default HomeView;

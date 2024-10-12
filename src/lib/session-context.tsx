@@ -1,4 +1,4 @@
-import { createContext, useContext } from "solid-js";
+import { Accessor, createContext, Resource, useContext } from "solid-js";
 import { EphemeralMaybeSignedInState, TokenState } from "./auth-context";
 import { SetStoreFunction } from "solid-js/store";
 import { OAuth } from "megalodon";
@@ -9,6 +9,7 @@ export const SessionContext = createContext<PillbugSessionContext>();
 export interface PillbugSessionContext {
     sessionStore: PillbugSessionStore;
     setSessionStore: SetStoreFunction<PillbugSessionStore>;
+    authState: Resource<EphemeralMaybeSignedInState>;
 
     persistentStore: PillbugPersistentStore;
     setPersistentStore: SetStoreFunction<PillbugPersistentStore>;
@@ -34,7 +35,6 @@ export class WrappedSessionContext {
 
 /** 'Live' data store related to the current pillbug tab / instance. */
 export interface PillbugSessionStore {
-    signedIn: EphemeralMaybeSignedInState;
     currentAccountIndex: number | undefined;
 }
 

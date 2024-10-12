@@ -134,7 +134,7 @@ const AppFrame: Component<{ children: JSX.Element }> = (props) => {
                                                 <MenubarTrigger>
                                                     <CurrentAccountWithAvatar
                                                         signInState={
-                                                            authManager.getSignedInStateMemo()() as EphemeralSignedInState
+                                                            authManager.getSignedInState() as EphemeralSignedInState
                                                         }
                                                     />
                                                 </MenubarTrigger>

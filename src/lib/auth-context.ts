@@ -4,9 +4,8 @@ import { Instance } from "megalodon/lib/src/entities/instance";
 import OAuth from "megalodon/lib/src/oauth";
 import { createContext, createMemo, useContext } from "solid-js";
 import { produce, SetStoreFunction } from "solid-js/store";
-import { OAuthRegistration, PillbugAccount, PillbugSessionContext, SessionContext, SignedInAccount, useRawSessionContext } from "./session-context";
+import { OAuthRegistration, PillbugAccount, PillbugPersistentStore, PillbugSessionContext, SessionContext, SignedInAccount, useRawSessionContext } from "./session-context";
 import { unwrapResponse } from "./clientUtil";
-import { Accessor, Memo } from "solid-js/types/reactive/signal.d.ts";
 
 export interface PersistentAuthState {
     appData?: OAuth.AppData | undefined;
@@ -103,7 +102,7 @@ export class SessionAuthManager {
             return false;
         }
 
-        if (!this.context.sessionStore.signedIn?.signedIn) {
+        if (!this.context.authState()?.signedIn) {
             return false;
         }
 
@@ -120,99 +119,17 @@ export class SessionAuthManager {
 
     /** Get the current cached signed in state. Throws if there is no signed in account, or the client has not been created in this session yet. */
     public getCachedSignedInState(): EphemeralMaybeSignedInState {
-        const sessionContext = this.context;
-
-        if (!this.checkSignedIn()) {
-            return { signedIn: false };
-        }
-
-        let signedInState = sessionContext.sessionStore.signedIn;
-        if (signedInState === undefined || signedInState === null) {
-            // If this throws, getSignedInState() hasn't been called yet.
-            throw new Error("Can't get cached signed in state, client must be created first.")
-        }
-
-        return signedInState;
+        return this.context.authState() ?? { signedIn: false };
     }
 
     public getActiveAccountIndex(): number {
         return this.context.sessionStore.currentAccountIndex ?? -1
     }
 
-    public getSignedInStateMemo(): Accessor<EphemeralMaybeSignedInState> {
-        return createMemo(() => {
-            return this.getCachedSignedInState();
-        });
-    }
-
     /** Get the current signed in state for this session. Throws if there is no signed in account. If the client was not created this session yet, it'll be created. */
-    public async getSignedInState(): Promise<EphemeralMaybeSignedInState> {
+    public getSignedInState(): EphemeralMaybeSignedInState {
         const sessionContext = this.context;
-
-        let signedInState = sessionContext.sessionStore.signedIn;
-        if (signedInState !== undefined && signedInState !== null && signedInState.signedIn !== false) {
-            return signedInState;
-        }
-
-        let currentAccountIndex = sessionContext.sessionStore.currentAccountIndex;
-        if (currentAccountIndex === undefined) {
-            const persistedIndex = sessionContext.persistentStore.lastUsedAccount;
-            if (persistedIndex !== undefined) {
-                currentAccountIndex = persistedIndex;
-                sessionContext.setSessionStore("currentAccountIndex", persistedIndex);
-                console.log(`Setting current account index from persistent store: ${currentAccountIndex}`)
-            }
-            else {
-                currentAccountIndex = 0;
-                sessionContext.setSessionStore("currentAccountIndex", 0);
-                console.log(`Setting current account index to 0`)
-            }
-        }
-
-        if (sessionContext.persistentStore.accounts === undefined) {
-            throw new Error("Account list is undefined")
-        }
-
-        if (currentAccountIndex >= sessionContext.persistentStore.accounts.length) {
-            const clamped = sessionContext.persistentStore.accounts.length - 1;
-            console.log(`Out of bounds account index: ${currentAccountIndex} >= ${sessionContext.persistentStore.accounts.length}. clamping to ${clamped}`);
-            currentAccountIndex = clamped;
-            sessionContext.setSessionStore("currentAccountIndex", clamped);
-        }
-
-        const account: PillbugAccount = sessionContext.persistentStore.accounts[currentAccountIndex];
-
-        if (!account.signedIn) {
-            return { signedIn: false };
-        }
-
-        const client = await this.getClientForAccount(account);
-
-        const instanceInfo = unwrapResponse(await client.getInstance(), "Getting instance info");
-        const creds = unwrapResponse(await client.verifyAccountCredentials(), "Verifying account credentials");
-
-        let domain = instanceInfo.uri;
-        try {
-            domain = new URL(instanceInfo.uri).hostname;
-        } catch { }
-
-        signedInState = {
-            authenticatedClient: client,
-            instanceData: instanceInfo,
-            accountData: creds,
-            domain: domain,
-            signedIn: true,
-        }
-
-        sessionContext.setSessionStore("signedIn", signedInState)
-        return signedInState;
-    }
-
-    public async getClientForAccount(account: SignedInAccount): Promise<MegalodonInterface> {
-        account = await this.ensureAccountHasCurrentToken(account);
-
-        const client = generator(account.instanceSoftware, account.instanceUrl, account.token.tokenData.access_token)
-        return client;
+        return sessionContext.authState() ?? { signedIn: false }
     }
 
     public getAccountList(): SignedInAccount[] {
@@ -225,37 +142,10 @@ export class SessionAuthManager {
 
     public switchActiveAccount(newIdx: number): void {
         this.context.setSessionStore("currentAccountIndex", newIdx);
+        this.context.authState()
         this.context.setPersistentStore("lastUsedAccount", newIdx);
     }
 
-    private async ensureAccountHasCurrentToken(account: SignedInAccount): Promise<SignedInAccount> {
-        const currentTokenState = account.token;
-        if (tokenIsExpired(currentTokenState)) {
-            // I don't know if the refresh code actually works. It hasn't been tested.
-
-            if (currentTokenState.tokenData.refresh_token === null) {
-                throw new Error(
-                    "Token is expired and we have no refresh token."
-                )
-            }
-
-            // Create an unauthenticated client.
-            let client = generator(account.instanceSoftware, account.instanceUrl);
-            const newToken = await client.refreshToken(account.appData.client_id, account.appData.client_secret, account.token.tokenData.refresh_token!);
-
-            const tokenState: TokenState = wrapToken(newToken);
-
-            return {
-                appData: account.appData,
-                instanceUrl: account.instanceUrl,
-                instanceSoftware: account.instanceSoftware,
-                signedIn: true,
-                token: tokenState,
-            }
-        }
-
-        return account;
-    }
 
     public async createNewInstanceRegistration(instance: string): Promise<OAuthRegistration> {
 
@@ -433,4 +323,72 @@ function wrapToken(token: OAuth.TokenData): TokenState {
         tokenState.expiresAfterTime = nowUtc + token.expires_in
     }
     return tokenState;
+}
+
+export async function updateAuthStateForActiveAccount(accountIndex: number, persistentStore: PillbugPersistentStore, setPersistentStore: SetStoreFunction<PillbugPersistentStore>): Promise<EphemeralMaybeSignedInState> {
+
+    if (persistentStore.accounts === undefined || persistentStore.accounts.length === 0) {
+        return { signedIn: false };
+    }
+
+    if (accountIndex >= persistentStore.accounts.length) {
+        const clamped = persistentStore.accounts.length - 1;
+        console.log(`Out of bounds account index: ${accountIndex} >= ${persistentStore.accounts.length}. clamping to ${clamped}`);
+        accountIndex = clamped;
+    }
+
+    let account: PillbugAccount = persistentStore.accounts[accountIndex];
+
+    if (!account.signedIn) {
+        return { signedIn: false };
+    }
+
+    account = await ensureAccountHasCurrentToken(account);
+    const client = generator(account.instanceSoftware, account.instanceUrl, account.token.tokenData.access_token)
+
+    const instanceInfo = unwrapResponse(await client.getInstance(), "Getting instance info");
+    const creds = unwrapResponse(await client.verifyAccountCredentials(), "Verifying account credentials");
+
+    let domain = instanceInfo.uri;
+    try {
+        domain = new URL(instanceInfo.uri).hostname;
+    } catch { }
+
+    return {
+        authenticatedClient: client,
+        instanceData: instanceInfo,
+        accountData: creds,
+        domain: domain,
+        signedIn: true,
+    }
+
+}
+
+async function ensureAccountHasCurrentToken(account: SignedInAccount): Promise<SignedInAccount> {
+    const currentTokenState = account.token;
+    if (tokenIsExpired(currentTokenState)) {
+        // I don't know if the refresh code actually works. It hasn't been tested.
+
+        if (currentTokenState.tokenData.refresh_token === null) {
+            throw new Error(
+                "Token is expired and we have no refresh token."
+            )
+        }
+
+        // Create an unauthenticated client.
+        let client = generator(account.instanceSoftware, account.instanceUrl);
+        const newToken = await client.refreshToken(account.appData.client_id, account.appData.client_secret, account.token.tokenData.refresh_token!);
+
+        const tokenState: TokenState = wrapToken(newToken);
+
+        return {
+            appData: account.appData,
+            instanceUrl: account.instanceUrl,
+            instanceSoftware: account.instanceSoftware,
+            signedIn: true,
+            token: tokenState,
+        }
+    }
+
+    return account;
 }

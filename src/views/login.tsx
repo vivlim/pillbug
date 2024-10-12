@@ -20,6 +20,7 @@ import {
     TextFieldLabel,
 } from "~/components/ui/text-field";
 import {
+    EphemeralSignedInState,
     SessionAuthManager,
     useAuthContext,
     useSessionAuthManager,
@@ -109,6 +110,25 @@ const LoginView: Component = () => {
                                 {store.sessionStore.currentAccountIndex}
                                 {authManager.getActiveAccountIndex()}
                             </div>
+                            <Show
+                                when={
+                                    authManager.getCachedSignedInState()
+                                        ?.signedIn
+                                }
+                            >
+                                <div>
+                                    {
+                                        (
+                                            authManager.getCachedSignedInState() as EphemeralSignedInState
+                                        ).domain
+                                    }
+                                    {
+                                        (
+                                            store.authState() as EphemeralSignedInState
+                                        ).domain
+                                    }
+                                </div>
+                            </Show>
                             <ul>
                                 <For each={authManager.getAccountList()}>
                                     {(a, idx) => (
