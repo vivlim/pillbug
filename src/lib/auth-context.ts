@@ -2,10 +2,11 @@ import generator, { detector, MegalodonInterface } from "megalodon";
 import { Account } from "megalodon/lib/src/entities/account";
 import { Instance } from "megalodon/lib/src/entities/instance";
 import OAuth from "megalodon/lib/src/oauth";
-import { createContext, useContext } from "solid-js";
+import { createContext, createMemo, useContext } from "solid-js";
 import { produce, SetStoreFunction } from "solid-js/store";
 import { OAuthRegistration, PillbugAccount, PillbugSessionContext, SessionContext, SignedInAccount, useRawSessionContext } from "./session-context";
 import { unwrapResponse } from "./clientUtil";
+import { Accessor, Memo } from "solid-js/types/reactive/signal.d.ts";
 
 export interface PersistentAuthState {
     appData?: OAuth.AppData | undefined;
@@ -118,8 +119,12 @@ export class SessionAuthManager {
     }
 
     /** Get the current cached signed in state. Throws if there is no signed in account, or the client has not been created in this session yet. */
-    public getCachedSignedInState(): EphemeralSignedInState {
+    public getCachedSignedInState(): EphemeralMaybeSignedInState {
         const sessionContext = this.context;
+
+        if (!this.checkSignedIn()) {
+            return { signedIn: false };
+        }
 
         let signedInState = sessionContext.sessionStore.signedIn;
         if (signedInState === undefined || signedInState === null) {
@@ -127,11 +132,17 @@ export class SessionAuthManager {
             throw new Error("Can't get cached signed in state, client must be created first.")
         }
 
-        if (signedInState.signedIn === false) {
-            throw new Error("Not signed in (signed in state is false)")
-        }
-
         return signedInState;
+    }
+
+    public getActiveAccountIndex(): number {
+        return this.context.sessionStore.currentAccountIndex ?? -1
+    }
+
+    public getSignedInStateMemo(): Accessor<EphemeralMaybeSignedInState> {
+        return createMemo(() => {
+            return this.getCachedSignedInState();
+        });
     }
 
     /** Get the current signed in state for this session. Throws if there is no signed in account. If the client was not created this session yet, it'll be created. */
@@ -202,6 +213,19 @@ export class SessionAuthManager {
 
         const client = generator(account.instanceSoftware, account.instanceUrl, account.token.tokenData.access_token)
         return client;
+    }
+
+    public getAccountList(): SignedInAccount[] {
+        if (this.context.persistentStore.accounts === undefined) {
+            return [];
+        }
+
+        return this.context.persistentStore.accounts.filter(a => a.signedIn);
+    }
+
+    public switchActiveAccount(newIdx: number): void {
+        this.context.setSessionStore("currentAccountIndex", newIdx);
+        this.context.setPersistentStore("lastUsedAccount", newIdx);
     }
 
     private async ensureAccountHasCurrentToken(account: SignedInAccount): Promise<SignedInAccount> {

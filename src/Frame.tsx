@@ -3,6 +3,7 @@ import {
     createContext,
     createResource,
     createSignal,
+    For,
     JSX,
     Match,
     Setter,
@@ -43,6 +44,8 @@ import {
     InstanceBanner,
     UserInstanceBanner,
 } from "./components/instance-banner";
+import { PillbugAccount, SignedInAccount } from "./lib/session-context";
+import { Account } from "megalodon/lib/src/entities/account";
 
 export const ExpandMenuSignalContext = createContext<{
     menuOpen: Accessor<boolean>;
@@ -62,22 +65,39 @@ export function useExpandMenuSignalContext(): {
     return value;
 }
 
+const CurrentAccountWithAvatar: Component<{
+    signInState: EphemeralSignedInState;
+}> = (props) => {
+    return (
+        <>
+            <AvatarImage
+                user={props.signInState.accountData}
+                imgClass="size-6"
+                class="inline sm:mr-2"
+                alt="Your avatar"
+            />
+            <span class="hidden sm:inline overflow-hidden text-ellipsis">
+                {`${props.signInState.accountData.username}@${props.signInState.domain}`}
+            </span>
+        </>
+    );
+};
+
+const AvailableAccountWithAvatar: Component<{
+    account: SignedInAccount;
+}> = (props) => {
+    return (
+        <>
+            <span class="hidden sm:inline overflow-hidden text-ellipsis">
+                {`?@${props.account.instanceUrl}`}
+            </span>
+        </>
+    );
+};
+
 const AppFrame: Component<{ children: JSX.Element }> = (props) => {
     const authManager = useSessionAuthManager();
     const editingOverlayContext = useEditOverlayContext();
-    const [authState] = createResource(authManager, async (authManager) => {
-        try {
-            if (authManager.checkAccountsExist()) {
-                const signedInState = await authManager.getSignedInState();
-                return signedInState;
-            }
-            return { signedIn: false };
-        } catch (error) {
-            if (error instanceof Error) {
-                alert(`Error loading page: ${error.message}`);
-            }
-        }
-    });
 
     const [expandMenu, setExpandMenu] = createSignal(false);
 
@@ -107,35 +127,36 @@ const AppFrame: Component<{ children: JSX.Element }> = (props) => {
                             </div>
                             <div class="flex-1" />
                             <Switch>
-                                <Match when={authState()?.signedIn}>
+                                <Match when={authManager.checkSignedIn()}>
                                     <div class="flex-0">
                                         <Menubar>
                                             <MenubarMenu>
                                                 <MenubarTrigger>
-                                                    <AvatarImage
-                                                        user={
-                                                            (
-                                                                authState() as EphemeralSignedInState
-                                                            ).accountData
+                                                    <CurrentAccountWithAvatar
+                                                        signInState={
+                                                            authManager.getSignedInStateMemo()() as EphemeralSignedInState
                                                         }
-                                                        imgClass="size-6"
-                                                        class="inline sm:mr-2"
-                                                        alt="Your avatar"
                                                     />
-                                                    <span class="hidden sm:inline overflow-hidden text-ellipsis">
-                                                        {`${
-                                                            (
-                                                                authState() as EphemeralSignedInState
-                                                            ).accountData
-                                                                .username
-                                                        }@${
-                                                            (
-                                                                authState() as EphemeralSignedInState
-                                                            ).domain
-                                                        }`}
-                                                    </span>
                                                 </MenubarTrigger>
                                                 <MenubarContent>
+                                                    <For
+                                                        each={authManager.getAccountList()}
+                                                    >
+                                                        {(a, idx) => (
+                                                            <MenubarItem
+                                                                onClick={() =>
+                                                                    authManager.switchActiveAccount(
+                                                                        idx()
+                                                                    )
+                                                                }
+                                                            >
+                                                                <AvailableAccountWithAvatar
+                                                                    account={a}
+                                                                />
+                                                            </MenubarItem>
+                                                        )}
+                                                    </For>
+
                                                     <MenubarItem
                                                         onClick={() => {
                                                             /*logOut(
@@ -212,13 +233,12 @@ const AppFrame: Component<{ children: JSX.Element }> = (props) => {
                                         </Button>
                                     </div>
                                 </Match>
-                                <Match when={authState.loading}>
-                                    <div>
-                                        i'm loading over here...
-                                        <span class="animate-spin">🤔</span>
-                                    </div>
-                                </Match>
-                                <Match when={authState()?.signedIn === false}>
+                                <Match
+                                    when={
+                                        authManager.checkAccountsExist() ===
+                                        false
+                                    }
+                                >
                                     <div class="flex-0 py-4">
                                         <Button
                                             onClick={() =>
@@ -235,7 +255,9 @@ const AppFrame: Component<{ children: JSX.Element }> = (props) => {
                         </div>
                     </div>
                 </div>
-                <Show when={authState() !== undefined}>{props.children}</Show>
+                <Show when={authManager.getCachedSignedInState()}>
+                    {props.children}
+                </Show>
             </div>
         </ExpandMenuSignalContext.Provider>
     );

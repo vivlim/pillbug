@@ -1,7 +1,13 @@
 import { makePersisted } from "@solid-primitives/storage";
 import { useLocation, useNavigate, useSearchParams } from "@solidjs/router";
 import generator, { detector } from "megalodon";
-import { createResource, createSignal, Show, type Component } from "solid-js";
+import {
+    createResource,
+    createSignal,
+    For,
+    Show,
+    type Component,
+} from "solid-js";
 import { NewInstanceOauth } from "~/client/auth";
 import { ErrorBox } from "~/components/error";
 import { Button } from "~/components/ui/button";
@@ -18,6 +24,7 @@ import {
     useAuthContext,
     useSessionAuthManager,
 } from "~/lib/auth-context";
+import { useRawSessionContext, useSessionContext } from "~/lib/session-context";
 
 const LoginView: Component = () => {
     const authManager = useSessionAuthManager();
@@ -87,10 +94,41 @@ const LoginView: Component = () => {
         getToken();
     }
 
+    const store = useRawSessionContext();
+
     return (
         <div class="flex flex-row p-8 size-full">
             <div class="md:grow"></div>
             <div class="grow w-max md:w-1/2 place-self">
+                <Show when={authManager.checkSignedIn()}>
+                    <Card>
+                        <CardHeader>switch account</CardHeader>
+                        <CardContent>
+                            <div>
+                                Active id
+                                {store.sessionStore.currentAccountIndex}
+                                {authManager.getActiveAccountIndex()}
+                            </div>
+                            <ul>
+                                <For each={authManager.getAccountList()}>
+                                    {(a, idx) => (
+                                        <li>
+                                            <button
+                                                onClick={() =>
+                                                    authManager.switchActiveAccount(
+                                                        idx()
+                                                    )
+                                                }
+                                            >
+                                                {a.instanceUrl}
+                                            </button>
+                                        </li>
+                                    )}
+                                </For>
+                            </ul>
+                        </CardContent>
+                    </Card>
+                </Show>
                 <Card>
                     <CardHeader>
                         <CardTitle>log in</CardTitle>

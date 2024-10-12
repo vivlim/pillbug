@@ -17,7 +17,7 @@ import {
     usePostPageContext,
 } from "~/views/postpage";
 import { Card } from "../ui/card";
-import { useAuthContext } from "~/lib/auth-context";
+import { useAuthContext, useSessionAuthManager } from "~/lib/auth-context";
 import { Entity, MegalodonInterface } from "megalodon";
 import { isValidVisibility, PostOptions } from "~/views/editdialog";
 import { IoWarningOutline } from "solid-icons/io";
@@ -101,7 +101,7 @@ export interface NewCommentEditorProps {
 }
 
 export const NewCommentEditor: Component<NewCommentEditorProps> = (props) => {
-    const authContext = useAuthContext();
+    const authManager = useSessionAuthManager();
     const postPageContext = usePostPageContext();
 
     const [posted, setPosted] = createSignal(false);
@@ -175,14 +175,13 @@ export const NewCommentEditor: Component<NewCommentEditorProps> = (props) => {
         <form
             onsubmit={async (ev) => {
                 ev.preventDefault();
-                if (!authContext.authState.signedIn) {
+                if (!authManager.checkSignedIn()) {
                     pushError("Can't post if you're not logged in!");
                     return;
                 }
 
                 setBusy(true);
-                const client =
-                    authContext.authState.signedIn.authenticatedClient;
+                const client = await authManager.getAuthenticatedClientAsync();
                 const post_id = await sendPost(client);
                 if (post_id) {
                     setPostId(post_id);
