@@ -3,7 +3,7 @@ import { Account } from "megalodon/lib/src/entities/account";
 import { Instance } from "megalodon/lib/src/entities/instance";
 import OAuth from "megalodon/lib/src/oauth";
 import { createContext, useContext } from "solid-js";
-import { SetStoreFunction } from "solid-js/store";
+import { produce, SetStoreFunction } from "solid-js/store";
 import { OAuthRegistration, PillbugAccount, PillbugSessionContext, SessionContext, SignedInAccount, useRawSessionContext } from "./session-context";
 import { unwrapResponse } from "./clientUtil";
 
@@ -22,16 +22,21 @@ export interface PersistentAuthState {
 }
 
 export interface EphemeralAuthState {
-    signedIn: EphemeralMaybeSignedInState;
+    signedIn: EphemeralMaybeSignedInState; // TODO rename this
 }
 
-export type EphemeralMaybeSignedInState = EphemeralSignedInState | false | null;
+export type EphemeralMaybeSignedInState = EphemeralSignedInState | NotSignedInState | null;
 
 export interface EphemeralSignedInState {
     authenticatedClient: MegalodonInterface;
     instanceData: Instance;
     accountData: Account;
     domain: string;
+    signedIn: true;
+}
+
+export interface NotSignedInState {
+    signedIn: false;
 }
 
 export interface TokenState {
@@ -61,18 +66,17 @@ export function useAuthContext(): AuthProviderProps {
 const AppDisplayName: string = "pillbug";
 
 export function useSessionAuthManager(): SessionAuthManager {
-    return new SessionAuthManager(() => {
-        return useRawSessionContext();
-    });
+    const sessionContext = useRawSessionContext();
+    return new SessionAuthManager(sessionContext);
 }
 
 export class SessionAuthManager {
-    constructor(public readonly useContext: () => PillbugSessionContext) {
+    constructor(public readonly context: PillbugSessionContext) {
 
     }
 
     public checkAccountsExist(): boolean {
-        const sessionContext = this.useContext();
+        const sessionContext = this.context;
         if (sessionContext.persistentStore.accounts === undefined) {
             return false;
         }
@@ -95,12 +99,15 @@ export class SessionAuthManager {
 
     public async getAuthenticatedClientAsync(): Promise<MegalodonInterface> {
         const state = await this.getSignedInState();
+        if (!state?.signedIn) {
+            throw new Error("Can't get authenticated client, not signed in.")
+        }
         return state.authenticatedClient;
     }
 
     /** Get the current cached signed in state. Throws if there is no signed in account, or the client has not been created in this session yet. */
     public getCachedSignedInState(): EphemeralSignedInState {
-        const sessionContext = this.useContext();
+        const sessionContext = this.context;
 
         let signedInState = sessionContext.sessionStore.signedIn;
         if (signedInState === undefined || signedInState === null) {
@@ -108,7 +115,7 @@ export class SessionAuthManager {
             throw new Error("Can't get cached signed in state, client must be created first.")
         }
 
-        if (signedInState === false) {
+        if (signedInState.signedIn === false) {
             throw new Error("Not signed in (signed in state is false)")
         }
 
@@ -116,18 +123,27 @@ export class SessionAuthManager {
     }
 
     /** Get the current signed in state for this session. Throws if there is no signed in account. If the client was not created this session yet, it'll be created. */
-    public async getSignedInState(): Promise<EphemeralSignedInState> {
-        const sessionContext = this.useContext();
+    public async getSignedInState(): Promise<EphemeralMaybeSignedInState> {
+        const sessionContext = this.context;
 
         let signedInState = sessionContext.sessionStore.signedIn;
-        if (signedInState !== undefined && signedInState !== null && signedInState !== false) {
+        if (signedInState !== undefined && signedInState !== null && signedInState.signedIn !== false) {
             return signedInState;
         }
 
         let currentAccountIndex = sessionContext.sessionStore.currentAccountIndex;
         if (currentAccountIndex === undefined) {
-            sessionContext.setSessionStore("currentAccountIndex", sessionContext.persistentStore.lastUsedAccount ?? 0);
-            currentAccountIndex = 0;
+            const persistedIndex = sessionContext.persistentStore.lastUsedAccount;
+            if (persistedIndex !== undefined) {
+                currentAccountIndex = persistedIndex;
+                sessionContext.setSessionStore("currentAccountIndex", persistedIndex);
+                console.log(`Setting current account index from persistent store: ${currentAccountIndex}`)
+            }
+            else {
+                currentAccountIndex = 0;
+                sessionContext.setSessionStore("currentAccountIndex", 0);
+                console.log(`Setting current account index to 0`)
+            }
         }
 
         if (sessionContext.persistentStore.accounts === undefined) {
@@ -135,12 +151,16 @@ export class SessionAuthManager {
         }
 
         if (currentAccountIndex >= sessionContext.persistentStore.accounts.length) {
-            throw new Error(`Out of bounds account index: ${currentAccountIndex} >= ${sessionContext.persistentStore.accounts.length}`)
+            const clamped = sessionContext.persistentStore.accounts.length - 1;
+            console.log(`Out of bounds account index: ${currentAccountIndex} >= ${sessionContext.persistentStore.accounts.length}. clamping to ${clamped}`);
+            currentAccountIndex = clamped;
+            sessionContext.setSessionStore("currentAccountIndex", clamped);
         }
 
         const account: PillbugAccount = sessionContext.persistentStore.accounts[currentAccountIndex];
+
         if (!account.signedIn) {
-            throw new Error("Account isn't signed in");
+            return { signedIn: false };
         }
 
         const client = await this.getClientForAccount(account);
@@ -157,7 +177,8 @@ export class SessionAuthManager {
             authenticatedClient: client,
             instanceData: instanceInfo,
             accountData: creds,
-            domain: domain
+            domain: domain,
+            signedIn: true,
         }
 
         sessionContext.setSessionStore("signedIn", signedInState)
@@ -248,37 +269,56 @@ export class SessionAuthManager {
     }
 
     public async completeLogin(code: string) {
+        console.log("Attempting to complete login");
 
-        const partialLogin = this.getUnfinishedLogin();
+        try {
+            const [partialLogin, partialLoginIndex] = this.getUnfinishedLogin();
 
-        // obtain our first token.
-        let client = generator(partialLogin.instanceSoftware, partialLogin.instanceUrl);
+            // obtain our first token.
+            let client = generator(partialLogin.instanceSoftware, partialLogin.instanceUrl);
 
-        if (partialLogin.appData.redirect_uri === null) {
-            throw new Error("Failed to complete login: redirect_uri was null")
+            if (partialLogin.appData.redirect_uri === null) {
+                throw new Error("Failed to complete login: redirect_uri was null")
+            }
+
+            let token = await client.fetchAccessToken(partialLogin.appData.client_id,
+                partialLogin.appData.client_secret,
+                code,
+                partialLogin.appData.redirect_uri
+            )
+
+            const tokenState: TokenState = wrapToken(token);
+
+            const completeLogin: SignedInAccount = {
+                appData: partialLogin.appData,
+                instanceUrl: partialLogin.instanceUrl,
+                instanceSoftware: partialLogin.instanceSoftware,
+                signedIn: true,
+                token: tokenState,
+            };
+            console.log(`Attempting to write back to persistent store a complete login for ${completeLogin.instanceUrl}`)
+
+            this.context.setPersistentStore("accounts", partialLoginIndex, (prev) => {
+                if (prev.appData.client_id !== completeLogin.appData.client_id) {
+                    throw new Error("Mismatch when trying to overwrite the partially signed in account with the complete one.");
+                }
+                return completeLogin;
+            });
+
+            console.log(`Completed login to ${completeLogin.instanceUrl}`)
+
+            return completeLogin;
         }
-
-        let token = await client.fetchAccessToken(partialLogin.appData.client_id,
-            partialLogin.appData.client_secret,
-            code,
-            partialLogin.appData.redirect_uri
-        )
-
-        const tokenState: TokenState = wrapToken(token);
-
-        const completeLogin: SignedInAccount = {
-            appData: partialLogin.appData,
-            instanceUrl: partialLogin.instanceUrl,
-            instanceSoftware: partialLogin.instanceSoftware,
-            signedIn: true,
-            token: tokenState,
-        };
-
-        return completeLogin;
+        catch (e) {
+            if (e instanceof Error) {
+                console.error(`Failed to complete login: ${e}`)
+                throw e;
+            }
+        }
     }
 
     private appendAccount(account: PillbugAccount) {
-        const sessionContext = this.useContext();
+        const sessionContext = this.context;
         const length: number | undefined = sessionContext.persistentStore.accounts?.length;
 
         if (length === undefined) {
@@ -291,17 +331,46 @@ export class SessionAuthManager {
         }
     }
 
-    private getUnfinishedLogin(): PillbugAccount {
-        const accounts = this.useContext().persistentStore.accounts;
+    private getUnfinishedLogin(): [PillbugAccount, number] {
+        const accounts = this.context.persistentStore.accounts?.slice();
         if (accounts === undefined) { throw new Error("Can't complete logging in, there are no accounts in the persistent store") }
 
-        for (const account of accounts) {
+        let unfinishedLogins: number[] = [];
+
+        for (let i = 0; i < accounts.length; i++) {
+            const account = accounts[i];
             if (account.signedIn === false && account.redirectUri !== undefined) {
-                return account;
+                unfinishedLogins.push(i);
             }
         }
 
-        throw new Error("Can't complete logging in, there are no unfinished logins in the persistent store")
+        if (unfinishedLogins.length === 0) {
+            throw new Error("Can't complete logging in, there are no unfinished logins in the persistent store")
+        }
+
+        let unfinishedLoginIndexToUse = unfinishedLogins.pop()!;
+        const unfinishedLoginToUse = accounts[unfinishedLoginIndexToUse];
+
+        if (unfinishedLogins.length > 0) {
+            unfinishedLogins.reverse();
+            console.log(`Cleaning up ${unfinishedLogins.length} old unfinished logins and using the most recent one.`)
+
+            for (const i of unfinishedLogins) {
+                accounts.splice(i, 1);
+            }
+
+            // Update what the index is.
+            unfinishedLoginIndexToUse = accounts.indexOf(unfinishedLoginToUse)
+        }
+
+        // Need to set these both at the same time. If they get out of sync, weird stuff
+        console.log(`Account index: ${unfinishedLoginIndexToUse}. Accounts: ${JSON.stringify(accounts)}`)
+        this.context.setPersistentStore(produce((store) => {
+            store.lastUsedAccount = unfinishedLoginIndexToUse;
+            store.accounts = accounts;
+        }))
+
+        return [unfinishedLoginToUse, unfinishedLoginIndexToUse];
     }
 }
 

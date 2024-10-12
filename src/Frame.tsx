@@ -68,10 +68,10 @@ const AppFrame: Component<{ children: JSX.Element }> = (props) => {
     const [authState] = createResource(authManager, async (authManager) => {
         try {
             if (authManager.checkAccountsExist()) {
-                return await authManager.getSignedInState();
+                const signedInState = await authManager.getSignedInState();
+                return signedInState;
             }
-
-            return false;
+            return { signedIn: false };
         } catch (error) {
             if (error instanceof Error) {
                 alert(`Error loading page: ${error.message}`);
@@ -107,7 +107,7 @@ const AppFrame: Component<{ children: JSX.Element }> = (props) => {
                             </div>
                             <div class="flex-1" />
                             <Switch>
-                                <Match when={authState()}>
+                                <Match when={authState()?.signedIn}>
                                     <div class="flex-0">
                                         <Menubar>
                                             <MenubarMenu>
@@ -218,7 +218,7 @@ const AppFrame: Component<{ children: JSX.Element }> = (props) => {
                                         <span class="animate-spin">🤔</span>
                                     </div>
                                 </Match>
-                                <Match when={authState() === false}>
+                                <Match when={authState()?.signedIn === false}>
                                     <div class="flex-0 py-4">
                                         <Button
                                             onClick={() =>

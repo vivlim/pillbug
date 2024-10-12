@@ -3,6 +3,7 @@ import { useLocation, useNavigate, useSearchParams } from "@solidjs/router";
 import generator, { detector } from "megalodon";
 import { createResource, createSignal, Show, type Component } from "solid-js";
 import { NewInstanceOauth } from "~/client/auth";
+import { ErrorBox } from "~/components/error";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Flex } from "~/components/ui/flex";
@@ -45,7 +46,7 @@ const LoginView: Component = () => {
                 console.log(
                     `error during login ${error.message}\n${error.stack}`
                 );
-                setError(`${error.message}\n${error.stack}`);
+                setError(error);
                 setBusy(false);
             }
         }
@@ -54,7 +55,7 @@ const LoginView: Component = () => {
     // persist the entered instance so that if you need to log again, it's already there.
     const [instance, setInstance] = makePersisted(createSignal(""));
     const [busy, setBusy] = createSignal(false);
-    const [error, setError] = createSignal<string | undefined>(undefined);
+    const [error, setError] = createSignal<Error | undefined>(undefined);
     //const [appData] = createResource(instance, doOAuth);
     const navigate = useNavigate();
 
@@ -72,13 +73,13 @@ const LoginView: Component = () => {
                     "trying to acquire a token using the provided code"
                 );
 
-                authManager.completeLogin(searchParams.code!);
+                await authManager.completeLogin(searchParams.code!);
                 setBusy(false);
                 navigate("/");
             } catch (error) {
                 if (error instanceof Error) {
                     console.log(`error getting token ${error.message}`);
-                    setError(error.message);
+                    setError(error);
                     setBusy(false);
                 }
             }
@@ -125,7 +126,12 @@ const LoginView: Component = () => {
                                     <span class="animate-spin ml-3">🤔</span>
                                 )}
                             </Button>
-                            {error() !== undefined && <pre>{error()}</pre>}
+                            {error() !== undefined && (
+                                <ErrorBox
+                                    error={error()}
+                                    description="Failed to log in"
+                                />
+                            )}
                         </form>
                     </CardContent>
                 </Card>

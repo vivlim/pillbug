@@ -29,7 +29,7 @@ export async function fetchPostInfoTree(
     console.log(
         `fetching post info tree with props: ${JSON.stringify(loadPostsProps)}`
     );
-    if (!authContext.authState.signedIn) {
+    if (!authContext.authState.signedIn?.signedIn) {
         throw new Error(`Not signed in`);
     }
 

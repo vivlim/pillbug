@@ -16,9 +16,11 @@ const HomeView: Component = () => {
         const authManager = useSessionAuthManager();
         if (authManager.checkAccountsExist()) {
             // Initialize the auth manager before bringing in other components
-            await authManager.getSignedInState();
-            navigate("/feed");
-            return false;
+            const signedInState = await authManager.getSignedInState();
+            if (signedInState?.signedIn) {
+                navigate("/feed");
+                return false;
+            }
         }
 
         navigate("/about");

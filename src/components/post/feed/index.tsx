@@ -9,11 +9,17 @@ import {
     ErrorBoundary,
     For,
 } from "solid-js";
-import { AuthProviderProps, useAuthContext } from "~/lib/auth-context";
+import {
+    AuthProviderProps,
+    SessionAuthManager,
+    useAuthContext,
+    useSessionAuthManager,
+} from "~/lib/auth-context";
 import Post from "..";
 import { PageNav } from "~/components/ui/page-footer";
 import { Button } from "~/components/ui/button";
 import { FeedContext } from "./feed-context";
+import { ErrorBox } from "~/components/error";
 
 interface GetTimelineOptionsApi {
     local?: boolean;
@@ -26,7 +32,7 @@ interface GetTimelineOptionsApi {
 export interface GetTimelineOptions extends GetTimelineOptionsApi {}
 
 type RequestHandler = (
-    authContext: AuthProviderProps,
+    authManager: SessionAuthManager,
     timelineOptions: GetTimelineOptions
 ) => Promise<Response<Array<Status>> | undefined> | undefined;
 
@@ -37,7 +43,7 @@ export interface PostFeedProps {
 
 async function fetchPostList(
     handler: RequestHandler,
-    authContext: AuthProviderProps,
+    authManager: SessionAuthManager,
     timelineOptions: GetTimelineOptions
 ) {
     console.log(
@@ -45,7 +51,7 @@ async function fetchPostList(
     );
 
     const posts: Status[] = [];
-    const result = await handler(authContext, timelineOptions);
+    const result = await handler(authManager, timelineOptions);
     if (result == undefined) {
         console.log("Got no response from handler");
         return;
@@ -63,7 +69,7 @@ async function fetchPostList(
 }
 
 export const PostFeed: Component<PostFeedProps> = (props) => {
-    const authContext = useAuthContext();
+    const authManager = useSessionAuthManager();
     const [searchParams, setSearchParams] = useSearchParams();
     const [postList, listActions] = createResource(
         () => {
@@ -73,7 +79,7 @@ export const PostFeed: Component<PostFeedProps> = (props) => {
                 max_id: searchParams.after,
             };
         },
-        (options) => fetchPostList(props.onRequest, authContext, options)
+        (options) => fetchPostList(props.onRequest, authManager, options)
     );
 
     const [lastRefresh, setLastRefresh] = createSignal(
@@ -99,7 +105,14 @@ export const PostFeed: Component<PostFeedProps> = (props) => {
     return (
         <FeedContext.Provider value={feedContext}>
             <div>
-                <ErrorBoundary fallback={<div>Failed to load posts.</div>}>
+                <ErrorBoundary
+                    fallback={(e) => (
+                        <ErrorBox
+                            error={e}
+                            description="Failed to load posts"
+                        />
+                    )}
+                >
                     <For each={postList()}>
                         {(status, index) => (
                             <Post status={status} fetchShareParent={false} />

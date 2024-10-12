@@ -64,12 +64,13 @@ export async function fetchShareParentPost(
     authContext: AuthProviderProps,
     postUrl: string
 ): Promise<Status | null> {
-    if (!authContext.authState.signedIn) {
+    const authState = authContext.authState;
+    if (!authState.signedIn?.signedIn) {
         return null;
     }
 
     console.log(`fetching parent post ${postUrl}`);
-    const client = authContext.authState.signedIn.authenticatedClient;
+    const client = authState.signedIn.authenticatedClient;
     const result = await client.search(postUrl, { type: "statuses", limit: 1 });
     if (result.status !== 200) {
         throw new Error(`Failed to get shared post: ${result.statusText}`);
