@@ -14,7 +14,7 @@ import {
     Switch,
     type Component,
 } from "solid-js";
-import { AuthProviderProps, useAuthContext } from "~/lib/auth-context";
+import { SessionAuthManager, useAuth } from "~/auth/auth-manager";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
 import HtmlSandbox from "../../views/htmlsandbox";
@@ -61,15 +61,15 @@ export type StatusPostBlockProps = {
 };
 
 export async function fetchShareParentPost(
-    authContext: AuthProviderProps,
+    auth: SessionAuthManager,
     postUrl: string
 ): Promise<Status | null> {
-    if (!authContext.authState.signedIn) {
+    if (!auth.signedIn) {
         return null;
     }
 
     console.log(`fetching parent post ${postUrl}`);
-    const client = authContext.authState.signedIn.authenticatedClient;
+    const client = auth.assumeSignedIn.client;
     const result = await client.search(postUrl, { type: "statuses", limit: 1 });
     if (result.status !== 200) {
         throw new Error(`Failed to get shared post: ${result.statusText}`);
@@ -203,7 +203,7 @@ async function toggleLike(
 }
 
 const Post: Component<PostProps> = (postData) => {
-    const authContext = useAuthContext();
+    const auth = useAuth();
     const [status, updateStatus] = createSignal(postData.status);
 
     const [showRaw, setShowRaw] = createSignal<boolean>(false);
@@ -241,31 +241,25 @@ const Post: Component<PostProps> = (postData) => {
                                 </ContextMenuItem>
                             </ContextMenuContent>
                         </ContextMenu>
-                        <Button
-                            variant="ghost"
-                            class="hover:bg-transparent p-0"
-                            aria-label="Like Post"
-                            onClick={async () => {
-                                if (!authContext.authState.signedIn) {
-                                    throw new Error("Not logged in");
-                                }
-
-                                const client =
-                                    authContext.authState.signedIn
-                                        .authenticatedClient;
-
-                                const updated = await toggleLike(
-                                    client,
-                                    status()
-                                );
-                                updateStatus(updated);
-                            }}
-                        >
-                            <Dynamic
-                                component={favButton(isLiked())}
-                                class="size-6"
-                            />
-                        </Button>
+                        <Show when={auth.signedIn}>
+                            <Button
+                                variant="ghost"
+                                class="hover:bg-transparent p-0"
+                                aria-label="Like Post"
+                                onClick={async () => {
+                                    const updated = await toggleLike(
+                                        auth.assumeSignedIn.client,
+                                        status()
+                                    );
+                                    updateStatus(updated);
+                                }}
+                            >
+                                <Dynamic
+                                    component={favButton(isLiked())}
+                                    class="size-6"
+                                />
+                            </Button>
+                        </Show>
                     </PostFooter>
                 </Card>
             </ErrorBoundary>
@@ -325,12 +319,12 @@ const StatusPostBlock: Component<StatusPostBlockProps> = (postData) => {
 };
 
 export const PostWithShared: Component<PostWithSharedProps> = (postData) => {
-    const authContext = useAuthContext();
+    const auth = useAuth();
     const [parentPostUrl, setParentPostUrl] = createSignal<string | null>(
         postData.shareParentUrl ?? null
     );
     const [shareParentPost] = createResource(parentPostUrl, (pp) => {
-        return fetchShareParentPost(authContext, pp);
+        return fetchShareParentPost(auth, pp);
     });
     if (postData.shareParentUrl === undefined) {
         const sharedUrl = getShareParentUrl(postData.status);

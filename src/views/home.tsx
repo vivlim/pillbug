@@ -1,26 +1,20 @@
-import { A, useNavigate, useParams } from "@solidjs/router";
-import { createResource, createSignal, type Component } from "solid-js";
-import { tryGetAuthenticatedClient } from "~/App";
-import { Button } from "~/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
-import { Flex } from "~/components/ui/flex";
-import { Grid, Col } from "~/components/ui/grid";
-import NotSignedInLandingView from "./notsignedin";
-import Feed from "./feed";
-import { useAuthContext } from "~/lib/auth-context";
+import { Match, Switch, type Component } from "solid-js";
+import { useAuth } from "~/auth/auth-manager";
+import { RedirectComponent } from "~/components/utility/redirect-when-displayed";
 
 const HomeView: Component = () => {
-    const authContext = useAuthContext();
-    const [busy, setBusy] = createSignal(true);
-    const navigate = useNavigate();
+    const auth = useAuth();
 
-    if (authContext.authState.signedIn) {
-        navigate("/feed");
-    } else {
-        navigate("/about");
-    }
-
-    return <>{authContext.authState.signedIn && <div>redirecting...</div>}</>;
+    return (
+        <Switch>
+            <Match when={auth.signedIn}>
+                <RedirectComponent redirectTarget="/feed" doRedirect={true} />
+            </Match>
+            <Match when={!auth.signedIn}>
+                <RedirectComponent redirectTarget="/about" doRedirect={true} />
+            </Match>
+        </Switch>
+    );
 };
 
 export default HomeView;

@@ -15,25 +15,32 @@ import {
 } from "solid-js";
 import Post from "~/components/post";
 import { Status } from "megalodon/lib/src/entities/status";
-import { AuthProviderProps, useAuthContext } from "~/lib/auth-context";
+import { useAuth } from "~/auth/auth-manager";
 import { ProfileZone } from "~/components/user/profile-zone";
 import { Comment, NewCommentEditor } from "~/components/post/comments";
 import { Card } from "~/components/ui/card";
+import { ErrorBox } from "~/components/error";
+import { MaybeSignedInState } from "~/auth/auth-types";
 
 /** Fetch the info for a post and arrange its context in a nested tree structure before returning. */
 export async function fetchPostInfoTree(
-    authContext: AuthProviderProps,
-    loadPostsProps: LoadPostsProps,
+    props: {
+        loadProps: LoadPostsProps;
+        signedInState: MaybeSignedInState;
+    },
     previousTree: IPostTreeNode | undefined
 ): Promise<IPostTreeNode> {
+    const loadPostsProps = props.loadProps;
+    const signedInState = props.signedInState;
+
     console.log(
         `fetching post info tree with props: ${JSON.stringify(loadPostsProps)}`
     );
-    if (!authContext.authState.signedIn) {
-        throw new Error(`Not signed in`);
+    if (!signedInState?.signedIn) {
+        return new PostTreePlaceholderNode("not signed in", []);
     }
 
-    const client = authContext.authState.signedIn.authenticatedClient;
+    const client = signedInState.authenticatedClient;
     if (
         previousTree !== undefined &&
         loadPostsProps.newCommentId !== undefined
@@ -311,7 +318,16 @@ const PostPage: Component = () => {
     };
     return (
         <PostPageContext.Provider value={postContext}>
-            <PostWithCommentTree />
+            <ErrorBoundary
+                fallback={(e) => (
+                    <ErrorBox
+                        error={e}
+                        description="Failed to load post page"
+                    />
+                )}
+            >
+                <PostWithCommentTree />
+            </ErrorBoundary>
         </PostPageContext.Provider>
     );
 };
@@ -325,18 +341,23 @@ export function usePostPageContext(): PostPageContextValue {
 }
 
 const PostWithCommentTree: Component = () => {
-    const authContext = useAuthContext();
+    const auth = useAuth();
     const postPageContext = usePostPageContext();
     const threadInfoFetcher: ResourceFetcher<
-        LoadPostsProps,
+        {
+            loadProps: LoadPostsProps;
+            signedInState: MaybeSignedInState;
+        },
         IPostTreeNode,
         true
     > = (loadProps, { value, refetching }) =>
-        fetchPostInfoTree(authContext, loadProps, value);
-    const [threadInfo, mutateThreadInfo] = createResource(
-        postPageContext.loadProps[0],
-        threadInfoFetcher
-    );
+        fetchPostInfoTree(loadProps, value);
+    const [threadInfo, mutateThreadInfo] = createResource(() => {
+        return {
+            loadProps: postPageContext.loadProps[0](),
+            signedInState: auth.state,
+        };
+    }, threadInfoFetcher);
     return (
         <div class="flex flex-col md:flex-row mx-1 md:mx-4 gap-4">
             <Show

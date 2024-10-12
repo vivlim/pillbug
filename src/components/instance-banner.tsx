@@ -1,40 +1,22 @@
-import { IoWarningOutline } from "solid-icons/io";
-import { Button } from "./ui/button";
-import {
-    Accessor,
-    Component,
-    createSignal,
-    JSX,
-    Match,
-    Show,
-    Switch,
-} from "solid-js";
+import { Component, Match, Show, Switch } from "solid-js";
 import { Instance } from "megalodon/lib/src/entities/instance";
-import { useAuthContext } from "~/lib/auth-context";
+import { useAuth } from "~/auth/auth-manager";
 
 export interface InstanceBannerProps {
     instance: Instance;
 }
 
 export const UserInstanceBanner: Component = () => {
-    const authContext = useAuthContext();
-
-    const instance = () => {
-        if (
-            authContext.authState.signedIn &&
-            authContext.authState.signedIn.instanceData
-        ) {
-            return authContext.authState.signedIn.instanceData;
-        }
-        return undefined;
-    };
+    const auth = useAuth();
 
     return (
         <Switch>
-            <Match when={instance() !== undefined}>
-                <InstanceBanner instance={instance()!} />
+            <Match when={auth.signedIn}>
+                <InstanceBanner
+                    instance={auth.assumeSignedIn.state.instanceData}
+                />
             </Match>
-            <Match when={instance() === undefined}>
+            <Match when={!auth.signedIn}>
                 <PillbugBanner />
             </Match>
         </Switch>
