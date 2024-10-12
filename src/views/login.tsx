@@ -2,12 +2,6 @@ import { makePersisted } from "@solid-primitives/storage";
 import { useLocation, useNavigate, useSearchParams } from "@solidjs/router";
 import generator, { detector } from "megalodon";
 import { createResource, createSignal, Show, type Component } from "solid-js";
-import {
-    GetClientError,
-    tryGetUnauthenticatedClient,
-    tryGetToken,
-    AppDisplayName,
-} from "~/App";
 import { NewInstanceOauth } from "~/client/auth";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
@@ -18,15 +12,18 @@ import {
     TextFieldInput,
     TextFieldLabel,
 } from "~/components/ui/text-field";
-import { initAppFrameAsync } from "~/Frame";
-import { useAuthContext } from "~/lib/auth-context";
+import {
+    SessionAuthManager,
+    useAuthContext,
+    useSessionAuthManager,
+} from "~/lib/auth-context";
 
 const LoginView: Component = () => {
-    const authContext = useAuthContext();
+    const authManager = useSessionAuthManager();
 
     const [searchParams, setSearchParams] = useSearchParams();
 
-    const doOAuth = async () => {
+    const doOAuth = async (authManager: SessionAuthManager) => {
         if (busy()) {
             console.log(
                 "tried to enter oauth when already busy. taking no action"
@@ -35,54 +32,20 @@ const LoginView: Component = () => {
         }
         setBusy(true);
         try {
-            // Normalize Instance URL.
-            // Check for https:// or http:// at the beginning of the instance string, and add it if it's not there (assume https)
-            if (
-                !instance().startsWith("https://") &&
-                !instance().startsWith("http://")
-            ) {
-                setInstance(`https://${instance()}`);
+            const registration =
+                await authManager.createNewInstanceRegistration(instance());
+            if (registration.appData.url === null) {
+                throw new Error("Client url is null");
             }
-            // Trim trailing forward slashes.
-            setInstance(instance().replace(/\/+$/, ""));
-            // TODO: Additional normalization? I'm not sure what other ways a URL can be malformed.
-            let software = await detector(instance());
-            console.log(`detected software '${software}' on ${instance()}`);
 
-            // Set instance url and software in auth state. That's the minimum needed to get client
-            authContext.setPersistentAuthState("instanceUrl", (_) =>
-                instance()
-            ); // Replace any existing app data. Probably shouldn't be able to do this if you are signed in!
-            authContext.setPersistentAuthState(
-                "instanceSoftware",
-                (_) => software
-            );
-
-            let client = tryGetUnauthenticatedClient(authContext);
-
-            let redirect_uri = window.location.href;
-            if (window.location.search.length > 0) {
-                redirect_uri = redirect_uri.substring(
-                    0,
-                    redirect_uri.length - window.location.search.length
-                );
-            }
-            console.log(`redirect uri: ${redirect_uri}`);
-
-            let appData = await client.registerApp(AppDisplayName, {
-                redirect_uris: redirect_uri, // code will be passed as get parameter 'code'
-            });
-            if (appData === undefined || appData.url === null) {
-                setError("Failed to log in");
-                setBusy(false);
-                return;
-            }
-            authContext.setPersistentAuthState("appData", (_) => appData); // Replace any existing app data. Probably shouldn't be able to do this if you are signed in!
-            window.location.assign(appData.url);
+            // let's gooo
+            window.location.assign(registration.appData.url);
         } catch (error) {
             if (error instanceof Error) {
-                console.log(`error during login ${error.message}`);
-                setError(error.message);
+                console.log(
+                    `error during login ${error.message}\n${error.stack}`
+                );
+                setError(`${error.message}\n${error.stack}`);
                 setBusy(false);
             }
         }
@@ -95,8 +58,8 @@ const LoginView: Component = () => {
     //const [appData] = createResource(instance, doOAuth);
     const navigate = useNavigate();
 
-    const getToken = async () => {
-        if (searchParams.code !== undefined) {
+    if (searchParams.code !== undefined) {
+        const getToken = async () => {
             if (busy()) {
                 console.log(
                     "tried to enter getting token when already busy. taking no action"
@@ -109,15 +72,8 @@ const LoginView: Component = () => {
                     "trying to acquire a token using the provided code"
                 );
 
-                let authContext = useAuthContext();
-                authContext.setPersistentAuthState(
-                    "authorizationCode",
-                    searchParams.code
-                );
-                await tryGetToken(authContext);
-                console.log("got token!");
+                authManager.completeLogin(searchParams.code!);
                 setBusy(false);
-                await initAppFrameAsync(authContext);
                 navigate("/");
             } catch (error) {
                 if (error instanceof Error) {
@@ -126,9 +82,9 @@ const LoginView: Component = () => {
                     setBusy(false);
                 }
             }
-        }
-    };
-    getToken();
+        };
+        getToken();
+    }
 
     return (
         <div class="flex flex-row p-8 size-full">
@@ -142,7 +98,7 @@ const LoginView: Component = () => {
                         <form
                             onSubmit={async (ev) => {
                                 ev.preventDefault();
-                                await doOAuth();
+                                await doOAuth(authManager);
                             }}
                             noValidate={true}
                         >
@@ -160,13 +116,16 @@ const LoginView: Component = () => {
                                     readOnly={busy()}
                                 />
                             </TextField>
-                            <Button onClick={doOAuth} disabled={busy()}>
+                            <Button
+                                onClick={() => doOAuth(authManager)}
+                                disabled={busy()}
+                            >
                                 Log in
                                 {busy() && (
                                     <span class="animate-spin ml-3">🤔</span>
                                 )}
                             </Button>
-                            {error() !== undefined && <p>{error()}</p>}
+                            {error() !== undefined && <pre>{error()}</pre>}
                         </form>
                     </CardContent>
                 </Card>

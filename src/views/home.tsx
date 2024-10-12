@@ -7,20 +7,25 @@ import { Flex } from "~/components/ui/flex";
 import { Grid, Col } from "~/components/ui/grid";
 import NotSignedInLandingView from "./notsignedin";
 import Feed from "./feed";
-import { useAuthContext } from "~/lib/auth-context";
+import { useAuthContext, useSessionAuthManager } from "~/lib/auth-context";
 
 const HomeView: Component = () => {
-    const authContext = useAuthContext();
     const [busy, setBusy] = createSignal(true);
     const navigate = useNavigate();
+    const [signedOut] = createResource(async () => {
+        const authManager = useSessionAuthManager();
+        if (authManager.checkAccountsExist()) {
+            // Initialize the auth manager before bringing in other components
+            await authManager.getSignedInState();
+            navigate("/feed");
+            return false;
+        }
 
-    if (authContext.authState.signedIn) {
-        navigate("/feed");
-    } else {
         navigate("/about");
-    }
+        return true;
+    });
 
-    return <>{authContext.authState.signedIn && <div>redirecting...</div>}</>;
+    return <div>redirecting... signed out: {signedOut()}</div>;
 };
 
 export default HomeView;

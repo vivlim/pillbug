@@ -3,6 +3,7 @@ import { Button } from "./ui/button";
 import {
     Accessor,
     Component,
+    createResource,
     createSignal,
     JSX,
     Match,
@@ -10,24 +11,26 @@ import {
     Switch,
 } from "solid-js";
 import { Instance } from "megalodon/lib/src/entities/instance";
-import { useAuthContext } from "~/lib/auth-context";
+import { useAuthContext, useSessionAuthManager } from "~/lib/auth-context";
 
 export interface InstanceBannerProps {
     instance: Instance;
 }
 
 export const UserInstanceBanner: Component = () => {
-    const authContext = useAuthContext();
+    const authManager = useSessionAuthManager();
 
-    const instance = () => {
-        if (
-            authContext.authState.signedIn &&
-            authContext.authState.signedIn.instanceData
-        ) {
-            return authContext.authState.signedIn.instanceData;
+    const [instance] = createResource(async () => {
+        if (!authManager.checkAccountsExist()) {
+            return undefined;
         }
+        const signedInState = await authManager.getSignedInState();
+        if (signedInState.instanceData !== undefined) {
+            return signedInState.instanceData;
+        }
+
         return undefined;
-    };
+    });
 
     return (
         <Switch>

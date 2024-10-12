@@ -13,7 +13,7 @@ import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Flex } from "~/components/ui/flex";
 import { Grid, Col } from "~/components/ui/grid";
-import { useAuthContext } from "~/lib/auth-context";
+import { useAuthContext, useSessionAuthManager } from "~/lib/auth-context";
 
 class Feature {
     public constructor(
@@ -80,7 +80,15 @@ const features: Feature[] = [
 ];
 
 const NotSignedInLandingView: Component = () => {
-    const authContext = useAuthContext();
+    const [signedOut] = createResource(async () => {
+        const authManager = useSessionAuthManager();
+        if (authManager.checkAccountsExist()) {
+            await authManager.getSignedInState();
+            return false;
+        }
+        return true;
+    });
+
     return (
         <div class="flex flex-row p-8 size-full">
             <div class="md:grow"></div>
@@ -108,7 +116,7 @@ const NotSignedInLandingView: Component = () => {
                         </p>
                     </CardContent>
                 </Card>
-                <Show when={!authContext.authState.signedIn}>
+                <Show when={signedOut()}>
                     <Card>
                         <CardContent>
                             <p>you aren't logged in.</p>

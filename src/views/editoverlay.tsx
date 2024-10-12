@@ -5,7 +5,6 @@ import EditDialog from "./editdialog";
 import { useNavigate } from "@solidjs/router";
 
 const EditOverlay: Component = () => {
-    const authContext = useAuthContext();
     const editingOverlayContext = useEditOverlayContext();
     const navigate = useNavigate();
 
