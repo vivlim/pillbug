@@ -17,7 +17,7 @@ import {
     usePostPageContext,
 } from "~/views/postpage";
 import { Card } from "../ui/card";
-import { useAuthContext, useSessionAuthManager } from "~/lib/auth-context";
+import { useAuthContext, useAuth } from "~/lib/auth-context";
 import { Entity, MegalodonInterface } from "megalodon";
 import { isValidVisibility, PostOptions } from "~/views/editdialog";
 import { IoWarningOutline } from "solid-icons/io";
@@ -101,7 +101,7 @@ export interface NewCommentEditorProps {
 }
 
 export const NewCommentEditor: Component<NewCommentEditorProps> = (props) => {
-    const authManager = useSessionAuthManager();
+    const authManager = useAuth();
     const postPageContext = usePostPageContext();
 
     const [posted, setPosted] = createSignal(false);

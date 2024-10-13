@@ -12,7 +12,7 @@ import {
     EphemeralMaybeSignedInState,
     SessionAuthManager,
     useAuthContext,
-    useSessionAuthManager,
+    useAuth,
 } from "~/lib/auth-context";
 import { ProfileZone } from "~/components/user/profile-zone";
 import { GetTimelineOptions, PostFeed } from "~/components/post/feed";
@@ -44,7 +44,7 @@ const fetchUserInfo = async (
 };
 
 const UserProfile: Component = () => {
-    const authManager = useSessionAuthManager();
+    const authManager = useAuth();
     const params = useParams();
     const [username, setUserName] = createSignal<string>(params.username);
     const [userInfo] = createResource(

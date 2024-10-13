@@ -33,7 +33,7 @@ import {
     EphemeralSignedInState,
     SessionAuthManager,
     useAuthContext,
-    useSessionAuthManager,
+    useAuth,
 } from "./lib/auth-context";
 import { useEditOverlayContext } from "./lib/edit-overlay-context";
 import { FaSolidBars } from "solid-icons/fa";
@@ -96,7 +96,7 @@ const AvailableAccountWithAvatar: Component<{
 };
 
 const AppFrame: Component<{ children: JSX.Element }> = (props) => {
-    const authManager = useSessionAuthManager();
+    const authManager = useAuth();
     const editingOverlayContext = useEditOverlayContext();
 
     const [expandMenu, setExpandMenu] = createSignal(false);

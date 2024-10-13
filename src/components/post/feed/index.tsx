@@ -14,7 +14,7 @@ import {
     EphemeralMaybeSignedInState,
     SessionAuthManager,
     useAuthContext,
-    useSessionAuthManager,
+    useAuth,
 } from "~/lib/auth-context";
 import Post from "..";
 import { PageNav } from "~/components/ui/page-footer";
@@ -70,7 +70,7 @@ async function fetchPostList(
 }
 
 export const PostFeed: Component<PostFeedProps> = (props) => {
-    const authManager = useSessionAuthManager();
+    const authManager = useAuth();
     const [searchParams, setSearchParams] = useSearchParams();
     const [postList, listActions] = createResource(
         () => {

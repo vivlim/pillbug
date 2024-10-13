@@ -13,11 +13,11 @@ import { Flex } from "~/components/ui/flex";
 import { Grid, Col } from "~/components/ui/grid";
 import NotSignedInLandingView from "./notsignedin";
 import Feed from "./feed";
-import { useAuthContext, useSessionAuthManager } from "~/lib/auth-context";
+import { useAuthContext, useAuth } from "~/lib/auth-context";
 import { RedirectComponent } from "~/components/utility/redirect-when-displayed";
 
 const HomeView: Component = () => {
-    const authManager = useSessionAuthManager();
+    const authManager = useAuth();
 
     return (
         <Switch>

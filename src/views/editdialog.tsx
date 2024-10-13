@@ -8,11 +8,7 @@ import {
     ValidComponent,
     type Component,
 } from "solid-js";
-import {
-    AuthProviderProps,
-    useAuthContext,
-    useSessionAuthManager,
-} from "~/lib/auth-context";
+import { AuthProviderProps, useAuthContext, useAuth } from "~/lib/auth-context";
 import { Button, ButtonProps } from "~/components/ui/button";
 import {
     Dialog,
@@ -76,7 +72,7 @@ export function isValidVisibility(
 }
 
 const EditDialog: Component<EditDialogProps> = (props) => {
-    const authManager = useSessionAuthManager();
+    const authManager = useAuth();
     const editingOverlayContext = useEditOverlayContext();
     const navigate = useNavigate();
 

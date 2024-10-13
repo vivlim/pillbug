@@ -13,7 +13,7 @@ import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Flex } from "~/components/ui/flex";
 import { Grid, Col } from "~/components/ui/grid";
-import { useAuthContext, useSessionAuthManager } from "~/lib/auth-context";
+import { useAuthContext, useAuth } from "~/lib/auth-context";
 
 class Feature {
     public constructor(
@@ -81,7 +81,7 @@ const features: Feature[] = [
 
 const NotSignedInLandingView: Component = () => {
     const [signedOut] = createResource(async () => {
-        const authManager = useSessionAuthManager();
+        const authManager = useAuth();
         if (authManager.checkAccountsExist()) {
             await authManager.getSignedInState();
             return false;

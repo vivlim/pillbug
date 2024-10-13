@@ -19,7 +19,7 @@ import {
     AuthProviderProps,
     EphemeralMaybeSignedInState,
     useAuthContext,
-    useSessionAuthManager,
+    useAuth,
 } from "~/lib/auth-context";
 import { ProfileZone } from "~/components/user/profile-zone";
 import { Comment, NewCommentEditor } from "~/components/post/comments";
@@ -345,7 +345,7 @@ export function usePostPageContext(): PostPageContextValue {
 }
 
 const PostWithCommentTree: Component = () => {
-    const authManager = useSessionAuthManager();
+    const authManager = useAuth();
     const postPageContext = usePostPageContext();
     const threadInfoFetcher: ResourceFetcher<
         {

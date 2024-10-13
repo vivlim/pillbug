@@ -55,7 +55,7 @@ export interface AuthProviderProps {
 
 /** Compatibility shim for code using pre-refactor auth. */
 export function useAuthContext(): AuthProviderProps {
-    const manager = useSessionAuthManager();
+    const manager = useAuth();
     const signedInState = manager.getCachedSignedInState();
 
     return {
@@ -66,7 +66,7 @@ export function useAuthContext(): AuthProviderProps {
 
 const AppDisplayName: string = "pillbug";
 
-export function useSessionAuthManager(): SessionAuthManager {
+export function useAuth(): SessionAuthManager {
     const sessionContext = useRawSessionContext();
     return sessionContext.authManager;
 }

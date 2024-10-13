@@ -23,12 +23,12 @@ import {
     EphemeralSignedInState,
     SessionAuthManager,
     useAuthContext,
-    useSessionAuthManager,
+    useAuth,
 } from "~/lib/auth-context";
 import { useRawSessionContext, useSessionContext } from "~/lib/session-context";
 
 const LoginView: Component = () => {
-    const authManager = useSessionAuthManager();
+    const authManager = useAuth();
 
     const [searchParams, setSearchParams] = useSearchParams();
 

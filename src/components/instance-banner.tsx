@@ -11,14 +11,14 @@ import {
     Switch,
 } from "solid-js";
 import { Instance } from "megalodon/lib/src/entities/instance";
-import { useAuthContext, useSessionAuthManager } from "~/lib/auth-context";
+import { useAuthContext, useAuth } from "~/lib/auth-context";
 
 export interface InstanceBannerProps {
     instance: Instance;
 }
 
 export const UserInstanceBanner: Component = () => {
-    const authManager = useSessionAuthManager();
+    const authManager = useAuth();
 
     const [instance] = createResource(
         () => authManager.getSignedInState(),

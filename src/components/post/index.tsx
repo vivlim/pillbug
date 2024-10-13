@@ -14,11 +14,7 @@ import {
     Switch,
     type Component,
 } from "solid-js";
-import {
-    AuthProviderProps,
-    useAuthContext,
-    useSessionAuthManager,
-} from "~/lib/auth-context";
+import { AuthProviderProps, useAuthContext, useAuth } from "~/lib/auth-context";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
 import HtmlSandbox from "../../views/htmlsandbox";
@@ -208,7 +204,7 @@ async function toggleLike(
 }
 
 const Post: Component<PostProps> = (postData) => {
-    const authManager = useSessionAuthManager();
+    const authManager = useAuth();
     const [status, updateStatus] = createSignal(postData.status);
 
     const [showRaw, setShowRaw] = createSignal<boolean>(false);
