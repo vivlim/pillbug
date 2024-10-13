@@ -2,10 +2,11 @@ import generator, { detector, MegalodonInterface } from "megalodon";
 import { Account } from "megalodon/lib/src/entities/account";
 import { Instance } from "megalodon/lib/src/entities/instance";
 import OAuth from "megalodon/lib/src/oauth";
-import { createContext, createMemo, useContext } from "solid-js";
+import { createContext, createMemo, createResource, Resource, useContext } from "solid-js";
 import { produce, SetStoreFunction } from "solid-js/store";
-import { OAuthRegistration, PillbugAccount, PillbugPersistentStore, PillbugSessionContext, SessionContext, SignedInAccount, useRawSessionContext } from "./session-context";
+import { OAuthRegistration, PillbugAccount, PillbugPersistentStore, PillbugSessionContext, PillbugSessionStore, SessionContext, SignedInAccount, useRawSessionContext } from "./session-context";
 import { unwrapResponse } from "./clientUtil";
+import { PersistentStoreBacked } from "./store-backed";
 
 export interface PersistentAuthState {
     appData?: OAuth.AppData | undefined;
@@ -67,31 +68,58 @@ const AppDisplayName: string = "pillbug";
 
 export function useSessionAuthManager(): SessionAuthManager {
     const sessionContext = useRawSessionContext();
-    return new SessionAuthManager(sessionContext);
+    return sessionContext.authManager;
 }
 
-export class SessionAuthManager {
-    constructor(public readonly context: PillbugSessionContext) {
 
+export class SessionAuthManager extends PersistentStoreBacked<PillbugSessionStore, PillbugPersistentStore> {
+    /** State related to the current account, like an authenticated client if available */
+    public readonly authState: Resource<EphemeralMaybeSignedInState>;
+
+    constructor() {
+        const initialEphemeral: PillbugSessionStore = {
+            currentAccountIndex: undefined,
+        };
+        const initialPersistent: PillbugPersistentStore = {
+        }
+        super(initialEphemeral, initialPersistent, {
+            name: "pillbug-authManager"
+        });
+
+        const [authState] = createResource(
+            () => this.store.currentAccountIndex,
+            async (i) =>
+                updateAuthStateForActiveAccount(
+                    i,
+                    this.persistentStore,
+                    this.setPersistentStore
+                )
+        );
+
+        this.authState = authState;
+
+        // Now that everything's set up, change the account index if there is an account
+        if (this.persistentStore.accounts !== undefined && this.persistentStore.accounts.length > 0) {
+            this.setStore("currentAccountIndex", this.persistentStore.lastUsedAccount ?? 0);
+        }
     }
 
     public checkAccountsExist(): boolean {
-        const sessionContext = this.context;
-        if (sessionContext.persistentStore.accounts === undefined) {
+        if (this.persistentStore.accounts === undefined) {
             return false;
         }
 
-        if (sessionContext.persistentStore.accounts.length === 0) {
+        if (this.persistentStore.accounts.length === 0) {
             return false;
         }
 
         // Fix up the last used account index while we're checking for signed in status
-        let lastUsedAccount = sessionContext.persistentStore.lastUsedAccount;
+        let lastUsedAccount = this.persistentStore.lastUsedAccount;
         if (lastUsedAccount === undefined) {
-            sessionContext.setPersistentStore("lastUsedAccount", 0);
+            this.setPersistentStore("lastUsedAccount", 0);
         }
-        else if (lastUsedAccount >= sessionContext.persistentStore.accounts.length) {
-            sessionContext.setPersistentStore("lastUsedAccount", 0);
+        else if (lastUsedAccount >= this.persistentStore.accounts.length) {
+            this.setPersistentStore("lastUsedAccount", 0);
         }
 
         return true;
@@ -102,7 +130,7 @@ export class SessionAuthManager {
             return false;
         }
 
-        if (!this.context.authState()?.signedIn) {
+        if (!this.authState()?.signedIn) {
             return false;
         }
 
@@ -119,31 +147,30 @@ export class SessionAuthManager {
 
     /** Get the current cached signed in state. Throws if there is no signed in account, or the client has not been created in this session yet. */
     public getCachedSignedInState(): EphemeralMaybeSignedInState {
-        return this.context.authState() ?? { signedIn: false };
+        return this.authState() ?? { signedIn: false };
     }
 
     public getActiveAccountIndex(): number {
-        return this.context.sessionStore.currentAccountIndex ?? -1
+        return this.store.currentAccountIndex ?? -1
     }
 
     /** Get the current signed in state for this session. Throws if there is no signed in account. If the client was not created this session yet, it'll be created. */
     public getSignedInState(): EphemeralMaybeSignedInState {
-        const sessionContext = this.context;
-        return sessionContext.authState() ?? { signedIn: false }
+        return this.authState() ?? { signedIn: false }
     }
 
     public getAccountList(): SignedInAccount[] {
-        if (this.context.persistentStore.accounts === undefined) {
+        if (this.persistentStore.accounts === undefined) {
             return [];
         }
 
-        return this.context.persistentStore.accounts.filter(a => a.signedIn);
+        return this.persistentStore.accounts.filter(a => a.signedIn);
     }
 
     public switchActiveAccount(newIdx: number): void {
-        this.context.setSessionStore("currentAccountIndex", newIdx);
-        this.context.authState()
-        this.context.setPersistentStore("lastUsedAccount", newIdx);
+        this.setStore("currentAccountIndex", newIdx);
+        // ??? idk what this line was this.context.authState()
+        this.setPersistentStore("lastUsedAccount", newIdx);
     }
 
 
@@ -224,7 +251,7 @@ export class SessionAuthManager {
             };
             console.log(`Attempting to write back to persistent store a complete login for ${completeLogin.instanceUrl}`)
 
-            this.context.setPersistentStore("accounts", partialLoginIndex, (prev) => {
+            this.setPersistentStore("accounts", partialLoginIndex, (prev) => {
                 if (prev.appData.client_id !== completeLogin.appData.client_id) {
                     throw new Error("Mismatch when trying to overwrite the partially signed in account with the complete one.");
                 }
@@ -244,21 +271,20 @@ export class SessionAuthManager {
     }
 
     private appendAccount(account: PillbugAccount) {
-        const sessionContext = this.context;
-        const length: number | undefined = sessionContext.persistentStore.accounts?.length;
+        const length: number | undefined = this.persistentStore.accounts?.length;
 
         if (length === undefined) {
-            sessionContext.setPersistentStore("accounts", [account]);
-            sessionContext.setPersistentStore("lastUsedAccount", 0);
+            this.setPersistentStore("accounts", [account]);
+            this.setPersistentStore("lastUsedAccount", 0);
         } else {
             // This adds it to the end of the list in the store.
-            sessionContext.setPersistentStore("accounts", length, account);
-            sessionContext.setPersistentStore("lastUsedAccount", length);
+            this.setPersistentStore("accounts", length, account);
+            this.setPersistentStore("lastUsedAccount", length);
         }
     }
 
     private getUnfinishedLogin(): [PillbugAccount, number] {
-        const accounts = this.context.persistentStore.accounts?.slice();
+        const accounts = this.persistentStore.accounts?.slice();
         if (accounts === undefined) { throw new Error("Can't complete logging in, there are no accounts in the persistent store") }
 
         let unfinishedLogins: number[] = [];
@@ -291,7 +317,7 @@ export class SessionAuthManager {
 
         // Need to set these both at the same time. If they get out of sync, weird stuff
         console.log(`Account index: ${unfinishedLoginIndexToUse}. Accounts: ${JSON.stringify(accounts)}`)
-        this.context.setPersistentStore(produce((store) => {
+        this.setPersistentStore(produce((store) => {
             store.lastUsedAccount = unfinishedLoginIndexToUse;
             store.accounts = accounts;
         }))
@@ -326,6 +352,7 @@ function wrapToken(token: OAuth.TokenData): TokenState {
 }
 
 export async function updateAuthStateForActiveAccount(accountIndex: number, persistentStore: PillbugPersistentStore, setPersistentStore: SetStoreFunction<PillbugPersistentStore>): Promise<EphemeralMaybeSignedInState> {
+    // not sure if i need to use store fns passed in or i can use the ones belonging to this class. it is called from a resource context.
 
     if (persistentStore.accounts === undefined || persistentStore.accounts.length === 0) {
         return { signedIn: false };

@@ -5,7 +5,11 @@ import {
     Resource,
     useContext,
 } from "solid-js";
-import { EphemeralMaybeSignedInState, TokenState } from "./auth-context";
+import {
+    EphemeralMaybeSignedInState,
+    SessionAuthManager,
+    TokenState,
+} from "./auth-context";
 import { SetStoreFunction } from "solid-js/store";
 import { OAuth } from "megalodon";
 import { BlockingLoadProgressTracker } from "./blocking-load";
@@ -14,13 +18,7 @@ export const SessionContext = createContext<PillbugSessionContext>();
 
 /** Context containing stores relevant to the current session of Pillbug. */
 export interface PillbugSessionContext {
-    sessionStore: PillbugSessionStore;
-    setSessionStore: SetStoreFunction<PillbugSessionStore>;
-    authState: Resource<EphemeralMaybeSignedInState>;
-
-    persistentStore: PillbugPersistentStore;
-    setPersistentStore: SetStoreFunction<PillbugPersistentStore>;
-
+    authManager: SessionAuthManager;
     blockingLoadProgressTracker: BlockingLoadProgressTracker;
 }
 

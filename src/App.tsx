@@ -25,6 +25,7 @@ import {
     AuthProviderProps,
     EphemeralAuthState,
     PersistentAuthState,
+    SessionAuthManager,
     TokenState,
     updateAuthStateForActiveAccount,
 } from "./lib/auth-context";
@@ -86,15 +87,7 @@ const App: Component<RouteSectionProps> = (props: RouteSectionProps) => {
 
     const [showingEditorOverlay, setShowingEditorOverlay] = createSignal(false);
 
-    const [authState, setCurrentAccountIndex] = createResource(
-        () => sessionStore.currentAccountIndex,
-        async (i) =>
-            updateAuthStateForActiveAccount(
-                i,
-                persistentStore,
-                setPersistentStore
-            )
-    );
+    const authManager = new SessionAuthManager();
 
     const blockingLoadProgressTracker = new BlockingLoadProgressTracker(
         initialLoadOperations
@@ -102,17 +95,13 @@ const App: Component<RouteSectionProps> = (props: RouteSectionProps) => {
     blockingLoadProgressTracker.pushNewResourceOperation(
         "loading account state",
         "loadAccountState",
-        authState
+        authManager.authState
     );
 
     return (
         <SessionContext.Provider
             value={{
-                sessionStore,
-                setSessionStore,
-                persistentStore,
-                setPersistentStore,
-                authState,
+                authManager,
                 blockingLoadProgressTracker,
             }}
         >
