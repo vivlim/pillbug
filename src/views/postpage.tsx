@@ -359,7 +359,7 @@ const PostWithCommentTree: Component = () => {
         };
     }, threadInfoFetcher);
     return (
-        <div class="flex flex-col md:flex-row mx-1 md:mx-4 gap-4">
+        <div class="flex flex-col md:flex-row mx-1 md:mx-4 gap-4 justify-center">
             <Show
                 when={threadInfo()?.tryGetStatus() !== undefined}
                 fallback={<div>Loading</div>}

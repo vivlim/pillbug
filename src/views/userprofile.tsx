@@ -61,7 +61,7 @@ const UserProfile: Component = () => {
                 when={userInfo() != null}
                 fallback={<div>Loading user profile</div>}
             >
-                <div class="flex flex-col md:flex-row mx-1 md:mx-4 gap-4">
+                <div class="flex flex-col md:flex-row mx-1 md:mx-4 gap-4 justify-center">
                     <ProfileZone userInfo={userInfo()!} />
                     <div class="flex-grow max-w-4xl flex flex-col justify-start">
                         <PostFeed
