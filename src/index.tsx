@@ -24,6 +24,7 @@ import { lazy } from "solid-js";
 const root = document.getElementById("root");
 
 const HomeView = lazy(() => import("./views/home"));
+const SettingsFacet = lazy(() => import("./views/facets/settings"));
 
 if (import.meta.env.DEV && !(root instanceof HTMLElement)) {
     throw new Error(
@@ -88,7 +89,7 @@ render(
                     component={() => {
                         return (
                             <FacetNavigationFrame>
-                                placeholder for settings
+                                <SettingsFacet />
                             </FacetNavigationFrame>
                         );
                     }}

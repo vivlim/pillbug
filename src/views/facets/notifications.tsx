@@ -22,7 +22,7 @@ import {
     ContextMenuItem,
     ContextMenuTrigger,
 } from "~/components/ui/context-menu";
-import { AuthProviderProps, useAuthContext } from "~/lib/auth-context";
+import { AuthProviderProps, useAuthContext } from "~/lib/auth-manager";
 import { HtmlSandboxSpan } from "../htmlsandbox";
 import { Timestamp } from "~/components/post/timestamp";
 import { AvatarLink } from "~/components/user/avatar";

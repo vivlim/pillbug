@@ -1,7 +1,7 @@
 import { createSignal, type Component } from "solid-js";
 import EditDialog from "../editdialog";
 import { Button } from "~/components/ui/button";
-import { useAuthContext } from "~/lib/auth-context";
+import { useAuthContext } from "~/lib/auth-manager";
 
 const DevEditDialogPage: Component = () => {
     const authContext = useAuthContext();

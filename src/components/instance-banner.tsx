@@ -11,7 +11,7 @@ import {
     Switch,
 } from "solid-js";
 import { Instance } from "megalodon/lib/src/entities/instance";
-import { useAuthContext, useAuth } from "~/lib/auth-context";
+import { useAuthContext, useAuth } from "~/lib/auth-manager";
 
 export interface InstanceBannerProps {
     instance: Instance;

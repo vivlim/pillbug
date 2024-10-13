@@ -13,7 +13,7 @@ import {
     SessionAuthManager,
     useAuthContext,
     useAuth,
-} from "~/lib/auth-context";
+} from "~/lib/auth-manager";
 import { ProfileZone } from "~/components/user/profile-zone";
 import { GetTimelineOptions, PostFeed } from "~/components/post/feed";
 import { ErrorBox } from "~/components/error";

@@ -17,7 +17,7 @@ import {
     usePostPageContext,
 } from "~/views/postpage";
 import { Card } from "../ui/card";
-import { useAuthContext, useAuth } from "~/lib/auth-context";
+import { useAuthContext, useAuth } from "~/lib/auth-manager";
 import { Entity, MegalodonInterface } from "megalodon";
 import { isValidVisibility, PostOptions } from "~/views/editdialog";
 import { IoWarningOutline } from "solid-icons/io";

@@ -27,7 +27,7 @@ import {
     SessionAuthManager,
     useAuthContext,
     useAuth,
-} from "~/lib/auth-context";
+} from "~/lib/auth-manager";
 import {
     SignedInAccount,
     useRawSessionContext,
@@ -267,7 +267,12 @@ const ManageAccountItem: Component<{
                     <li>{account.instanceUrl}</li>
                 </ul>
             </button>
-            <button onClick={() => auth.removeAccount(index)}>log out</button>
+            <button
+                class="p-2 border-2 rounded-md hover:border-red-900"
+                onClick={() => auth.removeAccount(index)}
+            >
+                log out
+            </button>
         </li>
     );
 };

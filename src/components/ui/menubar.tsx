@@ -141,116 +141,132 @@ type MenubarItemProps<T extends ValidComponent = "div"> = MenubarPrimitive.Menub
 }
 
 const MenubarItem = <T extends ValidComponent = "div">(
-  props: PolymorphicProps<T, MenubarItemProps<T>>
+    props: PolymorphicProps<T, MenubarItemProps<T>>
 ) => {
-  const [local, others] = splitProps(props as MenubarItemProps, ["class", "inset"])
-  return (
-    <MenubarPrimitive.Item
-      class={cn(
-        "relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
-        local.inset && "pl-8",
-        local.class
-      )}
-      {...others}
-    />
-  )
-}
+    const [local, others] = splitProps(props as MenubarItemProps, [
+        "class",
+        "inset",
+    ]);
+    return (
+        <MenubarPrimitive.Item
+            class={cn(
+                "relative flex cursor-default select-none items-center rounded-sm px-2 sm:py-1.5 py-4 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+                local.inset && "pl-8",
+                local.class
+            )}
+            {...others}
+        />
+    );
+};
 
 type MenubarCheckboxItemProps<T extends ValidComponent = "div"> =
-  MenubarPrimitive.MenubarCheckboxItemProps<T> & {
-    class?: string | undefined
-    children?: JSX.Element
-  }
+    MenubarPrimitive.MenubarCheckboxItemProps<T> & {
+        class?: string | undefined;
+        children?: JSX.Element;
+    };
 
 const MenubarCheckboxItem = <T extends ValidComponent = "div">(
-  props: PolymorphicProps<T, MenubarCheckboxItemProps<T>>
+    props: PolymorphicProps<T, MenubarCheckboxItemProps<T>>
 ) => {
-  const [local, others] = splitProps(props as MenubarCheckboxItemProps, ["class", "children"])
-  return (
-    <MenubarPrimitive.CheckboxItem
-      class={cn(
-        "relative flex cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
-        local.class
-      )}
-      {...others}
-    >
-      <span class="absolute left-2 flex size-3.5 items-center justify-center">
-        <MenubarPrimitive.ItemIndicator>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            class="size-4"
-          >
-            <path d="M5 12l5 5l10 -10" />
-          </svg>
-        </MenubarPrimitive.ItemIndicator>
-      </span>
-      {local.children}
-    </MenubarPrimitive.CheckboxItem>
-  )
-}
+    const [local, others] = splitProps(props as MenubarCheckboxItemProps, [
+        "class",
+        "children",
+    ]);
+    return (
+        <MenubarPrimitive.CheckboxItem
+            class={cn(
+                "relative flex cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+                local.class
+            )}
+            {...others}
+        >
+            <span class="absolute left-2 flex size-3.5 items-center justify-center">
+                <MenubarPrimitive.ItemIndicator>
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        class="size-4"
+                    >
+                        <path d="M5 12l5 5l10 -10" />
+                    </svg>
+                </MenubarPrimitive.ItemIndicator>
+            </span>
+            {local.children}
+        </MenubarPrimitive.CheckboxItem>
+    );
+};
 
 type MenubarRadioItemProps<T extends ValidComponent = "div"> =
-  MenubarPrimitive.MenubarRadioItemProps<T> & {
-    class?: string | undefined
-    children?: JSX.Element
-  }
+    MenubarPrimitive.MenubarRadioItemProps<T> & {
+        class?: string | undefined;
+        children?: JSX.Element;
+    };
 
 const MenubarRadioItem = <T extends ValidComponent = "div">(
-  props: PolymorphicProps<T, MenubarRadioItemProps<T>>
+    props: PolymorphicProps<T, MenubarRadioItemProps<T>>
 ) => {
-  const [local, others] = splitProps(props as MenubarRadioItemProps, ["class", "children"])
-  return (
-    <MenubarPrimitive.RadioItem
-      class={cn(
-        "relative flex cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
-        local.class
-      )}
-      {...others}
-    >
-      <span class="absolute left-2 flex size-3.5 items-center justify-center">
-        <MenubarPrimitive.ItemIndicator>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            class="size-2 fill-current"
-          >
-            <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" />
-          </svg>
-        </MenubarPrimitive.ItemIndicator>
-      </span>
-      {local.children}
-    </MenubarPrimitive.RadioItem>
-  )
-}
+    const [local, others] = splitProps(props as MenubarRadioItemProps, [
+        "class",
+        "children",
+    ]);
+    return (
+        <MenubarPrimitive.RadioItem
+            class={cn(
+                "relative flex cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+                local.class
+            )}
+            {...others}
+        >
+            <span class="absolute left-2 flex size-3.5 items-center justify-center">
+                <MenubarPrimitive.ItemIndicator>
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        class="size-2 fill-current"
+                    >
+                        <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" />
+                    </svg>
+                </MenubarPrimitive.ItemIndicator>
+            </span>
+            {local.children}
+        </MenubarPrimitive.RadioItem>
+    );
+};
 
 type MenubarItemLabelProps<T extends ValidComponent = "div"> =
-  MenubarPrimitive.MenubarItemLabelProps<T> & {
-    class?: string | undefined
-    inset?: boolean
-  }
+    MenubarPrimitive.MenubarItemLabelProps<T> & {
+        class?: string | undefined;
+        inset?: boolean;
+    };
 
 const MenubarItemLabel = <T extends ValidComponent = "div">(
-  props: PolymorphicProps<T, MenubarItemLabelProps<T>>
+    props: PolymorphicProps<T, MenubarItemLabelProps<T>>
 ) => {
-  const [local, others] = splitProps(props as MenubarItemLabelProps, ["class", "inset"])
-  return (
-    <MenubarPrimitive.ItemLabel
-      class={cn("px-2 py-1.5 text-sm font-semibold", local.inset && "pl-8", local.class)}
-      {...others}
-    />
-  )
-}
+    const [local, others] = splitProps(props as MenubarItemLabelProps, [
+        "class",
+        "inset",
+    ]);
+    return (
+        <MenubarPrimitive.ItemLabel
+            class={cn(
+                "px-2 py-8 text-sm font-semibold",
+                local.inset && "pl-8",
+                local.class
+            )}
+            {...others}
+        />
+    );
+};
 
 type MenubarGroupLabelProps<T extends ValidComponent = "span"> =
   MenubarPrimitive.MenubarGroupLabelProps<T> & {

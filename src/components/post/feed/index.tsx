@@ -15,7 +15,7 @@ import {
     SessionAuthManager,
     useAuthContext,
     useAuth,
-} from "~/lib/auth-context";
+} from "~/lib/auth-manager";
 import Post from "..";
 import { PageNav } from "~/components/ui/page-footer";
 import { Button } from "~/components/ui/button";

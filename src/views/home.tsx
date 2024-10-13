@@ -13,7 +13,7 @@ import { Flex } from "~/components/ui/flex";
 import { Grid, Col } from "~/components/ui/grid";
 import NotSignedInLandingView from "./notsignedin";
 import Feed from "./feed";
-import { useAuthContext, useAuth } from "~/lib/auth-context";
+import { useAuthContext, useAuth } from "~/lib/auth-manager";
 import { RedirectComponent } from "~/components/utility/redirect-when-displayed";
 
 const HomeView: Component = () => {

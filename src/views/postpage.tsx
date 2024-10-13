@@ -20,7 +20,7 @@ import {
     EphemeralMaybeSignedInState,
     useAuthContext,
     useAuth,
-} from "~/lib/auth-context";
+} from "~/lib/auth-manager";
 import { ProfileZone } from "~/components/user/profile-zone";
 import { Comment, NewCommentEditor } from "~/components/post/comments";
 import { Card } from "~/components/ui/card";

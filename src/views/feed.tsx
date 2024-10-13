@@ -14,7 +14,7 @@ import {
     Setter,
     type Component,
 } from "solid-js";
-import { AuthProviderProps, useAuthContext } from "~/lib/auth-context";
+import { AuthProviderProps, useAuthContext } from "~/lib/auth-manager";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Flex } from "~/components/ui/flex";

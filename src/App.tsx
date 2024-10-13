@@ -28,7 +28,7 @@ import {
     SessionAuthManager,
     TokenState,
     updateAuthStateForActiveAccount,
-} from "./lib/auth-context";
+} from "./lib/auth-manager";
 import { EditingOverlayContext } from "./lib/edit-overlay-context";
 import {
     PillbugPersistentStore,
@@ -40,58 +40,22 @@ import {
     initialLoadOperations,
 } from "./lib/blocking-load";
 import { TrackedBlockingLoadComponent } from "./components/tracked-blocking-load";
+import { SettingsManager } from "./lib/settings-manager";
 
 export class GetClientError extends Error {}
 
-export const AppDisplayName: string = "pillbug";
-
-function tokenIsExpired(tokenState: TokenState): boolean {
-    const nowUtc: number = new Date().getTime();
-    if (
-        tokenState.expiresAfterTime !== null &&
-        nowUtc >= tokenState.expiresAfterTime
-    ) {
-        return true;
-    }
-    return false;
-}
-
-export async function tryGetAuthenticatedClient(
-    authContext: AuthProviderProps
-): Promise<MegalodonInterface | null> {
-    throw new Error("not yet");
-}
-
-export function logOut(authContext: AuthProviderProps) {
-    throw new Error("not yet");
-    /*
-    authContext.setPersistentAuthState("appData", undefined);
-    authContext.setPersistentAuthState("authorizationCode", undefined);
-    // authContext.setPersistentAuthState("instanceUrl", undefined); // this is inconvenient for dev
-    authContext.setPersistentAuthState("instanceSoftware", undefined);
-    authContext.setPersistentAuthState("token", undefined);
-    authContext.setAuthState("signedIn", false);
-    */
-}
-
 const App: Component<RouteSectionProps> = (props: RouteSectionProps) => {
-    const [persistentStore, setPersistentStore] = makePersisted(
-        createStore<PillbugPersistentStore>(
-            {},
-            { name: "pillbugPersistentStore" }
-        )
-    );
-    const [sessionStore, setSessionStore] = createStore<PillbugSessionStore>({
-        currentAccountIndex: persistentStore.lastUsedAccount ?? 0,
-    });
-
+    // This is where the session context gets constructed and built.
     const [showingEditorOverlay, setShowingEditorOverlay] = createSignal(false);
+
+    const settingsManager = new SettingsManager();
 
     const authManager = new SessionAuthManager();
 
     const blockingLoadProgressTracker = new BlockingLoadProgressTracker(
         initialLoadOperations
     );
+
     blockingLoadProgressTracker.pushNewResourceOperation(
         "loading account state",
         "loadAccountState",
@@ -103,6 +67,7 @@ const App: Component<RouteSectionProps> = (props: RouteSectionProps) => {
             value={{
                 authManager,
                 blockingLoadProgressTracker,
+                settingsManager,
             }}
         >
             <TrackedBlockingLoadComponent

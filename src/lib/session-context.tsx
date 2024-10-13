@@ -9,12 +9,13 @@ import {
     EphemeralMaybeSignedInState,
     SessionAuthManager,
     TokenState,
-} from "./auth-context";
+} from "./auth-manager";
 import { SetStoreFunction } from "solid-js/store";
 import { OAuth } from "megalodon";
 import { BlockingLoadProgressTracker } from "./blocking-load";
 import { Account } from "megalodon/lib/src/entities/account";
 import { Instance } from "megalodon/lib/src/entities/instance";
+import { SettingsManager } from "./settings-manager";
 
 export const SessionContext = createContext<PillbugSessionContext>();
 
@@ -22,6 +23,7 @@ export const SessionContext = createContext<PillbugSessionContext>();
 export interface PillbugSessionContext {
     authManager: SessionAuthManager;
     blockingLoadProgressTracker: BlockingLoadProgressTracker;
+    settingsManager: SettingsManager;
 }
 
 export function useSessionContext(): WrappedSessionContext {

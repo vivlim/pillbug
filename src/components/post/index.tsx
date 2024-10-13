@@ -14,7 +14,7 @@ import {
     Switch,
     type Component,
 } from "solid-js";
-import { AuthProviderProps, useAuthContext, useAuth } from "~/lib/auth-context";
+import { AuthProviderProps, useAuthContext, useAuth } from "~/lib/auth-manager";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
 import HtmlSandbox from "../../views/htmlsandbox";

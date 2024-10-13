@@ -15,7 +15,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Flex } from "~/components/ui/flex";
 import { Grid, Col } from "~/components/ui/grid";
 import HtmlSandbox, { HtmlSandboxSpan } from "./htmlsandbox";
-import { useAuthContext } from "~/lib/auth-context";
+import { useAuthContext } from "~/lib/auth-manager";
 import { Timestamp } from "~/components/post/timestamp";
 import { DateTime } from "luxon";
 import { AvatarLink } from "~/components/user/avatar";

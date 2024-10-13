@@ -17,7 +17,6 @@ import {
 import logo from "./logo.svg";
 import styles from "./App.module.css";
 import { useNavigate } from "@solidjs/router";
-import { logOut, tryGetAuthenticatedClient } from "./App";
 import {
     Menubar,
     MenubarContent,
@@ -35,7 +34,7 @@ import {
     SessionAuthManager,
     useAuthContext,
     useAuth,
-} from "./lib/auth-context";
+} from "./lib/auth-manager";
 import { useEditOverlayContext } from "./lib/edit-overlay-context";
 import { FaSolidBars } from "solid-icons/fa";
 import { AvatarImage } from "./components/user/avatar";
@@ -93,11 +92,11 @@ const AvailableAccountWithAvatar: Component<{
                 <AvatarImage
                     user={props.account.cachedAccount!}
                     imgClass="size-6"
-                    class="inline sm:mr-2"
+                    class="inline mr-2"
                     alt="Your avatar"
                 />
             </Show>
-            <span class="hidden sm:inline overflow-hidden text-ellipsis">
+            <span class="inline overflow-hidden text-ellipsis">
                 {props.account.fullAcct}
             </span>
         </>
@@ -176,19 +175,6 @@ const AppFrame: Component<{ children: JSX.Element }> = (props) => {
                                                     >
                                                         Manage Accounts
                                                     </MenubarItem>
-                                                    <MenubarSeparator />
-
-                                                    <MenubarItem
-                                                        onClick={() => {
-                                                            /*logOut(
-                                                                        authContext
-                                                                    );*/
-                                                            navigate("/");
-                                                        }}
-                                                    >
-                                                        Log out
-                                                    </MenubarItem>
-
                                                     <MenubarSeparator />
 
                                                     <MenubarItem

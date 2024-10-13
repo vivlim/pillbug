@@ -1,5 +1,6 @@
-import { Component, JSX, splitProps } from "solid-js";
+import { Component, createMemo, JSX, splitProps } from "solid-js";
 import { DateTime, FixedOffsetZone, Zone } from "luxon";
+import { useSettings } from "~/lib/settings-manager";
 
 type TimestampProvider = (ts: DateTime) => string;
 
@@ -33,8 +34,14 @@ export interface TimestampProps
 
 export const Timestamp: Component<TimestampProps> = (props) => {
     const [, rest] = splitProps(props, ["ts"]);
+    const settings = useSettings();
     // TODO: support other timestamp providers
-    const tsProvider = LocalTz;
+    const tsProvider = createMemo(() => {
+        if (settings.getPersistent().useInternetTime) {
+            return InternetTime;
+        }
+        return LocalTz;
+    });
     const longString = props.ts.toLocaleString({
         month: "long",
         day: "numeric",
@@ -45,7 +52,7 @@ export const Timestamp: Component<TimestampProps> = (props) => {
 
     return (
         <span title={longString} {...rest}>
-            {tsProvider(props.ts)}
+            {tsProvider()(props.ts)}
         </span>
     );
 };
