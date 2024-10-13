@@ -8,7 +8,7 @@ import {
     type Component,
 } from "solid-js";
 import {
-    EphemeralMaybeSignedInState,
+    MaybeSignedInState,
     SessionAuthManager,
     useAuth,
 } from "~/lib/auth-manager";
@@ -24,7 +24,7 @@ interface GetAccountFeedOptions extends Omit<GetTimelineOptions, "local"> {
 }
 
 const fetchUserInfo = async (
-    signedInState: EphemeralMaybeSignedInState,
+    signedInState: MaybeSignedInState,
     username: string
 ) => {
     if (!signedInState?.signedIn) {

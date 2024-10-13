@@ -35,6 +35,13 @@ const FeatureListItem: Component<{ feature: Feature }> = (props) => {
 };
 
 const features: Feature[] = [
+    new Feature("Sharing posts", false),
+    new Feature("Searching for posts and users", false),
+    new Feature("Tagging other users in posts", false),
+    new Feature("Attaching images to new posts", false),
+    new Feature("Using custom emoji in posts", false),
+    new Feature("Previewing posts", false),
+    new Feature("Content filtering rules", false),
     new Feature("Interpreting replies as 'comments'", true),
     new Feature(
         "Interpreting boosts as shares without additional content",
@@ -49,17 +56,14 @@ const features: Feature[] = [
         "an inconsistent number of posts are shown on each page, because replies are hidden",
     ]),
     new Feature("Viewing notifications", true),
-    new Feature("Searching for posts and users", false),
     new Feature("Viewing profiles", true),
     new Feature("Writing new posts", true),
     new Feature("Favoriting posts", true),
-    new Feature("Sharing posts", false),
-    new Feature("Replying to 'comments'", false),
-    new Feature("Attaching images to new posts", false),
+    new Feature("Replying to 'comments'", true),
     new Feature("Viewing images attached to posts", true),
     new Feature("Content warnings shown when viewing posts", true),
-    new Feature("Custom emoji shown", false),
-    new Feature("Multiple accounts", false),
+    new Feature("Custom emoji shown", true),
+    new Feature("Multiple accounts", true),
     new Feature(
         "Right clicking the bottom of a post to see its raw json",
         true,
@@ -99,7 +103,14 @@ const NotSignedInLandingView: Component = () => {
                 <Show when={!auth.signedIn}>
                     <Card>
                         <CardContent>
+                            <CardTitle>log in</CardTitle>
+                        </CardContent>
+                        <CardContent>
                             <p>you aren't logged in.</p>
+                            <p>
+                                ℹ️ note: following the addition of multiple
+                                accounts, you will have to log in again. sorry!
+                            </p>
                             <p>
                                 <A href="/login" class="underline">
                                     Log in

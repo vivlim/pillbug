@@ -1,9 +1,9 @@
 import { produce, reconcile } from "solid-js/store";
 import { PersistentStoreBacked } from "./store-backed";
-import { useRawSessionContext } from "./session-context";
+import { useSessionContext } from "./session-context";
 
 export function useSettings(): SettingsManager {
-    const sessionContext = useRawSessionContext();
+    const sessionContext = useSessionContext();
     return sessionContext.settingsManager;
 }
 

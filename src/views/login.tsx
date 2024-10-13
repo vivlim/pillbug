@@ -88,8 +88,6 @@ const LoginView: Component = () => {
         getToken();
     }
 
-    const auth = useAuth();
-
     return (
         <div class="flex flex-row p-8 size-full">
             <div class="md:grow"></div>

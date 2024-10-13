@@ -1,38 +1,10 @@
-import {
-    Accessor,
-    createContext,
-    createMemo,
-    createResource,
-    createSignal,
-    Setter,
-    useContext,
-    type Component,
-} from "solid-js";
+import { createSignal, type Component } from "solid-js";
 
-import logo from "./logo.svg";
-import styles from "./App.module.css";
-import HomeView from "./views/home";
-import { createStore, SetStoreFunction } from "solid-js/store";
-import { RouteProps, RouteSectionProps, useNavigate } from "@solidjs/router";
-import OAuth from "megalodon/lib/src/oauth";
-import { makePersisted } from "@solid-primitives/storage";
-import generator, { MegalodonInterface } from "megalodon";
+import { RouteSectionProps } from "@solidjs/router";
 import AppFrame from "./Frame";
-import { Instance } from "megalodon/lib/src/entities/instance";
-import { Account } from "megalodon/lib/src/entities/account";
-import {
-    EphemeralAuthState,
-    PersistentAuthState,
-    SessionAuthManager,
-    TokenState,
-    updateAuthStateForActiveAccount,
-} from "./lib/auth-manager";
+import { SessionAuthManager } from "./lib/auth-manager";
 import { EditingOverlayContext } from "./lib/edit-overlay-context";
-import {
-    PillbugPersistentStore,
-    PillbugSessionStore,
-    SessionContext,
-} from "./lib/session-context";
+import { SessionContext } from "./lib/session-context";
 import {
     BlockingLoadProgressTracker,
     initialLoadOperations,

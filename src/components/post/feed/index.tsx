@@ -9,7 +9,7 @@ import {
     ErrorBoundary,
     For,
 } from "solid-js";
-import { EphemeralMaybeSignedInState, useAuth } from "~/lib/auth-manager";
+import { MaybeSignedInState, useAuth } from "~/lib/auth-manager";
 import Post from "..";
 import { PageNav } from "~/components/ui/page-footer";
 import { Button } from "~/components/ui/button";
@@ -27,7 +27,7 @@ interface GetTimelineOptionsApi {
 export interface GetTimelineOptions extends GetTimelineOptionsApi {}
 
 type RequestHandler = (
-    signedInState: EphemeralMaybeSignedInState,
+    signedInState: MaybeSignedInState,
     timelineOptions: GetTimelineOptions
 ) => Promise<Response<Array<Status>> | undefined> | undefined;
 
@@ -38,7 +38,7 @@ export interface PostFeedProps {
 
 async function fetchPostList(
     handler: RequestHandler,
-    signedInState: EphemeralMaybeSignedInState,
+    signedInState: MaybeSignedInState,
     timelineOptions: GetTimelineOptions
 ) {
     console.log(

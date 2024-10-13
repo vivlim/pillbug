@@ -6,7 +6,7 @@ import {
     useContext,
 } from "solid-js";
 import {
-    EphemeralMaybeSignedInState,
+    MaybeSignedInState,
     SessionAuthManager,
     TokenState,
 } from "./auth-manager";
@@ -26,13 +26,7 @@ export interface PillbugSessionContext {
     settingsManager: SettingsManager;
 }
 
-export function useSessionContext(): WrappedSessionContext {
-    return new WrappedSessionContext(() => {
-        return useRawSessionContext();
-    });
-}
-
-export function useRawSessionContext(): PillbugSessionContext {
+export function useSessionContext(): PillbugSessionContext {
     const value = useContext(SessionContext);
     if (value === undefined) {
         throw new Error("useSessionContext() must be used within a provider");

@@ -4,7 +4,7 @@ import { Instance } from "megalodon/lib/src/entities/instance";
 import OAuth from "megalodon/lib/src/oauth";
 import { createContext, createMemo, createResource, Resource, useContext } from "solid-js";
 import { produce, SetStoreFunction } from "solid-js/store";
-import { OAuthRegistration, PillbugAccount, PillbugPersistentStore, PillbugSessionContext, PillbugSessionStore, SessionContext, SignedInAccount, useRawSessionContext } from "./session-context";
+import { OAuthRegistration, PillbugAccount, PillbugPersistentStore, PillbugSessionContext, PillbugSessionStore, SessionContext, SignedInAccount, useSessionContext } from "./session-context";
 import { unwrapResponse } from "./clientUtil";
 import { PersistentStoreBacked } from "./store-backed";
 
@@ -22,13 +22,9 @@ export interface PersistentAuthState {
     token?: TokenState | undefined;
 }
 
-export interface EphemeralAuthState {
-    signedIn: EphemeralMaybeSignedInState; // TODO rename this
-}
+export type MaybeSignedInState = SignedInState | SignedOutState | null;
 
-export type EphemeralMaybeSignedInState = EphemeralSignedInState | NotSignedInState | null;
-
-export interface EphemeralSignedInState {
+export interface SignedInState {
     authenticatedClient: MegalodonInterface;
     instanceData: Instance;
     accountData: Account;
@@ -36,7 +32,7 @@ export interface EphemeralSignedInState {
     signedIn: true;
 }
 
-export interface NotSignedInState {
+export interface SignedOutState {
     signedIn: false;
 }
 
@@ -48,7 +44,7 @@ export interface TokenState {
 const AppDisplayName: string = "pillbug";
 
 export function useAuth(): SessionAuthManager {
-    const sessionContext = useRawSessionContext();
+    const sessionContext = useSessionContext();
     return sessionContext.authManager;
 }
 
@@ -66,7 +62,7 @@ export class SessionAuthManagerAssumingSignedIn {
         return client;
     }
 
-    public get state(): EphemeralSignedInState {
+    public get state(): SignedInState {
         const state = this.auth.state;
         if (!state.signedIn) {
             throw new Error("Called signedInState() without being signed in")
@@ -78,7 +74,7 @@ export class SessionAuthManagerAssumingSignedIn {
 
 export class SessionAuthManager extends PersistentStoreBacked<PillbugSessionStore, PillbugPersistentStore> {
     /** State related to the current account, like an authenticated client if available */
-    public readonly authState: Resource<EphemeralMaybeSignedInState>;
+    public readonly authState: Resource<MaybeSignedInState>;
 
     /** Gets a subset of the auth manager api that assumes you are signed in (and throws if you aren't) so you don't need to assert types everywhere. */
     public readonly assumeSignedIn: SessionAuthManagerAssumingSignedIn;
@@ -116,7 +112,7 @@ export class SessionAuthManager extends PersistentStoreBacked<PillbugSessionStor
     }
 
     /** Reactive state related to the currently active account. */
-    public get state(): EphemeralSignedInState | NotSignedInState {
+    public get state(): SignedInState | SignedOutState {
         return this.authState() ?? { signedIn: false };
     }
 
@@ -387,7 +383,7 @@ function wrapToken(token: OAuth.TokenData): TokenState {
     return tokenState;
 }
 
-export async function updateAuthStateForActiveAccount(accountIndex: number, persistentStore: PillbugPersistentStore, setPersistentStore: SetStoreFunction<PillbugPersistentStore>): Promise<EphemeralMaybeSignedInState> {
+export async function updateAuthStateForActiveAccount(accountIndex: number, persistentStore: PillbugPersistentStore, setPersistentStore: SetStoreFunction<PillbugPersistentStore>): Promise<MaybeSignedInState> {
     // not sure if i need to use store fns passed in or i can use the ones belonging to this class. it is called from a resource context.
 
     if (persistentStore.accounts === undefined || persistentStore.accounts.length === 0) {
