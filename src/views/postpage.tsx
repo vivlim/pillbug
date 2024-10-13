@@ -366,7 +366,7 @@ const PostWithCommentTree: Component = () => {
             >
                 <ProfileZone userInfo={threadInfo()!.tryGetStatus()!.account} />
             </Show>
-            <div class="grow flex flex-col justify-start">
+            <div class="flex-grow max-w-4xl flex flex-col justify-start">
                 <ErrorBoundary fallback={(err) => err}>
                     <Switch>
                         <Match when={threadInfo.loading}>
