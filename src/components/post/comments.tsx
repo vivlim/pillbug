@@ -175,13 +175,13 @@ export const NewCommentEditor: Component<NewCommentEditorProps> = (props) => {
         <form
             onsubmit={async (ev) => {
                 ev.preventDefault();
-                if (!authManager.checkSignedIn()) {
+                if (!authManager.signedIn) {
                     pushError("Can't post if you're not logged in!");
                     return;
                 }
 
                 setBusy(true);
-                const client = await authManager.getAuthenticatedClientAsync();
+                const client = await authManager.assumeSignedIn.client;
                 const post_id = await sendPost(client);
                 if (post_id) {
                     setPostId(post_id);

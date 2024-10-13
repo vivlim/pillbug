@@ -95,40 +95,21 @@ const LoginView: Component = () => {
         getToken();
     }
 
-    const store = useRawSessionContext();
+    const auth = useAuth();
 
     return (
         <div class="flex flex-row p-8 size-full">
             <div class="md:grow"></div>
             <div class="grow w-max md:w-1/2 place-self">
-                <Show when={authManager.checkSignedIn()}>
+                <Show when={authManager.signedIn}>
                     <Card>
                         <CardHeader>switch account</CardHeader>
                         <CardContent>
                             <div>
                                 Active id
-                                {store.sessionStore.currentAccountIndex}
-                                {authManager.getActiveAccountIndex()}
+                                {auth.currentAccountIndex}
                             </div>
-                            <Show
-                                when={
-                                    authManager.getCachedSignedInState()
-                                        ?.signedIn
-                                }
-                            >
-                                <div>
-                                    {
-                                        (
-                                            authManager.getCachedSignedInState() as EphemeralSignedInState
-                                        ).domain
-                                    }
-                                    {
-                                        (
-                                            store.authState() as EphemeralSignedInState
-                                        ).domain
-                                    }
-                                </div>
-                            </Show>
+                            <div>{auth.assumeSignedIn.state.domain}</div>
                             <ul>
                                 <For each={authManager.getAccountList()}>
                                     {(a, idx) => (

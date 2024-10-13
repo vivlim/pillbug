@@ -127,14 +127,16 @@ const AppFrame: Component<{ children: JSX.Element }> = (props) => {
                             </div>
                             <div class="flex-1" />
                             <Switch>
-                                <Match when={authManager.checkSignedIn()}>
+                                <Match when={authManager.signedIn}>
                                     <div class="flex-0">
                                         <Menubar>
                                             <MenubarMenu>
                                                 <MenubarTrigger>
                                                     <CurrentAccountWithAvatar
                                                         signInState={
-                                                            authManager.getSignedInState() as EphemeralSignedInState
+                                                            authManager
+                                                                .assumeSignedIn
+                                                                .state
                                                         }
                                                     />
                                                 </MenubarTrigger>
@@ -233,12 +235,7 @@ const AppFrame: Component<{ children: JSX.Element }> = (props) => {
                                         </Button>
                                     </div>
                                 </Match>
-                                <Match
-                                    when={
-                                        authManager.checkAccountsExist() ===
-                                        false
-                                    }
-                                >
+                                <Match when={authManager.accountCount === 0}>
                                     <div class="flex-0 py-4">
                                         <Button
                                             onClick={() =>
@@ -255,9 +252,7 @@ const AppFrame: Component<{ children: JSX.Element }> = (props) => {
                         </div>
                     </div>
                 </div>
-                <Show when={authManager.getCachedSignedInState()}>
-                    {props.children}
-                </Show>
+                {props.children}
             </div>
         </ExpandMenuSignalContext.Provider>
     );

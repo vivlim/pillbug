@@ -59,16 +59,13 @@ export const FacetNavigationFrame: Component<{ children: JSX.Element }> = (
 ) => {
     const authManager = useAuth();
 
-    const [profileUrl] = createResource(async () => {
-        const state = await authManager.getSignedInState();
-        if (state?.signedIn) {
-            return `/user/${state.accountData.acct}`;
+    const profileUrl = () => {
+        if (authManager.signedIn) {
+            return `/user/${authManager.assumeSignedIn.state.accountData.acct}`;
         }
         return undefined;
-    });
+    };
 
-    const location = useLocation();
-    const navigate = useNavigate();
     const expandMenuContext = useExpandMenuSignalContext();
 
     return (

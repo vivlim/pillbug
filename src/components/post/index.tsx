@@ -242,17 +242,14 @@ const Post: Component<PostProps> = (postData) => {
                                 </ContextMenuItem>
                             </ContextMenuContent>
                         </ContextMenu>
-                        <Show when={authManager.checkSignedIn()}>
+                        <Show when={authManager.signedIn}>
                             <Button
                                 variant="ghost"
                                 class="hover:bg-transparent p-0"
                                 aria-label="Like Post"
                                 onClick={async () => {
-                                    const client =
-                                        await authManager.getAuthenticatedClientAsync();
-
                                     const updated = await toggleLike(
-                                        client,
+                                        authManager.assumeSignedIn.client,
                                         status()
                                     );
                                     updateStatus(updated);

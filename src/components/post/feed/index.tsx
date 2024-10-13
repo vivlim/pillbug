@@ -75,7 +75,7 @@ export const PostFeed: Component<PostFeedProps> = (props) => {
     const [postList, listActions] = createResource(
         () => {
             return {
-                signedInState: authManager.getSignedInState(),
+                signedInState: authManager.state,
                 options: {
                     local: false,
                     limit: 25,

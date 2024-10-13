@@ -21,10 +21,10 @@ const HomeView: Component = () => {
 
     return (
         <Switch>
-            <Match when={authManager.checkSignedIn()}>
+            <Match when={authManager.signedIn}>
                 <RedirectComponent redirectTarget="/feed" doRedirect={true} />
             </Match>
-            <Match when={!authManager.checkSignedIn()}>
+            <Match when={!authManager.signedIn}>
                 <RedirectComponent redirectTarget="/about" doRedirect={true} />
             </Match>
         </Switch>

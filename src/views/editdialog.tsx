@@ -154,7 +154,7 @@ const EditDialog: Component<EditDialogProps> = (props) => {
                 <form
                     onsubmit={async (ev) => {
                         ev.preventDefault();
-                        if (!authManager.checkAccountsExist()) {
+                        if (!authManager.signedIn) {
                             pushError(
                                 "Can't post if there are no accounts logged in."
                             );
@@ -162,8 +162,7 @@ const EditDialog: Component<EditDialogProps> = (props) => {
                         }
 
                         setBusy(true);
-                        const client =
-                            await authManager.getAuthenticatedClientAsync();
+                        const client = await authManager.assumeSignedIn.client;
                         const post_id = await sendPost(client);
                         if (post_id) {
                             setPostId(post_id);

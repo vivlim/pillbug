@@ -359,7 +359,7 @@ const PostWithCommentTree: Component = () => {
     const [threadInfo, mutateThreadInfo] = createResource(() => {
         return {
             loadProps: postPageContext.loadProps[0](),
-            signedInState: authManager.getSignedInState(),
+            signedInState: authManager.state,
         };
     }, threadInfoFetcher);
     return (

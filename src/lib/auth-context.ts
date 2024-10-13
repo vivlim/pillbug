@@ -56,7 +56,7 @@ export interface AuthProviderProps {
 /** Compatibility shim for code using pre-refactor auth. */
 export function useAuthContext(): AuthProviderProps {
     const manager = useAuth();
-    const signedInState = manager.getCachedSignedInState();
+    const signedInState = manager.state;
 
     return {
         authState: { signedIn: signedInState }
@@ -71,10 +71,36 @@ export function useAuth(): SessionAuthManager {
     return sessionContext.authManager;
 }
 
+/** A subset of the auth manager api that assumes you are signed in, so you don't need to assert types when inside of a signedIn guard. Throws when used if you aren't */
+export class SessionAuthManagerAssumingSignedIn {
+    constructor(private readonly auth: SessionAuthManager) {
+
+    }
+
+    public get client(): MegalodonInterface {
+        const client = this.auth.client
+        if (!client) {
+            throw new Error("Not signed in")
+        }
+        return client;
+    }
+
+    public get state(): EphemeralSignedInState {
+        const state = this.auth.state;
+        if (!state.signedIn) {
+            throw new Error("Called signedInState() without being signed in")
+        }
+        return state;
+    }
+
+}
 
 export class SessionAuthManager extends PersistentStoreBacked<PillbugSessionStore, PillbugPersistentStore> {
     /** State related to the current account, like an authenticated client if available */
     public readonly authState: Resource<EphemeralMaybeSignedInState>;
+
+    /** Gets a subset of the auth manager api that assumes you are signed in (and throws if you aren't) so you don't need to assert types everywhere. */
+    public readonly assumeSignedIn: SessionAuthManagerAssumingSignedIn;
 
     constructor() {
         const initialEphemeral: PillbugSessionStore = {
@@ -102,15 +128,40 @@ export class SessionAuthManager extends PersistentStoreBacked<PillbugSessionStor
         if (this.persistentStore.accounts !== undefined && this.persistentStore.accounts.length > 0) {
             this.setStore("currentAccountIndex", this.persistentStore.lastUsedAccount ?? 0);
         }
+
+        this.assumeSignedIn = new SessionAuthManagerAssumingSignedIn(this);
     }
 
-    public checkAccountsExist(): boolean {
-        if (this.persistentStore.accounts === undefined) {
+    public get currentAccountIndex() {
+        return this.store.currentAccountIndex;
+    }
+
+    /** Reactive state related to the currently active account. */
+    public get state(): EphemeralSignedInState | NotSignedInState {
+        return this.authState() ?? { signedIn: false };
+    }
+
+    /** Get state, assuming that we're logged in. Usages of this should be guarded by signedIn checks. */
+
+    public get signedIn(): boolean {
+        if (this.accountCount === 0) {
             return false;
         }
 
-        if (this.persistentStore.accounts.length === 0) {
+        if (!this.state.signedIn) {
             return false;
+        }
+
+        return true;
+    }
+
+    public get accountCount(): number {
+        if (this.persistentStore.accounts === undefined) {
+            return 0;
+        }
+
+        if (this.persistentStore.accounts.length === 0) {
+            return 0;
         }
 
         // Fix up the last used account index while we're checking for signed in status
@@ -122,41 +173,14 @@ export class SessionAuthManager extends PersistentStoreBacked<PillbugSessionStor
             this.setPersistentStore("lastUsedAccount", 0);
         }
 
-        return true;
+        return this.persistentStore.accounts.length;
     }
 
-    public checkSignedIn(): boolean {
-        if (!this.checkAccountsExist()) {
-            return false;
-        }
-
-        if (!this.authState()?.signedIn) {
-            return false;
-        }
-
-        return true;
-    }
-
-    public getAuthenticatedClientAsync(): MegalodonInterface | undefined {
-        const state = this.getSignedInState();
-        if (!state?.signedIn) {
+    public get client(): MegalodonInterface | undefined {
+        if (!this.state.signedIn) {
             return undefined;
         }
-        return state.authenticatedClient;
-    }
-
-    /** Get the current cached signed in state. Throws if there is no signed in account, or the client has not been created in this session yet. */
-    public getCachedSignedInState(): EphemeralMaybeSignedInState {
-        return this.authState() ?? { signedIn: false };
-    }
-
-    public getActiveAccountIndex(): number {
-        return this.store.currentAccountIndex ?? -1
-    }
-
-    /** Get the current signed in state for this session. Throws if there is no signed in account. If the client was not created this session yet, it'll be created. */
-    public getSignedInState(): EphemeralMaybeSignedInState {
-        return this.authState() ?? { signedIn: false }
+        return this.state.authenticatedClient;
     }
 
     public getAccountList(): SignedInAccount[] {
@@ -172,7 +196,6 @@ export class SessionAuthManager extends PersistentStoreBacked<PillbugSessionStor
         // ??? idk what this line was this.context.authState()
         this.setPersistentStore("lastUsedAccount", newIdx);
     }
-
 
     public async createNewInstanceRegistration(instance: string): Promise<OAuthRegistration> {
 

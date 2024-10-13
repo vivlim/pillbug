@@ -80,15 +80,7 @@ const features: Feature[] = [
 ];
 
 const NotSignedInLandingView: Component = () => {
-    const [signedOut] = createResource(async () => {
-        const authManager = useAuth();
-        if (authManager.checkAccountsExist()) {
-            await authManager.getSignedInState();
-            return false;
-        }
-        return true;
-    });
-
+    const authManager = useAuth();
     return (
         <div class="flex flex-row p-8 size-full">
             <div class="md:grow"></div>
@@ -116,7 +108,7 @@ const NotSignedInLandingView: Component = () => {
                         </p>
                     </CardContent>
                 </Card>
-                <Show when={signedOut()}>
+                <Show when={!authManager.signedIn}>
                     <Card>
                         <CardContent>
                             <p>you aren't logged in.</p>

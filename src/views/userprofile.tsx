@@ -51,7 +51,7 @@ const UserProfile: Component = () => {
         () => {
             return {
                 username: username,
-                signedInState: authManager.getSignedInState(),
+                signedInState: authManager.state,
             };
         },
         (args) => fetchUserInfo(args.signedInState, args.username())

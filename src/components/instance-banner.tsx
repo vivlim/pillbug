@@ -20,26 +20,14 @@ export interface InstanceBannerProps {
 export const UserInstanceBanner: Component = () => {
     const authManager = useAuth();
 
-    const [instance] = createResource(
-        () => authManager.getSignedInState(),
-        async (authState) => {
-            if (!authManager.checkAccountsExist()) {
-                return undefined;
-            }
-            if (authState?.signedIn) {
-                return authState.instanceData;
-            }
-
-            return undefined;
-        }
-    );
-
     return (
         <Switch>
-            <Match when={instance() !== undefined}>
-                <InstanceBanner instance={instance()!} />
+            <Match when={authManager.signedIn}>
+                <InstanceBanner
+                    instance={authManager.assumeSignedIn.state.instanceData}
+                />
             </Match>
-            <Match when={instance() === undefined}>
+            <Match when={!authManager.signedIn}>
                 <PillbugBanner />
             </Match>
         </Switch>
