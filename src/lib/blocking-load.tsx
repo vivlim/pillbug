@@ -1,5 +1,6 @@
 import { createEffect, Resource } from "solid-js";
 import { createStore, SetStoreFunction } from "solid-js/store";
+import { StoreBacked } from "./store-backed";
 
 export interface LoadingOperation {
     label: string;
@@ -19,20 +20,12 @@ interface ProgressTrackerState {
 }
 
 /** Reactive container for multiple operations that should block loading */
-export class BlockingLoadProgressTracker {
-    private readonly store: ProgressTrackerState;
-    private readonly setStore: SetStoreFunction<ProgressTrackerState>;
-
+export class BlockingLoadProgressTracker extends StoreBacked<ProgressTrackerState> {
     constructor(initialOperations: LoadingOperation[]) {
         if (initialOperations === undefined) {
             throw new Error("A list of operations was not passed in");
         }
-
-        const [store, setStore] = createStore<ProgressTrackerState>({
-            operations: initialOperations,
-        });
-        this.store = store;
-        this.setStore = setStore;
+        super({ operations: initialOperations.slice() });
     }
 
     public pushNewOperation(label: string, key: string) {
