@@ -34,6 +34,11 @@ import {
     PillbugSessionStore,
     SessionContext,
 } from "./lib/session-context";
+import {
+    BlockingLoadProgressTracker,
+    initialLoadOperations,
+} from "./lib/blocking-load";
+import { TrackedBlockingLoadComponent } from "./components/tracked-blocking-load";
 
 export class GetClientError extends Error {}
 
@@ -83,12 +88,21 @@ const App: Component<RouteSectionProps> = (props: RouteSectionProps) => {
 
     const [authState, setCurrentAccountIndex] = createResource(
         () => sessionStore.currentAccountIndex,
-        (i) =>
+        async (i) =>
             updateAuthStateForActiveAccount(
                 i,
                 persistentStore,
                 setPersistentStore
             )
+    );
+
+    const blockingLoadProgressTracker = new BlockingLoadProgressTracker(
+        initialLoadOperations
+    );
+    blockingLoadProgressTracker.pushNewResourceOperation(
+        "loading account state",
+        "loadAccountState",
+        authState
     );
 
     return (
@@ -99,16 +113,22 @@ const App: Component<RouteSectionProps> = (props: RouteSectionProps) => {
                 persistentStore,
                 setPersistentStore,
                 authState,
+                blockingLoadProgressTracker,
             }}
         >
-            <EditingOverlayContext.Provider
-                value={{
-                    showingEditorOverlay: showingEditorOverlay,
-                    setShowingEditorOverlay: setShowingEditorOverlay,
-                }}
+            <TrackedBlockingLoadComponent
+                tracker={blockingLoadProgressTracker}
+                loadingCardClass="m-8"
             >
-                <AppFrame>{props.children}</AppFrame>
-            </EditingOverlayContext.Provider>
+                <EditingOverlayContext.Provider
+                    value={{
+                        showingEditorOverlay: showingEditorOverlay,
+                        setShowingEditorOverlay: setShowingEditorOverlay,
+                    }}
+                >
+                    <AppFrame>{props.children}</AppFrame>
+                </EditingOverlayContext.Provider>
+            </TrackedBlockingLoadComponent>
         </SessionContext.Provider>
     );
 };

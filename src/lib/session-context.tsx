@@ -1,7 +1,14 @@
-import { Accessor, createContext, Resource, useContext } from "solid-js";
+import {
+    Accessor,
+    createContext,
+    createSignal,
+    Resource,
+    useContext,
+} from "solid-js";
 import { EphemeralMaybeSignedInState, TokenState } from "./auth-context";
 import { SetStoreFunction } from "solid-js/store";
 import { OAuth } from "megalodon";
+import { BlockingLoadProgressTracker } from "./blocking-load";
 
 export const SessionContext = createContext<PillbugSessionContext>();
 
@@ -13,6 +20,8 @@ export interface PillbugSessionContext {
 
     persistentStore: PillbugPersistentStore;
     setPersistentStore: SetStoreFunction<PillbugPersistentStore>;
+
+    blockingLoadProgressTracker: BlockingLoadProgressTracker;
 }
 
 export function useSessionContext(): WrappedSessionContext {
