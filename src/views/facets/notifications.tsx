@@ -262,3 +262,4 @@ export const NotificationsFacet: Component = () => {
         </ul>
     );
 };
+export default NotificationsFacet;

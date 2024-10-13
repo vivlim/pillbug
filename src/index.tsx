@@ -2,29 +2,30 @@
 import { ErrorBoundary, render } from "solid-js/web";
 
 import "./index.css";
-import App from "./App";
 import { Route, Router } from "@solidjs/router";
-import LoginView from "./views/login";
-import ErrorView from "./views/error";
-import UserProfile from "./views/userprofile";
-import PostPage from "./views/postpage";
-import DevEditDialogPage from "./views/dev/editdialogpage";
-import Feed from "./views/feed";
-import NotSignedInLandingView from "./views/notsignedin";
-import { FacetNavigationFrame } from "./views/facetnavigation";
-import { NotificationsFacet } from "./views/facets/notifications";
 
 import "@fontsource/atkinson-hyperlegible/400.css";
 import "@fontsource/atkinson-hyperlegible/700.css";
 import "@fontsource/atkinson-hyperlegible/400-italic.css";
 import "@fontsource/atkinson-hyperlegible/700-italic.css";
-import { ErrorBox } from "./components/error";
 import { lazy } from "solid-js";
 
 const root = document.getElementById("root");
 
+// Lazy import different views to allow code splitting
+const App = lazy(() => import("./App"));
 const HomeView = lazy(() => import("./views/home"));
 const SettingsFacet = lazy(() => import("./views/facets/settings"));
+const NotificationsFacet = lazy(() => import("./views/facets/notifications"));
+const AboutPillbugView = lazy(() => import("./views/aboutpillbug"));
+const Feed = lazy(() => import("./views/feed"));
+const UserProfile = lazy(() => import("./views/userprofile"));
+const LoginView = lazy(() => import("./views/login"));
+const PostPage = lazy(() => import("./views/postpage"));
+const DevEditDialogPage = lazy(() => import("./views/dev/editdialogpage"));
+const FacetNavigationFrame = lazy(() => import("./views/facetnavigation"));
+const ErrorBox = lazy(() => import("./components/error"));
+const ErrorView = lazy(() => import("./views/error"));
 
 if (import.meta.env.DEV && !(root instanceof HTMLElement)) {
     throw new Error(
@@ -94,7 +95,7 @@ render(
                         );
                     }}
                 />
-                <Route path="/about" component={NotSignedInLandingView} />
+                <Route path="/about" component={AboutPillbugView} />
                 <Route path="/login" component={LoginView} />
                 <Route path="/user/:username" component={UserProfile} />
                 <Route path="/post/:postId" component={PostPage} />

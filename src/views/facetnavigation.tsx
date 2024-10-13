@@ -120,3 +120,5 @@ export const FacetNavigationFrame: Component<{ children: JSX.Element }> = (
         </div>
     );
 };
+
+export default FacetNavigationFrame;

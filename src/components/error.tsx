@@ -1,12 +1,6 @@
-import { Component, createSignal, JSX, Match, Show, Switch } from "solid-js";
+import { Component, JSX, Match, Switch } from "solid-js";
 import { TextField, TextFieldTextArea } from "./ui/text-field";
-import {
-    Card,
-    CardContent,
-    CardFooter,
-    CardHeader,
-    CardTitle,
-} from "./ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 
 export interface ErrorBoxProps {
     error: any;
@@ -67,3 +61,5 @@ const InnerErrorBox: Component<{ error: Error; description: string }> = (
         </Card>
     );
 };
+
+export default ErrorBox;
