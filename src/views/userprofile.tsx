@@ -63,7 +63,7 @@ const UserProfile: Component = () => {
             >
                 <div class="flex flex-col md:flex-row mx-1 md:mx-4 gap-4">
                     <ProfileZone userInfo={userInfo()!} />
-                    <div class="grow flex flex-col justify-start">
+                    <div class="flex-grow max-w-4xl flex flex-col justify-start">
                         <PostFeed
                             onRequest={async (
                                 signedInState,
