@@ -71,7 +71,7 @@ const features: Feature[] = [
     ),
 ];
 
-const NotSignedInLandingView: Component = () => {
+const AboutPillbugView: Component = () => {
     const auth = useAuth();
     return (
         <div class="flex flex-row p-8 size-full">
@@ -144,4 +144,4 @@ const NotSignedInLandingView: Component = () => {
     );
 };
 
-export default NotSignedInLandingView;
+export default AboutPillbugView;

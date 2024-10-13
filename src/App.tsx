@@ -1,7 +1,6 @@
 import { createSignal, type Component } from "solid-js";
 
 import { RouteSectionProps } from "@solidjs/router";
-import AppFrame from "./Frame";
 import { SessionAuthManager } from "./auth/auth-manager";
 import { EditingOverlayContext } from "./lib/edit-overlay-context";
 import { SessionContext } from "./lib/session-context";
@@ -11,6 +10,9 @@ import {
 } from "./lib/blocking-load";
 import { TrackedBlockingLoadComponent } from "./components/tracked-blocking-load";
 import { SettingsManager } from "./lib/settings-manager";
+import { lazy } from "solid-js";
+
+const AppFrame = lazy(() => import("./Frame"));
 
 export class GetClientError extends Error {}
 
