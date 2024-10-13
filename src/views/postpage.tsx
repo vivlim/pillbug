@@ -378,7 +378,7 @@ const PostWithCommentTree: Component = () => {
                                 status={
                                     threadInfo()?.tryGetStatus() as Status /* i don't think a placeholder should ever become root? Unless maybe it can't be found? unclear */
                                 }
-                                fetchShareParent={true}
+                                fetchShareParentDepth={5}
                             />
                             <For each={threadInfo()?.children}>
                                 {(node, index) => <Comment node={node} />}

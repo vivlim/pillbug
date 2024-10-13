@@ -42,21 +42,21 @@ import { AvatarLink } from "~/components/user/avatar";
 export type PostWithSharedProps = {
     status: Status;
     showRaw: boolean;
-    fetchShareParent: boolean;
+    fetchShareParentDepth: number;
     shareParentUrl?: string | null;
 };
 
 export type PostProps = {
     class?: string;
     status: Status;
-    fetchShareParent: boolean;
+    fetchShareParentDepth: number;
     shareParent?: Resource<Status | undefined> | undefined;
 };
 
 export type StatusPostBlockProps = {
     status: Status;
     showRaw: boolean;
-    fetchShareParent: boolean;
+    fetchShareParentDepth: number;
     shareParent?: Resource<Status | undefined> | undefined;
 };
 
@@ -225,7 +225,9 @@ const Post: Component<PostProps> = (postData) => {
                 <Card class="m-1 md:m-4 flex-auto">
                     <PostWithShared
                         status={postData.status}
-                        fetchShareParent={postData.fetchShareParent}
+                        fetchShareParentDepth={
+                            postData.fetchShareParentDepth - 1
+                        }
                         showRaw={showRaw()}
                     />
                     <PostFooter>
@@ -284,7 +286,9 @@ const StatusPostBlock: Component<StatusPostBlockProps> = (postData) => {
                             <PostWithShared
                                 status={postData.shareParent!() as Status}
                                 showRaw={postData.showRaw}
-                                fetchShareParent={postData.fetchShareParent}
+                                fetchShareParentDepth={
+                                    postData.fetchShareParentDepth - 1
+                                }
                             />
                             <PostUserBar
                                 status={status}
@@ -328,7 +332,10 @@ export const PostWithShared: Component<PostWithSharedProps> = (postData) => {
     const [shareParentPost] = createResource(parentPostUrl, (pp) => {
         return fetchShareParentPost(auth, pp);
     });
-    if (postData.shareParentUrl === undefined) {
+    if (
+        postData.shareParentUrl === undefined &&
+        postData.fetchShareParentDepth > 0
+    ) {
         const sharedUrl = getShareParentUrl(postData.status);
         if (sharedUrl !== undefined) {
             setParentPostUrl(sharedUrl);

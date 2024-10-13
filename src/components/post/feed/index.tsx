@@ -115,7 +115,7 @@ export const PostFeed: Component<PostFeedProps> = (props) => {
                 >
                     <For each={postList()}>
                         {(status, index) => (
-                            <Post status={status} fetchShareParent={false} />
+                            <Post status={status} fetchShareParentDepth={5} />
                         )}
                     </For>
                     <PageNav>
