@@ -104,7 +104,7 @@ const LoginView: Component = () => {
                             <CardTitle>add another account</CardTitle>
                         </Show>
                     </CardHeader>
-                    <CardContent class="p-6">
+                    <CardContent class="px-6 pb-2">
                         <form
                             onSubmit={async (ev) => {
                                 ev.preventDefault();
@@ -113,7 +113,10 @@ const LoginView: Component = () => {
                             noValidate={true}
                         >
                             <TextField class="pb-3">
-                                <TextFieldLabel class="pb-3 block" for="instanceUrl">
+                                <TextFieldLabel
+                                    class="pb-3 block"
+                                    for="instanceUrl"
+                                >
                                     Instance URL
                                 </TextFieldLabel>
                                 <TextFieldInput
@@ -171,7 +174,7 @@ const ManageAccounts: Component = () => {
                 <CardHeader>
                     <CardTitle>current account</CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent class="px-6 pb-4">
                     <ul class="flex flex-col w-full gap-4">
                         <ManageAccountItem
                             account={accounts().currentAccount}
@@ -184,7 +187,7 @@ const ManageAccounts: Component = () => {
                 <CardHeader>
                     <CardTitle>switch account</CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent class="px-6 pb-4">
                     <Switch>
                         <Match when={accounts().otherAccounts.length > 1}>
                             <div>
