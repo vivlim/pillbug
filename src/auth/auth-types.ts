@@ -1,11 +1,7 @@
-import generator, { detector, MegalodonInterface } from "megalodon";
+import { MegalodonInterface } from "megalodon";
 import { Account } from "megalodon/lib/src/entities/account";
 import { Instance } from "megalodon/lib/src/entities/instance";
 import OAuth from "megalodon/lib/src/oauth";
-import { createContext, createMemo, createResource, Resource, useContext } from "solid-js";
-import { produce, SetStoreFunction } from "solid-js/store";
-import { unwrapResponse } from "../lib/clientUtil";
-import { PersistentStoreBacked } from "../lib/store-backed";
 
 export interface PersistentAuthState {
     appData?: OAuth.AppData | undefined;

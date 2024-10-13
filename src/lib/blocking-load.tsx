@@ -1,5 +1,4 @@
 import { createEffect, Resource } from "solid-js";
-import { createStore, SetStoreFunction } from "solid-js/store";
 import { StoreBacked } from "./store-backed";
 
 export interface LoadingOperation {
@@ -8,10 +7,6 @@ export interface LoadingOperation {
     complete: boolean;
     error?: Error | undefined;
 }
-
-const initialLoadOperationKeys = {
-    initClient: "initClient",
-};
 
 export const initialLoadOperations: LoadingOperation[] = [];
 
@@ -28,6 +23,7 @@ export class BlockingLoadProgressTracker extends StoreBacked<ProgressTrackerStat
         super({ operations: initialOperations.slice() });
     }
 
+    /** Push a new operation that is manually completed. */
     public pushNewOperation(label: string, key: string) {
         this.setStore("operations", this.store.operations.length, {
             label,
@@ -36,6 +32,7 @@ export class BlockingLoadProgressTracker extends StoreBacked<ProgressTrackerStat
         });
     }
 
+    /** Push a new operation that completes when the provided resource is finished. If there is an error, that will be exposed (and probably displayed by a component) */
     public pushNewResourceOperation(
         label: string,
         key: string,

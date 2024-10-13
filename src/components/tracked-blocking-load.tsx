@@ -23,6 +23,7 @@ export interface ErrorBoxProps {
     description: string;
 }
 
+/** Component that displays a representation of multiple blocking async operations, and the status of each of them. */
 export const TrackedBlockingLoadComponent: Component<{
     tracker: BlockingLoadProgressTracker;
     children: JSX.Element;

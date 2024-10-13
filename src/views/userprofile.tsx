@@ -1,5 +1,4 @@
 import { A, useParams } from "@solidjs/router";
-import { Entity } from "megalodon";
 import {
     createResource,
     createSignal,
@@ -7,14 +6,11 @@ import {
     Show,
     type Component,
 } from "solid-js";
-import {
-    MaybeSignedInState,
-    SessionAuthManager,
-    useAuth,
-} from "~/auth/auth-manager";
+import { useAuth } from "~/auth/auth-manager";
 import { ProfileZone } from "~/components/user/profile-zone";
 import { GetTimelineOptions, PostFeed } from "~/components/post/feed";
 import { ErrorBox } from "~/components/error";
+import { MaybeSignedInState } from "~/auth/auth-types";
 
 interface GetAccountFeedOptions extends Omit<GetTimelineOptions, "local"> {
     pinned?: boolean;

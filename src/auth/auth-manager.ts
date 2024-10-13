@@ -1,49 +1,15 @@
 import generator, { detector, MegalodonInterface } from "megalodon";
-import { Account } from "megalodon/lib/src/entities/account";
-import { Instance } from "megalodon/lib/src/entities/instance";
 import OAuth from "megalodon/lib/src/oauth";
-import { createContext, createMemo, createResource, Resource, useContext } from "solid-js";
+import { createResource, Resource } from "solid-js";
 import { produce, SetStoreFunction } from "solid-js/store";
-import { OAuthRegistration, PillbugAccount, PillbugPersistentStore, PillbugSessionStore, SignedInAccount } from "./auth-types";
+import { MaybeSignedInState, OAuthRegistration, PillbugAccount, PillbugPersistentStore, PillbugSessionStore, SignedInAccount, SignedInState, SignedOutState, TokenState } from "./auth-types";
 import { unwrapResponse } from "../lib/clientUtil";
 import { PersistentStoreBacked } from "../lib/store-backed";
 import { useSessionContext } from "~/lib/session-context";
 
-export interface PersistentAuthState {
-    appData?: OAuth.AppData | undefined;
-    instanceUrl?: string | undefined;
-    instanceSoftware?:
-    | "mastodon"
-    | "pleroma"
-    | "friendica"
-    | "firefish"
-    | "gotosocial"
-    | undefined;
-    authorizationCode?: string | undefined;
-    token?: TokenState | undefined;
-}
-
-export type MaybeSignedInState = SignedInState | SignedOutState | null;
-
-export interface SignedInState {
-    authenticatedClient: MegalodonInterface;
-    instanceData: Instance;
-    accountData: Account;
-    domain: string;
-    signedIn: true;
-}
-
-export interface SignedOutState {
-    signedIn: false;
-}
-
-export interface TokenState {
-    tokenData: OAuth.TokenData;
-    expiresAfterTime: number | null;
-}
-
 const AppDisplayName: string = "pillbug";
 
+/** Access the auth manager for this session. Must be used within SessionContext (most places should have that) */
 export function useAuth(): SessionAuthManager {
     const sessionContext = useSessionContext();
     return sessionContext.authManager;

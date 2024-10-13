@@ -9,12 +9,13 @@ import {
     ErrorBoundary,
     For,
 } from "solid-js";
-import { MaybeSignedInState, useAuth } from "~/auth/auth-manager";
+import { useAuth } from "~/auth/auth-manager";
 import Post from "..";
 import { PageNav } from "~/components/ui/page-footer";
 import { Button } from "~/components/ui/button";
 import { FeedContext } from "./feed-context";
 import { ErrorBox } from "~/components/error";
+import { MaybeSignedInState } from "~/auth/auth-types";
 
 interface GetTimelineOptionsApi {
     local?: boolean;

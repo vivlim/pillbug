@@ -1,4 +1,4 @@
-import { produce, reconcile } from "solid-js/store";
+import { produce } from "solid-js/store";
 import { PersistentStoreBacked } from "./store-backed";
 import { useSessionContext } from "./session-context";
 
@@ -10,14 +10,12 @@ export function useSettings(): SettingsManager {
 export interface EphemeralSettings {
     version: 1
     kind: 'ephemeral'
-
 }
 
 export interface PersistentSettings {
     version: 1
     kind: 'persistent'
     useInternetTime?: boolean | undefined
-
 }
 
 export class SettingsManager extends PersistentStoreBacked<EphemeralSettings, PersistentSettings> {
