@@ -271,6 +271,9 @@ export class SessionAuthManager extends PersistentStoreBacked<PillbugSessionStor
                 instanceSoftware: partialLogin.instanceSoftware,
                 signedIn: true,
                 token: tokenState,
+                fullAcct: `?@${partialLogin.instanceUrl}`,
+                cachedInstance: undefined,
+                cachedAccount: undefined,
             };
             console.log(`Attempting to write back to persistent store a complete login for ${completeLogin.instanceUrl}`)
 
@@ -404,6 +407,20 @@ export async function updateAuthStateForActiveAccount(accountIndex: number, pers
         domain = new URL(instanceInfo.uri).hostname;
     } catch { }
 
+    // Update persisted state with current account info
+    setPersistentStore("accounts", accountIndex, (prev) => {
+        if (prev.appData.client_id !== account.appData.client_id) {
+            throw new Error("Mismatch when trying to update account info");
+        }
+        if (!prev.signedIn) {
+            throw new Error("Tried to update an account which we were able to create an authenticated client for, but state is still signed out.")
+        }
+        prev.fullAcct = `${creds.acct}@${domain}`;
+        prev.cachedAccount = creds;
+        prev.cachedInstance = instanceInfo;
+        return prev;
+    });
+
     return {
         authenticatedClient: client,
         instanceData: instanceInfo,
@@ -431,12 +448,16 @@ async function ensureAccountHasCurrentToken(account: SignedInAccount): Promise<S
 
         const tokenState: TokenState = wrapToken(newToken);
 
+
         return {
             appData: account.appData,
             instanceUrl: account.instanceUrl,
             instanceSoftware: account.instanceSoftware,
             signedIn: true,
             token: tokenState,
+            fullAcct: `?@${account.instanceUrl}`,
+            cachedInstance: undefined,
+            cachedAccount: undefined,
         }
     }
 

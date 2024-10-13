@@ -13,6 +13,8 @@ import {
 import { SetStoreFunction } from "solid-js/store";
 import { OAuth } from "megalodon";
 import { BlockingLoadProgressTracker } from "./blocking-load";
+import { Account } from "megalodon/lib/src/entities/account";
+import { Instance } from "megalodon/lib/src/entities/instance";
 
 export const SessionContext = createContext<PillbugSessionContext>();
 
@@ -71,4 +73,8 @@ export interface OAuthRegistration extends AccountBase {
 export interface SignedInAccount extends AccountBase {
     signedIn: true;
     token: TokenState;
+    /** full acct (including username and domain). if it starts with a ?, an authenticated client hasn't been created yet. */
+    fullAcct: string;
+    cachedAccount: Account | undefined;
+    cachedInstance: Instance | undefined;
 }

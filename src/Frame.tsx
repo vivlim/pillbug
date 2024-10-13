@@ -23,6 +23,7 @@ import {
     MenubarContent,
     MenubarItem,
     MenubarMenu,
+    MenubarSeparator,
     MenubarTrigger,
 } from "./components/ui/menubar";
 import { Button } from "./components/ui/button";
@@ -88,8 +89,16 @@ const AvailableAccountWithAvatar: Component<{
 }> = (props) => {
     return (
         <>
+            <Show when={props.account.cachedAccount !== undefined}>
+                <AvatarImage
+                    user={props.account.cachedAccount!}
+                    imgClass="size-6"
+                    class="inline sm:mr-2"
+                    alt="Your avatar"
+                />
+            </Show>
             <span class="hidden sm:inline overflow-hidden text-ellipsis">
-                {`?@${props.account.instanceUrl}`}
+                {props.account.fullAcct}
             </span>
         </>
     );
@@ -158,6 +167,16 @@ const AppFrame: Component<{ children: JSX.Element }> = (props) => {
                                                             </MenubarItem>
                                                         )}
                                                     </For>
+                                                    <MenubarSeparator />
+
+                                                    <MenubarItem
+                                                        onClick={() => {
+                                                            navigate("/login");
+                                                        }}
+                                                    >
+                                                        Add another account
+                                                    </MenubarItem>
+                                                    <MenubarSeparator />
 
                                                     <MenubarItem
                                                         onClick={() => {
@@ -169,6 +188,8 @@ const AppFrame: Component<{ children: JSX.Element }> = (props) => {
                                                     >
                                                         Log out
                                                     </MenubarItem>
+
+                                                    <MenubarSeparator />
 
                                                     <MenubarItem
                                                         onClick={() => {
