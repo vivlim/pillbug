@@ -65,20 +65,16 @@ const UserProfile: Component = () => {
                     <ProfileZone userInfo={userInfo()!} />
                     <div class="grow flex flex-col justify-start">
                         <PostFeed
-                            onRequest={async (
-                                signedInState,
-                                timelineOptions
-                            ) => {
+                            onRequest={async (auth, timelineOptions) => {
                                 const acctFeedProps: GetAccountFeedOptions = {
                                     exclude_replies: true,
                                     ...timelineOptions,
                                 };
-                                if (!signedInState?.signedIn) {
+                                if (!auth.signedIn) {
                                     return undefined;
                                 }
 
-                                const client =
-                                    signedInState.authenticatedClient;
+                                const client = auth.assumeSignedIn.client;
                                 let posts = await client.getAccountStatuses(
                                     userInfo()!.id,
                                     acctFeedProps
