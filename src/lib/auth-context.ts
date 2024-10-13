@@ -124,10 +124,8 @@ export class SessionAuthManager extends PersistentStoreBacked<PillbugSessionStor
 
         this.authState = authState;
 
-        // Now that everything's set up, change the account index if there is an account
-        if (this.persistentStore.accounts !== undefined && this.persistentStore.accounts.length > 0) {
-            this.setStore("currentAccountIndex", this.persistentStore.lastUsedAccount ?? 0);
-        }
+        // Now that everything's set up, set the account index, even if there's no account. If it stays undefined, loading will never complete.
+        this.setStore("currentAccountIndex", this.persistentStore.lastUsedAccount ?? 0);
 
         this.assumeSignedIn = new SessionAuthManagerAssumingSignedIn(this);
     }
@@ -193,8 +191,34 @@ export class SessionAuthManager extends PersistentStoreBacked<PillbugSessionStor
 
     public switchActiveAccount(newIdx: number): void {
         this.setStore("currentAccountIndex", newIdx);
-        // ??? idk what this line was this.context.authState()
         this.setPersistentStore("lastUsedAccount", newIdx);
+    }
+
+    public removeAccount(idx: number): void {
+        console.log(`Removing account at index ${idx}`)
+
+        // Setting to undefined removes that account
+        this.setPersistentStore("accounts", produce((accts) => {
+            accts?.splice(idx)
+        }));
+
+        if (this.persistentStore.accounts!.length > 0 && this.store.currentAccountIndex !== undefined) {
+            if (this.store.currentAccountIndex === idx) {
+                // The removed account is the one we were using, so switch to the first one in the list, whatever that is now.
+                this.setStore("currentAccountIndex", 0);
+            }
+            else {
+                // If the active account was at an index greater than the one just removed, then decrement the index by one.
+                if (this.store.currentAccountIndex > idx) {
+                    this.setStore("currentAccountIndex", this.store.currentAccountIndex - 1)
+                }
+            }
+        }
+        else {
+            // no accounts exist.
+            this.setStore("currentAccountIndex", undefined);
+        }
+        this.setPersistentStore("lastUsedAccount", this.store.currentAccountIndex);
     }
 
     public async createNewInstanceRegistration(instance: string): Promise<OAuthRegistration> {
@@ -271,7 +295,7 @@ export class SessionAuthManager extends PersistentStoreBacked<PillbugSessionStor
                 instanceSoftware: partialLogin.instanceSoftware,
                 signedIn: true,
                 token: tokenState,
-                fullAcct: `?@${partialLogin.instanceUrl}`,
+                fullAcct: `account at ${partialLogin.instanceUrl}`,
                 cachedInstance: undefined,
                 cachedAccount: undefined,
             };
@@ -285,6 +309,11 @@ export class SessionAuthManager extends PersistentStoreBacked<PillbugSessionStor
             });
 
             console.log(`Completed login to ${completeLogin.instanceUrl}`)
+
+            // Nudge the current account id to switch to it
+            // First set it to undefined, in case this is the first account. (Otherwise 0 would be no change)
+            this.setStore("currentAccountIndex", undefined);
+            this.switchActiveAccount(partialLoginIndex);
 
             return completeLogin;
         }
@@ -392,6 +421,10 @@ export async function updateAuthStateForActiveAccount(accountIndex: number, pers
 
     let account: PillbugAccount = persistentStore.accounts[accountIndex];
 
+    if (account === null) {
+        throw new Error(`the saved account slot at index ${accountIndex} is null.`)
+    }
+
     if (!account.signedIn) {
         return { signedIn: false };
     }
@@ -455,7 +488,7 @@ async function ensureAccountHasCurrentToken(account: SignedInAccount): Promise<S
             instanceSoftware: account.instanceSoftware,
             signedIn: true,
             token: tokenState,
-            fullAcct: `?@${account.instanceUrl}`,
+            fullAcct: `account at ${account.instanceUrl}`,
             cachedInstance: undefined,
             cachedAccount: undefined,
         }

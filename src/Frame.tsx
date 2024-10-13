@@ -174,7 +174,7 @@ const AppFrame: Component<{ children: JSX.Element }> = (props) => {
                                                             navigate("/login");
                                                         }}
                                                     >
-                                                        Add another account
+                                                        Manage Accounts
                                                     </MenubarItem>
                                                     <MenubarSeparator />
 

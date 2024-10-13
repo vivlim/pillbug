@@ -66,11 +66,29 @@ const LoadOperationComponent: Component<{ operation: LoadingOperation }> = (
         <li class="flex flex-row gap-2 py-2">
             <span class="flex-0">
                 <Switch>
+                    <Match when={props.operation.error !== undefined}>❌</Match>
                     <Match when={props.operation.complete}>✔️</Match>
-                    <Match when={!props.operation.complete}>⏳</Match>
+                    <Match when={!props.operation.complete}>
+                        <span class="animate-spin">⏳</span>
+                    </Match>
                 </Switch>
             </span>
-            <span class="flex-1">{props.operation.label}</span>
+            <span class="flex-1">
+                <Switch>
+                    <Match when={props.operation.error === undefined}>
+                        {props.operation.label}
+                    </Match>
+                    <Match when={props.operation.error !== undefined}>
+                        <details>
+                            <summary>{props.operation.label} failed</summary>
+                            <ErrorBox
+                                error={props.operation.error!}
+                                description={`failed: ${props.operation.label}`}
+                            />
+                        </details>
+                    </Match>
+                </Switch>
+            </span>
         </li>
     );
 };
