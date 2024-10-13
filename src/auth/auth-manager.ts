@@ -4,9 +4,10 @@ import { Instance } from "megalodon/lib/src/entities/instance";
 import OAuth from "megalodon/lib/src/oauth";
 import { createContext, createMemo, createResource, Resource, useContext } from "solid-js";
 import { produce, SetStoreFunction } from "solid-js/store";
-import { OAuthRegistration, PillbugAccount, PillbugPersistentStore, PillbugSessionContext, PillbugSessionStore, SessionContext, SignedInAccount, useSessionContext } from "./session-context";
-import { unwrapResponse } from "./clientUtil";
-import { PersistentStoreBacked } from "./store-backed";
+import { OAuthRegistration, PillbugAccount, PillbugPersistentStore, PillbugSessionStore, SignedInAccount } from "./auth-types";
+import { unwrapResponse } from "../lib/clientUtil";
+import { PersistentStoreBacked } from "../lib/store-backed";
+import { useSessionContext } from "~/lib/session-context";
 
 export interface PersistentAuthState {
     appData?: OAuth.AppData | undefined;

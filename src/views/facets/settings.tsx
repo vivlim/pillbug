@@ -3,7 +3,7 @@ import { features } from "process";
 import { Component, createSignal, For, Show } from "solid-js";
 import { Timestamp } from "~/components/post/timestamp";
 import { Card, CardHeader, CardTitle, CardContent } from "~/components/ui/card";
-import { useAuth } from "~/lib/auth-manager";
+import { useAuth } from "~/auth/auth-manager";
 import { useSettings } from "~/lib/settings-manager";
 
 const SettingsFacet: Component = () => {

@@ -11,7 +11,7 @@ import {
 } from "solid-icons/fa";
 import { Component, createResource, For, JSX, Show } from "solid-js";
 import { useExpandMenuSignalContext } from "~/Frame";
-import { useAuth } from "~/lib/auth-manager";
+import { useAuth } from "~/auth/auth-manager";
 import { cn } from "~/lib/utils";
 
 class FacetDefinition {

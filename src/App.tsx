@@ -2,7 +2,7 @@ import { createSignal, type Component } from "solid-js";
 
 import { RouteSectionProps } from "@solidjs/router";
 import AppFrame from "./Frame";
-import { SessionAuthManager } from "./lib/auth-manager";
+import { SessionAuthManager } from "./auth/auth-manager";
 import { EditingOverlayContext } from "./lib/edit-overlay-context";
 import { SessionContext } from "./lib/session-context";
 import {

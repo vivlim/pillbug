@@ -7,7 +7,6 @@ import {
     CardHeader,
     CardTitle,
 } from "./ui/card";
-import { error } from "console";
 
 export interface ErrorBoxProps {
     error: any;
@@ -60,7 +59,8 @@ const InnerErrorBox: Component<{ error: Error; description: string }> = (
                         class="underline"
                         target="_blank"
                     >
-                        please consider reporting this problem on github
+                        please consider reporting this problem on github if it
+                        seems like a problem with pillbug.
                     </a>
                 </div>
             </CardContent>

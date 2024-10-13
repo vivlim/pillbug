@@ -17,8 +17,8 @@ import {
     TextFieldLabel,
 } from "~/components/ui/text-field";
 import { AvatarImage } from "~/components/user/avatar";
-import { SessionAuthManager, useAuth } from "~/lib/auth-manager";
-import { SignedInAccount } from "~/lib/session-context";
+import { SessionAuthManager, useAuth } from "~/auth/auth-manager";
+import { SignedInAccount } from "~/auth/auth-types";
 
 const LoginView: Component = () => {
     const auth = useAuth();

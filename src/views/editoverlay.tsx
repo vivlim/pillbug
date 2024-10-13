@@ -1,6 +1,6 @@
 import { type Component } from "solid-js";
 import { useEditOverlayContext } from "~/lib/edit-overlay-context";
-import { useAuthContext } from "~/lib/auth-manager";
+import { useAuthContext } from "~/auth/auth-manager";
 import EditDialog from "./editdialog";
 import { useNavigate } from "@solidjs/router";
 

@@ -1,7 +1,7 @@
 import { A } from "@solidjs/router";
 import { For, Match, Show, Switch, type Component } from "solid-js";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
-import { useAuth } from "~/lib/auth-manager";
+import { useAuth } from "~/auth/auth-manager";
 
 class Feature {
     public constructor(
@@ -91,6 +91,7 @@ const NotSignedInLandingView: Component = () => {
                             <a
                                 href="https://github.com/vivlim/pillbug"
                                 class="underline"
+                                target="_blank"
                             >
                                 it's a work in progress under active development
                                 on GitHub.

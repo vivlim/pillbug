@@ -23,12 +23,12 @@ import {
 } from "./components/ui/menubar";
 import { Button } from "./components/ui/button";
 import EditOverlay from "./views/editoverlay";
-import { SignedInState, useAuth } from "./lib/auth-manager";
+import { SignedInState, useAuth } from "./auth/auth-manager";
 import { useEditOverlayContext } from "./lib/edit-overlay-context";
 import { FaSolidBars } from "solid-icons/fa";
 import { AvatarImage } from "./components/user/avatar";
 import { UserInstanceBanner } from "./components/instance-banner";
-import { SignedInAccount } from "./lib/session-context";
+import { SignedInAccount } from "./auth/auth-types";
 
 export const ExpandMenuSignalContext = createContext<{
     menuOpen: Accessor<boolean>;

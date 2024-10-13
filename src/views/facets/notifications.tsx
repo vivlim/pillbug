@@ -25,7 +25,7 @@ import {
 import { HtmlSandboxSpan } from "../htmlsandbox";
 import { Timestamp } from "~/components/post/timestamp";
 import { AvatarLink } from "~/components/user/avatar";
-import { SessionAuthManager, useAuth } from "~/lib/auth-manager";
+import { SessionAuthManager, useAuth } from "~/auth/auth-manager";
 
 type NotificationDayGroups = {
     created_day: DateTime<true> | DateTime<false>;

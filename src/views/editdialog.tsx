@@ -8,7 +8,7 @@ import {
     ValidComponent,
     type Component,
 } from "solid-js";
-import { useAuth } from "~/lib/auth-manager";
+import { useAuth } from "~/auth/auth-manager";
 import { Button, ButtonProps } from "~/components/ui/button";
 import {
     Dialog,

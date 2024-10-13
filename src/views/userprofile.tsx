@@ -11,7 +11,7 @@ import {
     MaybeSignedInState,
     SessionAuthManager,
     useAuth,
-} from "~/lib/auth-manager";
+} from "~/auth/auth-manager";
 import { ProfileZone } from "~/components/user/profile-zone";
 import { GetTimelineOptions, PostFeed } from "~/components/post/feed";
 import { ErrorBox } from "~/components/error";

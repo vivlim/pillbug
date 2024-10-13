@@ -9,7 +9,7 @@ import {
     ErrorBoundary,
     For,
 } from "solid-js";
-import { MaybeSignedInState, useAuth } from "~/lib/auth-manager";
+import { MaybeSignedInState, useAuth } from "~/auth/auth-manager";
 import Post from "..";
 import { PageNav } from "~/components/ui/page-footer";
 import { Button } from "~/components/ui/button";

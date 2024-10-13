@@ -15,7 +15,7 @@ import {
 } from "solid-js";
 import Post from "~/components/post";
 import { Status } from "megalodon/lib/src/entities/status";
-import { MaybeSignedInState, useAuth } from "~/lib/auth-manager";
+import { MaybeSignedInState, useAuth } from "~/auth/auth-manager";
 import { ProfileZone } from "~/components/user/profile-zone";
 import { Comment, NewCommentEditor } from "~/components/post/comments";
 import { Card } from "~/components/ui/card";
