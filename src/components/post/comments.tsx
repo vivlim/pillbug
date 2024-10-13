@@ -4,9 +4,7 @@ import {
     createSignal,
     ErrorBoundary,
     For,
-    JSX,
     Match,
-    splitProps,
     Switch,
 } from "solid-js";
 import { CommentPostComponent } from "~/views/comment";
@@ -17,11 +15,10 @@ import {
     usePostPageContext,
 } from "~/views/postpage";
 import { Card } from "../ui/card";
-import { useAuthContext, useAuth } from "~/lib/auth-manager";
+import { useAuth } from "~/lib/auth-manager";
 import { Entity, MegalodonInterface } from "megalodon";
 import { isValidVisibility, PostOptions } from "~/views/editdialog";
 import { IoWarningOutline } from "solid-icons/io";
-import { DialogHeader, DialogTitle, DialogFooter } from "../ui/dialog";
 import {
     DropdownMenuTrigger,
     DropdownMenuContent,
@@ -101,7 +98,7 @@ export interface NewCommentEditorProps {
 }
 
 export const NewCommentEditor: Component<NewCommentEditorProps> = (props) => {
-    const authManager = useAuth();
+    const auth = useAuth();
     const postPageContext = usePostPageContext();
 
     const [posted, setPosted] = createSignal(false);
@@ -175,13 +172,13 @@ export const NewCommentEditor: Component<NewCommentEditorProps> = (props) => {
         <form
             onsubmit={async (ev) => {
                 ev.preventDefault();
-                if (!authManager.signedIn) {
+                if (!auth.signedIn) {
                     pushError("Can't post if you're not logged in!");
                     return;
                 }
 
                 setBusy(true);
-                const client = await authManager.assumeSignedIn.client;
+                const client = await auth.assumeSignedIn.client;
                 const post_id = await sendPost(client);
                 if (post_id) {
                     setPostId(post_id);

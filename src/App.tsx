@@ -21,8 +21,6 @@ import AppFrame from "./Frame";
 import { Instance } from "megalodon/lib/src/entities/instance";
 import { Account } from "megalodon/lib/src/entities/account";
 import {
-    AuthContext,
-    AuthProviderProps,
     EphemeralAuthState,
     PersistentAuthState,
     SessionAuthManager,

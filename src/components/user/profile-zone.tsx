@@ -14,7 +14,7 @@ import {
     Switch,
 } from "solid-js";
 import HtmlSandbox, { HtmlSandboxSpan } from "~/views/htmlsandbox";
-import { useAuth, useAuthContext } from "~/lib/auth-manager";
+import { useAuth } from "~/lib/auth-manager";
 import { FaSolidLock } from "solid-icons/fa";
 import { AvatarLink } from "./avatar";
 

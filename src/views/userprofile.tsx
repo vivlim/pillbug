@@ -8,10 +8,8 @@ import {
     type Component,
 } from "solid-js";
 import {
-    AuthProviderProps,
     EphemeralMaybeSignedInState,
     SessionAuthManager,
-    useAuthContext,
     useAuth,
 } from "~/lib/auth-manager";
 import { ProfileZone } from "~/components/user/profile-zone";

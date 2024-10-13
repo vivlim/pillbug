@@ -11,7 +11,7 @@ import {
 } from "solid-icons/fa";
 import { Component, createResource, For, JSX, Show } from "solid-js";
 import { useExpandMenuSignalContext } from "~/Frame";
-import { useAuthContext, useAuth } from "~/lib/auth-manager";
+import { useAuth } from "~/lib/auth-manager";
 import { cn } from "~/lib/utils";
 
 class FacetDefinition {
@@ -57,11 +57,11 @@ const FacetNavigationItem: Component<{
 export const FacetNavigationFrame: Component<{ children: JSX.Element }> = (
     props
 ) => {
-    const authManager = useAuth();
+    const auth = useAuth();
 
     const profileUrl = () => {
-        if (authManager.signedIn) {
-            return `/user/${authManager.assumeSignedIn.state.accountData.acct}`;
+        if (auth.signedIn) {
+            return `/user/${auth.assumeSignedIn.state.accountData.acct}`;
         }
         return undefined;
     };

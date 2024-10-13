@@ -1,5 +1,5 @@
 import { useSearchParams } from "@solidjs/router";
-import { Entity, Response } from "megalodon";
+import { Response } from "megalodon";
 import { Status } from "megalodon/lib/src/entities/status";
 import {
     Component,
@@ -9,13 +9,7 @@ import {
     ErrorBoundary,
     For,
 } from "solid-js";
-import {
-    AuthProviderProps,
-    EphemeralMaybeSignedInState,
-    SessionAuthManager,
-    useAuthContext,
-    useAuth,
-} from "~/lib/auth-manager";
+import { EphemeralMaybeSignedInState, useAuth } from "~/lib/auth-manager";
 import Post from "..";
 import { PageNav } from "~/components/ui/page-footer";
 import { Button } from "~/components/ui/button";
@@ -70,12 +64,12 @@ async function fetchPostList(
 }
 
 export const PostFeed: Component<PostFeedProps> = (props) => {
-    const authManager = useAuth();
+    const auth = useAuth();
     const [searchParams, setSearchParams] = useSearchParams();
     const [postList, listActions] = createResource(
         () => {
             return {
-                signedInState: authManager.state,
+                signedInState: auth.state,
                 options: {
                     local: false,
                     limit: 25,

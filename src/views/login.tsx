@@ -1,8 +1,6 @@
 import { makePersisted } from "@solid-primitives/storage";
-import { useLocation, useNavigate, useSearchParams } from "@solidjs/router";
-import generator, { detector } from "megalodon";
+import { useNavigate, useSearchParams } from "@solidjs/router";
 import {
-    createResource,
     createSignal,
     For,
     Match,
@@ -10,32 +8,20 @@ import {
     Switch,
     type Component,
 } from "solid-js";
-import { NewInstanceOauth } from "~/client/auth";
 import { ErrorBox } from "~/components/error";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
-import { Flex } from "~/components/ui/flex";
-import { Grid, Col } from "~/components/ui/grid";
 import {
     TextField,
     TextFieldInput,
     TextFieldLabel,
 } from "~/components/ui/text-field";
 import { AvatarImage } from "~/components/user/avatar";
-import {
-    EphemeralSignedInState,
-    SessionAuthManager,
-    useAuthContext,
-    useAuth,
-} from "~/lib/auth-manager";
-import {
-    SignedInAccount,
-    useRawSessionContext,
-    useSessionContext,
-} from "~/lib/session-context";
+import { SessionAuthManager, useAuth } from "~/lib/auth-manager";
+import { SignedInAccount } from "~/lib/session-context";
 
 const LoginView: Component = () => {
-    const authManager = useAuth();
+    const auth = useAuth();
 
     const [searchParams, setSearchParams] = useSearchParams();
 
@@ -88,7 +74,7 @@ const LoginView: Component = () => {
                     "trying to acquire a token using the provided code"
                 );
 
-                await authManager.completeLogin(searchParams.code!);
+                await auth.completeLogin(searchParams.code!);
                 setBusy(false);
                 navigate("/");
             } catch (error) {
@@ -108,15 +94,15 @@ const LoginView: Component = () => {
         <div class="flex flex-row p-8 size-full">
             <div class="md:grow"></div>
             <div class="grow w-max md:w-1/2 place-self flex flex-col gap-4">
-                <Show when={authManager.signedIn}>
+                <Show when={auth.signedIn}>
                     <ManageAccounts />
                 </Show>
                 <Card>
                     <CardHeader>
-                        <Show when={!authManager.signedIn}>
+                        <Show when={!auth.signedIn}>
                             <CardTitle>log in</CardTitle>
                         </Show>
-                        <Show when={authManager.signedIn}>
+                        <Show when={auth.signedIn}>
                             <CardTitle>add another account</CardTitle>
                         </Show>
                     </CardHeader>
@@ -124,7 +110,7 @@ const LoginView: Component = () => {
                         <form
                             onSubmit={async (ev) => {
                                 ev.preventDefault();
-                                await doOAuth(authManager);
+                                await doOAuth(auth);
                             }}
                             noValidate={true}
                         >
@@ -143,7 +129,7 @@ const LoginView: Component = () => {
                                 />
                             </TextField>
                             <Button
-                                onClick={() => doOAuth(authManager)}
+                                onClick={() => doOAuth(auth)}
                                 disabled={busy()}
                             >
                                 Log in

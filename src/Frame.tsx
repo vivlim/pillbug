@@ -1,21 +1,17 @@
 import {
     Accessor,
     createContext,
-    createResource,
     createSignal,
     For,
     JSX,
     Match,
     Setter,
     Show,
-    Signal,
     Switch,
     useContext,
     type Component,
 } from "solid-js";
 
-import logo from "./logo.svg";
-import styles from "./App.module.css";
 import { useNavigate } from "@solidjs/router";
 import {
     Menubar,
@@ -27,25 +23,12 @@ import {
 } from "./components/ui/menubar";
 import { Button } from "./components/ui/button";
 import EditOverlay from "./views/editoverlay";
-import {
-    AuthProviderProps,
-    EphemeralAuthState,
-    EphemeralSignedInState,
-    SessionAuthManager,
-    useAuthContext,
-    useAuth,
-} from "./lib/auth-manager";
+import { EphemeralSignedInState, useAuth } from "./lib/auth-manager";
 import { useEditOverlayContext } from "./lib/edit-overlay-context";
 import { FaSolidBars } from "solid-icons/fa";
 import { AvatarImage } from "./components/user/avatar";
-import { Dynamic } from "solid-js/web";
-import { Instance } from "megalodon/lib/src/entities/instance";
-import {
-    InstanceBanner,
-    UserInstanceBanner,
-} from "./components/instance-banner";
-import { PillbugAccount, SignedInAccount } from "./lib/session-context";
-import { Account } from "megalodon/lib/src/entities/account";
+import { UserInstanceBanner } from "./components/instance-banner";
+import { SignedInAccount } from "./lib/session-context";
 
 export const ExpandMenuSignalContext = createContext<{
     menuOpen: Accessor<boolean>;

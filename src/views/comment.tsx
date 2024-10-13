@@ -1,21 +1,7 @@
 import { A } from "@solidjs/router";
-import { Entity } from "megalodon";
 import { Status } from "megalodon/lib/src/entities/status";
-import {
-    createResource,
-    createSignal,
-    For,
-    Setter,
-    Show,
-    type Component,
-} from "solid-js";
-import { tryGetAuthenticatedClient } from "~/App";
-import { Button } from "~/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
-import { Flex } from "~/components/ui/flex";
-import { Grid, Col } from "~/components/ui/grid";
+import { createSignal, Show, type Component } from "solid-js";
 import HtmlSandbox, { HtmlSandboxSpan } from "./htmlsandbox";
-import { useAuthContext } from "~/lib/auth-manager";
 import { Timestamp } from "~/components/post/timestamp";
 import { DateTime } from "luxon";
 import { AvatarLink } from "~/components/user/avatar";
@@ -37,7 +23,6 @@ export type CommentProps = {
 };
 
 export const CommentPostComponent: Component<CommentProps> = (postData) => {
-    const authContext = useAuthContext();
     const status = postData.status;
 
     const [showingReplyBox, setShowingReplyBox] = createSignal<boolean>(false);

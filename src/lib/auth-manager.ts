@@ -45,25 +45,6 @@ export interface TokenState {
     expiresAfterTime: number | null;
 }
 
-export const AuthContext = createContext<AuthProviderProps>();
-export interface AuthProviderProps {
-    // persistentAuthState: PersistentAuthState;
-    // setPersistentAuthState: SetStoreFunction<PersistentAuthState>;
-    authState: EphemeralAuthState;
-    // setAuthState: SetStoreFunction<EphemeralAuthState>;
-}
-
-/** Compatibility shim for code using pre-refactor auth. */
-export function useAuthContext(): AuthProviderProps {
-    const manager = useAuth();
-    const signedInState = manager.state;
-
-    return {
-        authState: { signedIn: signedInState }
-    }
-
-}
-
 const AppDisplayName: string = "pillbug";
 
 export function useAuth(): SessionAuthManager {

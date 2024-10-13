@@ -8,7 +8,7 @@ import {
     ValidComponent,
     type Component,
 } from "solid-js";
-import { AuthProviderProps, useAuthContext, useAuth } from "~/lib/auth-manager";
+import { useAuth } from "~/lib/auth-manager";
 import { Button, ButtonProps } from "~/components/ui/button";
 import {
     Dialog,
@@ -72,7 +72,7 @@ export function isValidVisibility(
 }
 
 const EditDialog: Component<EditDialogProps> = (props) => {
-    const authManager = useAuth();
+    const auth = useAuth();
     const editingOverlayContext = useEditOverlayContext();
     const navigate = useNavigate();
 
@@ -154,7 +154,7 @@ const EditDialog: Component<EditDialogProps> = (props) => {
                 <form
                     onsubmit={async (ev) => {
                         ev.preventDefault();
-                        if (!authManager.signedIn) {
+                        if (!auth.signedIn) {
                             pushError(
                                 "Can't post if there are no accounts logged in."
                             );
@@ -162,7 +162,7 @@ const EditDialog: Component<EditDialogProps> = (props) => {
                         }
 
                         setBusy(true);
-                        const client = await authManager.assumeSignedIn.client;
+                        const client = await auth.assumeSignedIn.client;
                         const post_id = await sendPost(client);
                         if (post_id) {
                             setPostId(post_id);

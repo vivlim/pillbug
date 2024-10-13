@@ -1,19 +1,7 @@
 import { A } from "@solidjs/router";
-import {
-    createResource,
-    createSignal,
-    For,
-    Match,
-    Show,
-    Switch,
-    type Component,
-} from "solid-js";
-import { tryGetAuthenticatedClient } from "~/App";
-import { Button } from "~/components/ui/button";
+import { For, Match, Show, Switch, type Component } from "solid-js";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
-import { Flex } from "~/components/ui/flex";
-import { Grid, Col } from "~/components/ui/grid";
-import { useAuthContext, useAuth } from "~/lib/auth-manager";
+import { useAuth } from "~/lib/auth-manager";
 
 class Feature {
     public constructor(
@@ -80,7 +68,7 @@ const features: Feature[] = [
 ];
 
 const NotSignedInLandingView: Component = () => {
-    const authManager = useAuth();
+    const auth = useAuth();
     return (
         <div class="flex flex-row p-8 size-full">
             <div class="md:grow"></div>
@@ -108,7 +96,7 @@ const NotSignedInLandingView: Component = () => {
                         </p>
                     </CardContent>
                 </Card>
-                <Show when={!authManager.signedIn}>
+                <Show when={!auth.signedIn}>
                     <Card>
                         <CardContent>
                             <p>you aren't logged in.</p>
