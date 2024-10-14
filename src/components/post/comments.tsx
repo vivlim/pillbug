@@ -128,7 +128,9 @@ export const NewCommentEditor: Component<NewCommentEditorProps> = (props) => {
         setErrors(errors);
     };
     const hasErrors = createMemo(() => postErrors().length > 0);
-    const [status, setStatus] = createSignal("");
+    const [status, setStatus] = createSignal(
+        `@${props.parentStatus.account.acct} `
+    );
     const [visibility, setVisibility] = createSignal<Entity.StatusVisibility>(
         props.parentStatus.visibility
     );
@@ -213,6 +215,7 @@ export const NewCommentEditor: Component<NewCommentEditorProps> = (props) => {
                         onInput={(e) => {
                             setStatus(e.currentTarget.value);
                         }}
+                        value={status()}
                     ></TextFieldTextArea>
                 </TextField>
                 <TextField
