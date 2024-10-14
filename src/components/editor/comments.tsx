@@ -1,101 +1,52 @@
-import { useNavigate } from "@solidjs/router";
-import { Entity, MegalodonInterface } from "megalodon";
 import {
-    createEffect,
+    Component,
     createMemo,
     createSignal,
-    splitProps,
-    ValidComponent,
-    type Component,
+    ErrorBoundary,
+    For,
+    Match,
+    Switch,
 } from "solid-js";
+import { CommentPostComponent } from "~/views/comment";
+import {
+    PostTreeStatusNode,
+    IPostTreeNode,
+    PostTreePlaceholderNode,
+    usePostPageContext,
+} from "~/views/postpage";
+import { Card } from "../ui/card";
 import { useAuth } from "~/auth/auth-manager";
-import { Button, ButtonProps } from "~/components/ui/button";
+import { Entity, MegalodonInterface } from "megalodon";
+import { isValidVisibility, PostOptions } from "~/views/editdialog";
+import { IoWarningOutline } from "solid-icons/io";
 import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from "~/components/ui/dialog";
-import {
-    TextFieldLabel,
-    TextFieldInput,
-    TextField,
-    TextFieldTextArea,
-} from "~/components/ui/text-field";
-import { DialogRootProps } from "@kobalte/core/dialog";
-import {
-    DropdownMenu,
+    DropdownMenuTrigger,
     DropdownMenuContent,
-    DropdownMenuItem,
     DropdownMenuRadioGroup,
     DropdownMenuRadioItem,
-    DropdownMenuTrigger,
-} from "~/components/ui/dropdown-menu";
-import { PolymorphicProps } from "@kobalte/core/polymorphic";
-import { cn } from "~/lib/utils";
-import { useEditOverlayContext } from "~/lib/edit-overlay-context";
-import { VisibilityIcon } from "~/components/visibility-icon";
-import { IoWarningOutline } from "solid-icons/io";
-import { MenuButton } from "~/components/ui/menubutton";
+    DropdownMenu,
+} from "../ui/dropdown-menu";
+import { TextFieldTextArea, TextFieldInput, TextField } from "../ui/text-field";
+import { VisibilityIcon } from "../visibility-icon";
+import { MenuButton } from "../ui/menubutton";
+import { Button } from "../ui/button";
+import { Status } from "megalodon/lib/src/entities/status";
+import { NewCommentEditorProps } from "./editor-types";
 
-export interface EditDialogProps extends DialogRootProps {
-    returnRoute?: string;
-    onSubmit?: (new_id: string) => void;
-}
-
-export interface PostOptions {
-    media_ids?: Array<string>;
-    poll?: {
-        options: Array<string>;
-        expires_in: number;
-        multiple?: boolean;
-        hide_totals?: boolean;
-    };
-    in_reply_to_id?: string;
-    sensitive?: boolean;
-    spoiler_text?: string;
-    visibility?: Entity.StatusVisibility;
-    scheduled_at?: string;
-    language?: string;
-    quote_id?: string;
-}
-
-export function isValidVisibility(
-    value: string
-): value is Entity.StatusVisibility {
-    return ["public", "unlisted", "private", "direct"].includes(
-        value as Entity.StatusVisibility
-    );
-}
-
-const PostEditor: Component<EditDialogProps> = (props) => {
+export const NewCommentEditor: Component<NewCommentEditorProps> = (props) => {
     const auth = useAuth();
-    const editingOverlayContext = useEditOverlayContext();
-    const navigate = useNavigate();
+    const postPageContext = usePostPageContext();
 
     const [posted, setPosted] = createSignal(false);
     const [postId, setPostId] = createSignal<string | null>(null);
-    // bubble up submit
-    createEffect(() => {
-        console.log("posted() changed?");
-        if (posted()) {
-            console.log("bubbling up...");
-            const new_id = postId();
-            if (new_id) {
-                props.onSubmit?.(new_id);
-            }
-            // TODO: technically not supposed to do this due to infinite loops.
-            // should be fine :x
-            setPosted(false);
-        }
-    });
 
     const [busy, setBusy] = createSignal(false);
-    const [cwVisible, setCwVisible] = createSignal(false);
-    const [rawCwContent, setCwContent] = createSignal("");
+    const [cwVisible, setCwVisible] = createSignal(
+        props.parentStatus.spoiler_text ? true : false
+    );
+    const [rawCwContent, setCwContent] = createSignal(
+        props.parentStatus.spoiler_text
+    );
     /// Gets the content warning in a way that can be transferred to Megalodon
     const cwContent = createMemo(() => {
         if (cwVisible()) {
@@ -113,9 +64,12 @@ const PostEditor: Component<EditDialogProps> = (props) => {
         setErrors(errors);
     };
     const hasErrors = createMemo(() => postErrors().length > 0);
-    const [status, setStatus] = createSignal("");
-    const [visibility, setVisibility] =
-        createSignal<Entity.StatusVisibility>("unlisted");
+    const [status, setStatus] = createSignal(
+        `@${props.parentStatus.account.acct} `
+    );
+    const [visibility, setVisibility] = createSignal<Entity.StatusVisibility>(
+        props.parentStatus.visibility
+    );
 
     // Submits the post. Returns the post ID, or null if an error occurred
     const sendPost = async (
@@ -133,7 +87,11 @@ const PostEditor: Component<EditDialogProps> = (props) => {
             sensitive: cw != null,
             /* @ts-expect-error: 'string | null' */
             spoiler_text: cw,
+            in_reply_to_id: props.parentStatus.id,
         };
+        console.log(
+            `new comment with post options: ${JSON.stringify(options)}`
+        );
         try {
             const status = await client.postStatus(imminentStatus, options);
             return status.data.id;
@@ -153,7 +111,7 @@ const PostEditor: Component<EditDialogProps> = (props) => {
             onsubmit={async (ev) => {
                 ev.preventDefault();
                 if (!auth.signedIn) {
-                    pushError("Can't post if there are no accounts logged in.");
+                    pushError("Can't post if you're not logged in!");
                     return;
                 }
 
@@ -163,10 +121,19 @@ const PostEditor: Component<EditDialogProps> = (props) => {
                 if (post_id) {
                     setPostId(post_id);
                     setPosted(true);
-                    editingOverlayContext.setShowingEditorOverlay(false);
                     // Reset the form
                     ev.currentTarget.form?.reset();
                     setBusy(false);
+
+                    // reload the post
+                    console.log("attempting to reload post to get new comment");
+                    const [loadProps, setLoadProps] = postPageContext.loadProps;
+                    // bump the last refresh time to trigger reload.
+                    setLoadProps({
+                        postId: loadProps().postId,
+                        lastRefresh: Date.now(),
+                        newCommentId: post_id,
+                    });
                 } else {
                     // TODO: show errors
                     console.error(postErrors().join("\n"));
@@ -174,19 +141,17 @@ const PostEditor: Component<EditDialogProps> = (props) => {
                 return false;
             }}
         >
-            <DialogHeader>
-                <DialogTitle>New post</DialogTitle>
-            </DialogHeader>
-            <div class="flex flex-col py-3 gap-3">
-                <TextField class="border-none w-full flex-grow py-0 items-start justify-between min-h-24">
+            <div class="flex flex-col gap-3">
+                <TextField class="border-none w-full flex-grow py-0 items-start justify-between">
                     <TextFieldTextArea
                         tabindex="0"
-                        placeholder="write your cool post"
-                        class="resize-none overflow-hidden px-3 py-2 text-md"
+                        placeholder="leave a comment..."
+                        class="resize-none overflow-hidden px-3 py-2 text-md border-2 rounded-md"
                         disabled={busy()}
                         onInput={(e) => {
                             setStatus(e.currentTarget.value);
                         }}
+                        value={status()}
                     ></TextFieldTextArea>
                 </TextField>
                 <TextField
@@ -195,16 +160,17 @@ const PostEditor: Component<EditDialogProps> = (props) => {
                 >
                     <TextFieldInput
                         type="text"
-                        class="resize-none h-6 px-3 py-0 text-sm border-none rounded-none focus-visible:ring-0"
+                        class="resize-none px-3 py-2 text-sm border-2 rounded-md focus-visible:ring-0"
                         placeholder="content warnings"
                         disabled={busy()}
                         onInput={(e) => {
                             setCwContent(e.currentTarget.value);
                         }}
+                        value={cwContent() ?? undefined}
                     ></TextFieldInput>
                 </TextField>
             </div>
-            <DialogFooter>
+            <div>
                 <div class="flex-grow flex flex-row gap-2">
                     <MenuButton
                         onClick={() => {
@@ -229,12 +195,9 @@ const PostEditor: Component<EditDialogProps> = (props) => {
                                 onChange={(val) => {
                                     if (isValidVisibility(val)) {
                                         setVisibility(val);
-                                    }
+                                    } // TODO: ignore it for now, but otherwise uh, explode or something
                                 }}
                             >
-                                <DropdownMenuRadioItem value="public">
-                                    Public
-                                </DropdownMenuRadioItem>
                                 <DropdownMenuRadioItem value="unlisted">
                                     Unlisted
                                 </DropdownMenuRadioItem>
@@ -247,13 +210,12 @@ const PostEditor: Component<EditDialogProps> = (props) => {
                             </DropdownMenuRadioGroup>
                         </DropdownMenuContent>
                     </DropdownMenu>
+                    <div class="flex-1" />
+                    <Button type="submit" disabled={busy()}>
+                        Post
+                    </Button>
                 </div>
-                <Button type="submit" disabled={busy()}>
-                    Post
-                </Button>
-            </DialogFooter>
+            </div>
         </form>
     );
 };
-
-export default PostEditor;
