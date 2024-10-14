@@ -38,6 +38,7 @@ import { ImageBox } from "~/components/post/image-box";
 import { Timestamp } from "~/components/post/timestamp";
 import { DateTime } from "luxon";
 import { AvatarLink } from "~/components/user/avatar";
+import { TrackedBlockingLoadWithContextComponent } from "../tracked-blocking-load";
 
 export type PostWithSharedProps = {
     status: Status;
@@ -215,7 +216,7 @@ const Post: Component<PostProps> = (postData) => {
     const postHref = `/post/${status().id}`;
 
     return (
-        <div class={cn("flex flex-row md:px-8 py-1", postData.class)}>
+        <div class={cn("flex flex-row py-1", postData.class)}>
             <ErrorBoundary fallback={(err) => err}>
                 <AvatarLink
                     user={status().account}

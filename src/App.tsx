@@ -12,7 +12,7 @@ import { TrackedBlockingLoadComponent } from "./components/tracked-blocking-load
 import { SettingsManager } from "./lib/settings-manager";
 import { lazy } from "solid-js";
 
-const AppFrame = lazy(() => import("./Frame"));
+const AppFrame = lazy(() => import("./components/frame/Frame"));
 
 export class GetClientError extends Error {}
 

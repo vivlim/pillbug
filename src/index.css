@@ -137,3 +137,96 @@ a {
     .post-content a {
         text-decoration: underline;
 }
+#layoutColumnsRoot {
+    display: grid;
+    width: 100%;
+    max-width: 76rem;
+
+    grid-template-columns: auto;
+    grid-template-rows: auto;
+    grid-auto-flow: columns;
+    overflow: hidden;
+    margin: auto;
+}
+
+@media (min-width: 768px) {
+    #layoutColumnsRoot {
+        grid-template-columns: 18rem auto;
+    }
+
+    #layoutMainColumn {
+        padding: 0.25rem;
+    }
+}
+
+@media (min-width: 1024px) {
+    #layoutMainColumn {
+        padding: 0.5rem;
+    }
+}
+
+@media (min-width: 1280) {
+    #layoutMainColumn {
+        padding: 1.5rem;
+    }
+}
+
+/* Singular left column that may contain blocks. Stacks above main column if the viewport is too narrow */
+#layoutLeftColumn {}
+
+#layoutMainColumn {}
+
+#notifications-facet {
+    display: grid;
+    width: 100%;
+
+    padding: 0.5rem;
+
+    grid-template-columns: auto;
+    grid-template-rows: repeat(auto);
+    grid-auto-flow: columns;
+    row-gap: 0.5rem;
+    overflow: hidden;
+    margin: auto;
+
+}
+
+#notifications-facet .pbCard {
+    display: block;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    padding-top: 0.8rem;
+    padding-bottom: 0.8rem;
+}
+
+#notifications-facet .pbCard>a {
+    text-decoration: underline;
+    margin-inline: 0.2em;
+}
+
+/* Generic card element for pillbug. This is some kind of rectangle that holds stuff. Doesn't define padding. */
+.pbCard {
+    border-color: hsl(var(--border));
+    background-color: hsl(var(--card));
+    color: hsl(var(--card-foreground));
+    border-radius: var(--radius);
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* When used inside of a pbCard, ends after one line */
+.pbSingleLineBlock {
+    display: block;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+summary::marker {
+    line-height: auto;
+}
+
+html.setting-alignColumnsLeft #layoutColumnsRoot {
+    margin-left: 0px;
+}

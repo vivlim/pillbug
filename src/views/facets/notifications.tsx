@@ -97,10 +97,9 @@ export const SingleLinePostPreviewLink: Component<{
                 <Match when={props.status !== undefined}>
                     <a
                         href={`/post/${props.status?.id}`}
-                        class="underline flex flex-1 truncate min-w-16"
+                        class="pbSingleLineBlock"
                     >
                         <HtmlSandboxSpan
-                            class="truncate"
                             html={props.status!.content}
                             emoji={props.status!.emojis}
                         />
@@ -125,16 +124,16 @@ export const GroupedNotificationComponent: Component<{
     let typeLabel = group.type;
     switch (group.type) {
         case "favourite":
-            typeLabel = "liked your post";
+            typeLabel = "liked your post:";
             break;
         case "follow":
-            typeLabel = "followed you";
+            typeLabel = "followed you:";
             break;
         case "mention":
-            typeLabel = "mentioned you";
+            typeLabel = "mentioned you:";
             break;
         case "reblog":
-            typeLabel = "shared your post";
+            typeLabel = "shared your post:";
             break;
         default:
             break;
@@ -144,66 +143,52 @@ export const GroupedNotificationComponent: Component<{
 
     return (
         <>
-            <ContextMenu>
-                <ContextMenuTrigger class="flex-auto" disabled>
-                    <a class="flex flex-wrap w-full p-3 border-2 rounded-xl gap-1 my-2">
+            <li class="pbNotification pbCard">
+                <Switch>
+                    <Match when={notifications.length === 1}>
+                        <Show when={firstNotification.account != null}>
+                            <AvatarLink
+                                user={firstNotification.account!}
+                                imgClass="size-6"
+                                class="inline-block underline"
+                            />
+                        </Show>
+                        <a
+                            href={`/user/${firstNotification.account?.acct}`}
+                            class="underline"
+                        >
+                            {firstNotification.account?.acct}
+                        </a>
                         <Switch>
-                            <Match when={notifications.length === 1}>
-                                <Show when={firstNotification.account != null}>
-                                    <AvatarLink
-                                        user={firstNotification.account!}
-                                        imgClass="size-6"
-                                        class="inline-block underline"
-                                    />
-                                </Show>
-                                <a
-                                    href={`/user/${firstNotification.account?.acct}`}
-                                    class="underline"
-                                >
-                                    {firstNotification.account?.acct}
-                                </a>
-                                <Switch>
-                                    <Match when={status === undefined}>
-                                        {typeLabel}
-                                    </Match>
-                                    <Match when={status !== undefined}>
-                                        <a
-                                            href={`/post/${status?.id}`}
-                                            class="flex"
-                                        >
-                                            {typeLabel}
-                                        </a>
-                                        <SingleLinePostPreviewLink
-                                            status={status}
-                                        />
-                                    </Match>
-                                </Switch>
+                            <Match when={status === undefined}>
+                                {typeLabel}
                             </Match>
-                            <Match when={notifications.length > 1}>
-                                <div>Several pages</div>
-                                <Switch>
-                                    <Match when={status === undefined}>
-                                        {typeLabel}
-                                    </Match>
-                                    <Match when={status !== undefined}>
-                                        <a
-                                            href={`/post/${status?.id}`}
-                                            class="flex"
-                                        >
-                                            {typeLabel}
-                                        </a>
-                                        <SingleLinePostPreviewLink
-                                            status={status}
-                                        />
-                                    </Match>
-                                </Switch>
-                                <div class="w-full flex flex-row gap-1 overflow-hidden">
+                            <Match when={status !== undefined}>
+                                <a href={`/post/${status?.id}`}>{typeLabel}</a>
+                                <SingleLinePostPreviewLink status={status} />
+                            </Match>
+                        </Switch>
+                    </Match>
+                    <Match when={notifications.length > 1}>
+                        <span>Several pages</span>
+                        <Switch>
+                            <Match when={status === undefined}>
+                                {typeLabel}
+                            </Match>
+                            <Match when={status !== undefined}>
+                                <a href={`/post/${status?.id}`}>{typeLabel}</a>
+                                <SingleLinePostPreviewLink status={status} />
+                            </Match>
+                        </Switch>
+                        <details>
+                            <summary>
+                                <div class="inline-block">
                                     <For each={notifications}>
                                         {(n, i) => (
                                             <>
                                                 <a
                                                     href={`/user/${n.account?.acct}`}
-                                                    class="flex"
+                                                    class="inline-block mx-1"
                                                     title={`${n.account?.acct}`}
                                                 >
                                                     <AvatarLink
@@ -216,9 +201,40 @@ export const GroupedNotificationComponent: Component<{
                                         )}
                                     </For>
                                 </div>
-                            </Match>
-                        </Switch>
-                    </a>
+                            </summary>
+                            <ul>
+                                <For each={notifications}>
+                                    {(n, i) => (
+                                        <li>
+                                            <a
+                                                href={`/user/${n.account?.acct}`}
+                                                class="flex"
+                                                title={`${n.account?.acct}`}
+                                            >
+                                                <AvatarLink
+                                                    user={n.account!}
+                                                    imgClass="size-6"
+                                                    class="inline-block"
+                                                />
+                                                <span>
+                                                    {n.account?.display_name}
+                                                </span>
+                                            </a>
+                                        </li>
+                                    )}
+                                </For>
+                            </ul>
+                        </details>
+                    </Match>
+                </Switch>
+            </li>
+        </>
+    );
+};
+/*
+
+            <ContextMenu>
+                <ContextMenuTrigger class="flex-auto" disabled>
                 </ContextMenuTrigger>
                 <ContextMenuContent>
                     <ContextMenuItem onClick={() => setShowRaw(!showRaw())}>
@@ -227,9 +243,8 @@ export const GroupedNotificationComponent: Component<{
                 </ContextMenuContent>
             </ContextMenu>
             <RawDataViewer data={props.kindGroup} show={showRaw()} />
-        </>
-    );
-};
+
+*/
 
 export const NotificationsFacet: Component = () => {
     const auth = useAuth();
@@ -242,13 +257,13 @@ export const NotificationsFacet: Component = () => {
     const navigate = useNavigate();
 
     return (
-        <ul class="flex flex-col w-full list-none p-6 gap-4">
+        <ul id="notifications-facet">
             <For each={notifications()}>
                 {(dayGroup, index) => (
-                    <div>
-                        <div>
+                    <>
+                        <li class="pbCard">
                             <Timestamp ts={dayGroup.created_day} />
-                        </div>
+                        </li>
                         <For each={dayGroup.kindGroups}>
                             {(kindGroup, index) => (
                                 <GroupedNotificationComponent
@@ -256,7 +271,7 @@ export const NotificationsFacet: Component = () => {
                                 />
                             )}
                         </For>
-                    </div>
+                    </>
                 )}
             </For>
         </ul>

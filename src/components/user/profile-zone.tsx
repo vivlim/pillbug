@@ -10,6 +10,8 @@ import {
     For,
     lazy,
     Match,
+    onCleanup,
+    onMount,
     Show,
     Switch,
 } from "solid-js";
@@ -17,6 +19,8 @@ import HtmlSandbox, { HtmlSandboxSpan } from "~/views/htmlsandbox";
 import { useAuth } from "~/auth/auth-manager";
 import { FaSolidLock } from "solid-icons/fa";
 import { AvatarLink } from "./avatar";
+import { useFrameContext } from "../frame/context";
+import { LayoutLeftColumnPortal } from "../layout/columns";
 
 /// Button that shows "Follow"/"Request to Follow"/"Unfollow"/"Cancel Request"
 /// and acts accordingly when clicked
@@ -111,62 +115,73 @@ export const ProfileZone: Component<ProfileZoneProps> = (props) => {
         }
     });
 
+    // Hide the nav if a profile is visible - the profile replaces it
+    const frameContext = useFrameContext();
+    onMount(() => {
+        frameContext.setShowNav(false);
+    });
+    onCleanup(() => {
+        frameContext.setShowNav(true);
+    });
+
     return (
-        <div class="md:w-72 p-8 md:flex-shrink-0 flex gap-4 min-h-max flex-col md:items-center justify-start bg-secondary text-secondary-foreground">
-            <div class="flex flex-row md:flex-col md:items-center gap-4">
-                <AvatarLink
-                    user={props.userInfo}
-                    imgClass="size-24"
-                    class="shadow-md"
-                />
-                <div class="flex flex-col md:items-center">
-                    <div class="flex flex-row items-center gap-2">
-                        <h2 class="text-xl font-bold">
-                            <HtmlSandboxSpan
-                                html={props.userInfo.display_name}
-                                emoji={props.userInfo.emojis}
-                            />
-                        </h2>
-                        <Show when={props.userInfo.locked}>
-                            <FaSolidLock
-                                class="inline size-5"
-                                aria-label="Locked account"
-                                title="This account requires approval to be followed"
-                            />
-                        </Show>
+        <LayoutLeftColumnPortal>
+            <div class="md:w-72 p-8 md:flex-shrink-0 flex gap-4 min-h-max flex-col md:items-center justify-start bg-secondary text-secondary-foreground">
+                <div class="flex flex-row md:flex-col md:items-center gap-4">
+                    <AvatarLink
+                        user={props.userInfo}
+                        imgClass="size-24"
+                        class="shadow-md"
+                    />
+                    <div class="flex flex-col md:items-center">
+                        <div class="flex flex-row items-center gap-2">
+                            <h2 class="text-xl font-bold">
+                                <HtmlSandboxSpan
+                                    html={props.userInfo.display_name}
+                                    emoji={props.userInfo.emojis}
+                                />
+                            </h2>
+                            <Show when={props.userInfo.locked}>
+                                <FaSolidLock
+                                    class="inline size-5"
+                                    aria-label="Locked account"
+                                    title="This account requires approval to be followed"
+                                />
+                            </Show>
+                        </div>
+                        <h3 class="text-sm">
+                            <A href={`/user/${props.userInfo.acct}`}>
+                                @{props.userInfo.acct}
+                            </A>
+                        </h3>
                     </div>
-                    <h3 class="text-sm">
-                        <A href={`/user/${props.userInfo.acct}`}>
-                            @{props.userInfo.acct}
-                        </A>
-                    </h3>
                 </div>
+                <Show
+                    when={currentUser()?.id != props.userInfo.id}
+                    fallback={
+                        <p class="text-sm text-muted-foreground">(it's you!)</p>
+                    }
+                >
+                    <FollowButton account={props.userInfo} />
+                </Show>
+                <HtmlSandbox
+                    html={props.userInfo.note}
+                    emoji={props.userInfo.emojis}
+                />
+                <Show when={props.userInfo.fields.length > 0}>
+                    <hr class="border-accent-foreground w-full" />
+                    <div class="flex flex-col justify-start w-full">
+                        <For each={props.userInfo.fields}>
+                            {(field, index) => (
+                                <ProfileField
+                                    field={field}
+                                    emoji={props.userInfo.emojis}
+                                />
+                            )}
+                        </For>
+                    </div>
+                </Show>
             </div>
-            <Show
-                when={currentUser()?.id != props.userInfo.id}
-                fallback={
-                    <p class="text-sm text-muted-foreground">(it's you!)</p>
-                }
-            >
-                <FollowButton account={props.userInfo} />
-            </Show>
-            <HtmlSandbox
-                html={props.userInfo.note}
-                emoji={props.userInfo.emojis}
-            />
-            <Show when={props.userInfo.fields.length > 0}>
-                <hr class="border-accent-foreground w-full" />
-                <div class="flex flex-col justify-start w-full">
-                    <For each={props.userInfo.fields}>
-                        {(field, index) => (
-                            <ProfileField
-                                field={field}
-                                emoji={props.userInfo.emojis}
-                            />
-                        )}
-                    </For>
-                </div>
-            </Show>
-        </div>
+        </LayoutLeftColumnPortal>
     );
 };
