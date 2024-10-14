@@ -38,7 +38,6 @@ import { ImageBox } from "~/components/post/image-box";
 import { Timestamp } from "~/components/post/timestamp";
 import { DateTime } from "luxon";
 import { AvatarLink } from "~/components/user/avatar";
-import { TrackedBlockingLoadWithContextComponent } from "../tracked-blocking-load";
 
 export type PostWithSharedProps = {
     status: Status;

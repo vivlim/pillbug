@@ -40,12 +40,15 @@ const EditorFacet: Component = () => {
         return { bodyPlaceholder: "write a post..." };
     });
     return (
-        <EditorComponent
-            model={model}
-            validator={validator}
-            submitter={submitter}
-            config={config()}
-        ></EditorComponent>
+        <>
+            <h1>note: this does *not* work right now</h1>
+            <EditorComponent
+                model={model}
+                validator={validator}
+                submitter={submitter}
+                config={config()}
+            ></EditorComponent>
+        </>
     );
 };
 
