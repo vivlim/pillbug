@@ -5,6 +5,7 @@ import {
     ErrorBoundary,
     For,
     Match,
+    Show,
     Switch,
 } from "solid-js";
 import { CommentPostComponent } from "~/views/comment";
@@ -161,6 +162,16 @@ export const EditorComponent: Component<EditorProps> = ({
                         Post
                     </Button>
                 </div>
+                <Show when={model.validationErrors.length > 0}>
+                    <div>
+                        Failed to post:
+                        <ul>
+                            <For each={model.validationErrors}>
+                                {(e) => <li>{e.message}</li>}
+                            </For>
+                        </ul>
+                    </div>
+                </Show>
             </div>
         </form>
     );
