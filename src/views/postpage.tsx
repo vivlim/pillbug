@@ -19,7 +19,7 @@ import Post from "~/components/post";
 import { Status } from "megalodon/lib/src/entities/status";
 import { useAuth } from "~/auth/auth-manager";
 import { ProfileZone } from "~/components/user/profile-zone";
-import { Comment, NewCommentEditor } from "~/components/post/comments";
+import { Comment } from "~/components/post/comments";
 import { Card } from "~/components/ui/card";
 import { ErrorBox } from "~/components/error";
 import { MaybeSignedInState } from "~/auth/auth-types";
@@ -28,6 +28,7 @@ import {
     LayoutMainColumn,
 } from "~/components/layout/columns";
 import { useFrameContext } from "~/components/frame/context";
+import { NewCommentEditor } from "~/components/editor/comments";
 
 /** Fetch the info for a post and arrange its context in a nested tree structure before returning. */
 export async function fetchPostInfoTree(
