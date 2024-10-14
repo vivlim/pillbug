@@ -16,6 +16,7 @@ const root = document.getElementById("root");
 const App = lazy(() => import("./App"));
 const HomeView = lazy(() => import("./views/home"));
 const SettingsFacet = lazy(() => import("./views/facets/settings"));
+const EditorFacet = lazy(() => import("./views/facets/editor"));
 const NotificationsFacet = lazy(() => import("./views/facets/notifications"));
 const AboutPillbugView = lazy(() => import("./views/aboutpillbug"));
 const Feed = lazy(() => import("./views/feed"));
@@ -66,6 +67,12 @@ render(
                     path="/profile"
                     component={() => {
                         return <div>placeholder for profile</div>;
+                    }}
+                />
+                <Route
+                    path="/editor/:target"
+                    component={() => {
+                        return <EditorFacet />;
                     }}
                 />
                 <Route
