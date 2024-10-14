@@ -6,6 +6,8 @@ import {
     ErrorBoundary,
     For,
     Match,
+    onCleanup,
+    onMount,
     ResourceFetcher,
     Show,
     Signal,
@@ -21,6 +23,11 @@ import { Comment, NewCommentEditor } from "~/components/post/comments";
 import { Card } from "~/components/ui/card";
 import { ErrorBox } from "~/components/error";
 import { MaybeSignedInState } from "~/auth/auth-types";
+import {
+    LayoutColumnsRoot,
+    LayoutMainColumn,
+} from "~/components/layout/columns";
+import { useFrameContext } from "~/components/frame/context";
 
 /** Fetch the info for a post and arrange its context in a nested tree structure before returning. */
 export async function fetchPostInfoTree(
@@ -316,6 +323,7 @@ const PostPage: Component = () => {
             postId: params.postId,
         }),
     };
+
     return (
         <PostPageContext.Provider value={postContext}>
             <ErrorBoundary
@@ -359,14 +367,14 @@ const PostWithCommentTree: Component = () => {
         };
     }, threadInfoFetcher);
     return (
-        <div class="flex flex-col md:flex-row mx-1 md:mx-4 gap-4 justify-center">
+        <LayoutColumnsRoot>
             <Show
                 when={threadInfo()?.tryGetStatus() !== undefined}
                 fallback={<div>Loading</div>}
             >
                 <ProfileZone userInfo={threadInfo()!.tryGetStatus()!.account} />
             </Show>
-            <div class="flex-grow max-w-4xl flex flex-col justify-start">
+            <LayoutMainColumn>
                 <ErrorBoundary fallback={(err) => err}>
                     <Switch>
                         <Match when={threadInfo.loading}>
@@ -396,8 +404,8 @@ const PostWithCommentTree: Component = () => {
                         </Match>
                     </Switch>
                 </ErrorBoundary>
-            </div>
-        </div>
+            </LayoutMainColumn>
+        </LayoutColumnsRoot>
     );
 };
 
