@@ -1,7 +1,9 @@
 import { A } from "@solidjs/router";
-import { For, Match, Show, Switch, type Component } from "solid-js";
+import { createMemo, For, Match, Show, Switch, type Component } from "solid-js";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { useAuth } from "~/auth/auth-manager";
+import { useFrameContext } from "~/components/frame/context";
+import { LayoutLeftColumnPortal } from "~/components/layout/columns";
 
 class Feature {
     public constructor(
@@ -73,75 +75,74 @@ const features: Feature[] = [
 
 const AboutPillbugView: Component = () => {
     const auth = useAuth();
+    const frameContext = useFrameContext();
+    createMemo(() => {
+        // Only show nav if we're signed in.
+        frameContext.setShowNav(auth.signedIn);
+    });
+
     return (
-        <div class="flex flex-row p-8 size-full">
-            <div class="md:grow"></div>
-            <div class="grow w-max md:w-1/2 place-self flex flex-col gap-5">
+        <div>
+            <Card>
+                <CardHeader>
+                    <CardTitle>pillbug</CardTitle>
+                </CardHeader>
+                <CardContent class="p-6 pt-0">
+                    <p>
+                        pillbug is a cohost-inspired client for GoToSocial and
+                        other Mastodon API-compatible ActivityPub servers.
+                    </p>
+                    <p>
+                        <a
+                            href="https://github.com/vivlim/pillbug"
+                            class="underline"
+                            target="_blank"
+                        >
+                            it's a work in progress under active development on
+                            GitHub.
+                        </a>
+                        &nbsp;features are currently missing and you will
+                        probably encounter bugs.
+                    </p>
+                </CardContent>
+            </Card>
+            <Show when={!auth.signedIn}>
                 <Card>
                     <CardHeader>
-                        <CardTitle>pillbug</CardTitle>
+                        <CardTitle>log in</CardTitle>
                     </CardHeader>
                     <CardContent class="p-6 pt-0">
+                        <p>you aren't logged in.</p>
                         <p>
-                            pillbug is a cohost-inspired client for GoToSocial
-                            and other Mastodon API-compatible ActivityPub
-                            servers.
+                            ℹ️ note: following the addition of multiple
+                            accounts, you will have to log in again. sorry!
                         </p>
                         <p>
-                            <a
-                                href="https://github.com/vivlim/pillbug"
-                                class="underline"
-                                target="_blank"
-                            >
-                                it's a work in progress under active development
-                                on GitHub.
-                            </a>
-                            &nbsp;features are currently missing and you will
-                            probably encounter bugs.
+                            <A href="/login" class="underline">
+                                Log in
+                            </A>
                         </p>
                     </CardContent>
                 </Card>
-                <Show when={!auth.signedIn}>
-                    <Card>
-                        <CardContent class="p-6">
-                            <CardHeader>
-                                <CardTitle>log in</CardTitle>
-                            </CardHeader>
-                        </CardContent>
-                        <CardContent>
-                            <p>you aren't logged in.</p>
-                            <p>
-                                ℹ️ note: following the addition of multiple
-                                accounts, you will have to log in again. sorry!
-                            </p>
-                            <p>
-                                <A href="/login" class="underline">
-                                    Log in
-                                </A>
-                            </p>
-                        </CardContent>
-                    </Card>
-                </Show>
-                <Card>
-                    <CardHeader>
-                        <CardTitle>current features</CardTitle>
-                    </CardHeader>
-                    <CardContent class="p-6 pt-0">
-                        <p>
-                            this is not an exhaustive list of planned features,
-                            and it is subject to change. also, a feature may be
-                            listed here with a check mark which is "good enough
-                            for now" but not in its final form.
-                        </p>
-                        <ul>
-                            <For each={features}>
-                                {(f, index) => <FeatureListItem feature={f} />}
-                            </For>
-                        </ul>
-                    </CardContent>
-                </Card>
-            </div>
-            <div class="md:grow"></div>
+            </Show>
+            <Card>
+                <CardHeader>
+                    <CardTitle>current features</CardTitle>
+                </CardHeader>
+                <CardContent class="p-6 pt-0">
+                    <p>
+                        this is not an exhaustive list of planned features, and
+                        it is subject to change. also, a feature may be listed
+                        here with a check mark which is "good enough for now"
+                        but not in its final form.
+                    </p>
+                    <ul>
+                        <For each={features}>
+                            {(f, index) => <FeatureListItem feature={f} />}
+                        </For>
+                    </ul>
+                </CardContent>
+            </Card>
         </div>
     );
 };
