@@ -1,6 +1,12 @@
 import { Entity } from "megalodon";
 import { Status } from "megalodon/lib/src/entities/status";
-import { Accessor, createSignal, Setter, Signal } from "solid-js";
+import {
+    Accessor,
+    ComponentProps,
+    createSignal,
+    Setter,
+    Signal,
+} from "solid-js";
 import { PersistentStoreBacked, StoreBacked } from "~/lib/store-backed";
 
 export interface NewCommentEditorProps {
@@ -93,4 +99,5 @@ export interface EditorProps {
     validator: EditorValidator;
     submitter: EditorSubmitter;
     config: EditorConfig;
+    class?: string | undefined;
 }

@@ -41,12 +41,12 @@ const EditorFacet: Component = () => {
     });
     return (
         <>
-            <h1>note: this does *not* work right now</h1>
             <EditorComponent
                 model={model}
                 validator={validator}
                 submitter={submitter}
                 config={config()}
+                class="h-full p-2"
             ></EditorComponent>
         </>
     );

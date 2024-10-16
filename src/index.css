@@ -143,7 +143,8 @@ a {
     max-width: 76rem;
 
     grid-template-columns: auto;
-    grid-template-rows: auto;
+    /* The first grid item should only occupy the minimum height needed, it could be a user profile or maybe empty space */
+        grid-template-rows: min-content auto;
     grid-auto-flow: columns;
     overflow: hidden;
     margin: auto;
@@ -152,6 +153,8 @@ a {
 @media (min-width: 768px) {
     #layoutColumnsRoot {
         grid-template-columns: 18rem auto;
+        /* The sidebar is shown so we want the single remaining row to take the full height */
+            grid-template-rows: auto;
     }
 
     #layoutMainColumn {
@@ -170,12 +173,20 @@ a {
         padding: 1.5rem;
     }
 }
+#layoutColumnsRoot {
+    flex: 1 1 auto;
+}
 
 /* Singular left column that may contain blocks. Stacks above main column if the viewport is too narrow */
 #layoutLeftColumn {}
 
-#layoutMainColumn {}
+#layoutMainColumn {
+    min-height: 100%;
+}
 
+#root {
+    min-height: 100vh;
+}
 #notifications-facet {
     display: grid;
     width: 100%;
