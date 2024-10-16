@@ -64,9 +64,46 @@ export class EditorDocumentModel extends StoreBacked<EditorDocument> {
     }
 }
 
-export class EditorValidator {
+export abstract class EditorTransformerBase<T>
+    implements IEditorTransformer<T>
+{
     /** Validate that the document is OK to attempt posting. Override to add additional checks. */
-    public async validate(doc: EditorDocument): Promise<ValidationError[]> {
+    public async validateAndTransform(
+        doc: EditorDocument
+    ): Promise<{ output: T | undefined; errors: ValidationError[] }> {
+        const errors = await this.validate(doc);
+        if (errors.length > 0) {
+            return { output: undefined, errors: errors };
+        }
+
+        try {
+            const result = await this.transform(doc);
+            return { output: result, errors: [] };
+        } catch (err) {
+            if (err instanceof Error) {
+                return {
+                    output: undefined,
+                    errors: [
+                        new ValidationError(
+                            `Failed to transform document: ${
+                                err.stack ?? err.message
+                            }`
+                        ),
+                    ],
+                };
+            }
+            return {
+                output: undefined,
+                errors: [
+                    new ValidationError(
+                        "Failed to transform document, and caught an error which wasn't instanceof Error (this is a bug)"
+                    ),
+                ],
+            };
+        }
+    }
+
+    protected async validate(doc: EditorDocument): Promise<ValidationError[]> {
         const errors: ValidationError[] = [];
         if (doc.body.length === 0) {
             errors.push(new ValidationError("No post body provided"));
@@ -74,17 +111,34 @@ export class EditorValidator {
 
         return errors;
     }
+
+    protected abstract transform(doc: EditorDocument): Promise<T>;
 }
 
-export class EditorSubmitter {
-    public async submit(doc: EditorDocument): Promise<ValidationError[]> {
+export abstract class EditorSubmitter<T> implements IEditorSubmitter<T> {
+    public async submit(
+        doc: T,
+        action: EditorActions
+    ): Promise<ValidationError[]> {
         const errors: ValidationError[] = [];
-        if (doc.body.length === 0) {
-            errors.push(new ValidationError("No post body provided"));
-        }
         return errors;
     }
 }
+export interface IEditorTransformer<T> {
+    validateAndTransform(
+        doc: EditorDocument
+    ): Promise<{ output: T | undefined; errors: ValidationError[] }>;
+}
+
+export interface IEditorSubmitter<T> {
+    submit(
+        transformedDoc: T,
+        action: EditorActions
+    ): Promise<ValidationError[]>;
+}
+
+/** Possible actions, like "submit" and "preview" */
+export type EditorActions = "submit";
 
 export class ValidationError {
     constructor(public message: string) {}
@@ -94,10 +148,10 @@ export interface EditorConfig {
     bodyPlaceholder: string;
 }
 
-export interface EditorProps {
+export interface EditorProps<T> {
     model: EditorDocumentModel;
-    validator: EditorValidator;
-    submitter: EditorSubmitter;
+    transformer: IEditorTransformer<T>;
+    submitter: IEditorSubmitter<T>;
     config: EditorConfig;
     class?: string | undefined;
 }

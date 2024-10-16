@@ -1,9 +1,11 @@
 import {
+    Accessor,
     Component,
     createMemo,
     createSignal,
     ErrorBoundary,
     For,
+    JSX,
     Match,
     Show,
     Switch,
@@ -32,144 +34,210 @@ import { VisibilityIcon } from "../visibility-icon";
 import { MenuButton } from "../ui/menubutton";
 import { Button } from "../ui/button";
 import {
+    EditorActions,
+    EditorConfig,
+    EditorDocumentModel,
     EditorProps,
+    IEditorSubmitter,
+    IEditorTransformer,
     NewCommentEditorProps,
     ValidationError,
 } from "./editor-types";
 import { unwrap } from "solid-js/store";
+import { Status } from "megalodon/lib/src/entities/status";
+import { MegalodonPostStatus } from "./megalodon-status-transformer";
 
-export const EditorComponent: Component<EditorProps> = (props) => {
-    const model = props.model;
-    const validator = props.validator;
-    const submitter = props.submitter;
-    const config = props.config;
-
-    // shorthand for whether controls should be active or not.
-    const busy = createMemo(() => {
-        return model.stage !== "idle";
-    });
-
-    return (
-        <form
-            class={`flex flex-col gap-3 ${props.class}`}
-            onsubmit={async (ev) => {
-                ev.preventDefault();
-                try {
-                    model.setStage("validating");
-                    // Unwrap the document, it doesn't need to be reactive now
-                    const doc = unwrap(model.document);
-
-                    const validationErrors = await validator.validate(doc);
-                    model.setValidationErrors(validationErrors);
-                    if (validationErrors.length > 0) {
-                        model.setStage("idle");
-                        return;
-                    }
-
-                    model.setStage("submitting");
-                    const submitErrors = await submitter.submit(doc);
-                    model.setValidationErrors(submitErrors);
-                    if (submitErrors.length > 0) {
-                        model.setStage("idle");
-                        return;
-                    }
-
-                    model.setStage("submitted");
-                } catch (err) {
-                    if (err instanceof Error) {
-                        model.setValidationErrors([
-                            new ValidationError(err.stack ?? err.message),
-                        ]);
-                        model.setStage("idle");
-                    }
-                }
-                return false;
-            }}
-        >
-            <TextField class="border-none w-full flex-grow py-0 items-start justify-between">
-                <TextFieldTextArea
-                    tabindex="0"
-                    placeholder={config.bodyPlaceholder}
-                    class="resize-none overflow-hidden px-3 py-2 text-md border-2 rounded-md"
-                    disabled={busy()}
-                    onInput={(e) => {
-                        model.set("body", e.currentTarget.value);
-                    }}
-                    value={model.document.body}
-                ></TextFieldTextArea>
-            </TextField>
-            <TextField
-                class="border-none w-full flex-shrink"
-                hidden={!model.document.cwVisible}
-            >
-                <TextFieldInput
-                    type="text"
-                    class="resize-none px-3 py-2 text-sm border-2 rounded-md focus-visible:ring-0"
-                    placeholder="content warnings"
-                    disabled={busy()}
-                    onInput={(e) => {
-                        model.set("cwContent", e.currentTarget.value);
-                    }}
-                    value={model.document.cwContent}
-                ></TextFieldInput>
-            </TextField>
-            <div class="flex flex-row gap-2">
-                <MenuButton
-                    onClick={() => {
-                        model.set("cwVisible", !model.document.cwVisible);
-                    }}
-                >
-                    <IoWarningOutline class="size-5" />
-                </MenuButton>
-                <DropdownMenu>
-                    <DropdownMenuTrigger
-                        as={MenuButton<"button">}
-                        type="button"
-                    >
-                        <VisibilityIcon
-                            value={model.document.visibility}
-                            class="size-4"
-                        />
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent class="w-48">
-                        <DropdownMenuRadioGroup
-                            value={model.document.visibility}
-                            onChange={(val) => {
-                                if (isValidVisibility(val)) {
-                                    model.set("visibility", val);
-                                } // TODO: ignore it for now, but otherwise uh, explode or something
-                            }}
-                        >
-                            <DropdownMenuRadioItem value="public">
-                                Public
-                            </DropdownMenuRadioItem>
-                            <DropdownMenuRadioItem value="unlisted">
-                                Unlisted
-                            </DropdownMenuRadioItem>
-                            <DropdownMenuRadioItem value="private">
-                                Private
-                            </DropdownMenuRadioItem>
-                            <DropdownMenuRadioItem value="direct">
-                                Mentioned Only
-                            </DropdownMenuRadioItem>
-                        </DropdownMenuRadioGroup>
-                    </DropdownMenuContent>
-                </DropdownMenu>
-                <div class="flex-1" />
-                <Button type="submit" disabled={busy()}>
-                    Post
-                </Button>
-            </div>
-            <Show when={model.validationErrors.length > 0}>
-                <div>
-                    Failed to post
-                    <ul>
-                        <For each={model.validationErrors}>
-                            {(e) => <li>{e.message}</li>}
-                        </For>
-                    </ul>
-                </div>
-            </Show>
-        </form>
-    );
+export const MegalodonStatusEditorComponent: Component<
+    EditorProps<MegalodonPostStatus>
+> = (props) => {
+    return new EditorComponentBase<MegalodonPostStatus>(props).makeComponent();
 };
+
+/** Extensible base for constructing different editor components */
+class EditorComponentBase<TOutput> {
+    protected model: EditorDocumentModel;
+    protected transformer: IEditorTransformer<TOutput>;
+    protected submitter: IEditorSubmitter<TOutput>;
+    protected config: EditorConfig;
+    protected class: string | undefined;
+
+    /** controls whether controls should be active or not. */
+    protected busy: Accessor<boolean>;
+
+    constructor(props: EditorProps<TOutput>) {
+        this.model = props.model;
+        this.transformer = props.transformer;
+        this.submitter = props.submitter;
+        this.config = props.config;
+        this.class = props.class;
+
+        // shorthand for whether controls should be active or not.
+        this.busy = createMemo(() => {
+            return this.model.stage !== "idle";
+        });
+    }
+
+    /** perform an 'action' */
+    protected async performAction(action: EditorActions) {
+        this.model.setValidationErrors([]);
+        this.model.setStage("validating");
+        // Unwrap the document, it doesn't need to be reactive now
+        const doc = unwrap(this.model.document);
+
+        const transformResult = await this.transformer.validateAndTransform(
+            doc
+        );
+        if (transformResult.errors.length > 0) {
+            this.model.setValidationErrors(transformResult.errors);
+            this.model.setStage("idle");
+            return;
+        }
+        if (transformResult.output === undefined) {
+            this.model.setValidationErrors([
+                new ValidationError(
+                    "Failed to transform message, and no explicit errors were returned. This is a bug."
+                ),
+            ]);
+            this.model.setStage("idle");
+            return;
+        }
+
+        this.model.setStage("submitting");
+        const submitErrors = await this.submitter.submit(
+            transformResult.output,
+            action
+        );
+        this.model.setValidationErrors(submitErrors);
+        if (submitErrors.length > 0) {
+            this.model.setStage("idle");
+            return;
+        }
+
+        this.model.setStage("submitted");
+    }
+
+    public makeComponent(): JSX.Element {
+        return (
+            <form
+                class={`flex flex-col gap-3 ${this.class}`}
+                onsubmit={async (ev) => {
+                    ev.preventDefault();
+                    try {
+                        await this.performAction("submit");
+                    } catch (err) {
+                        if (err instanceof Error) {
+                            this.model.setValidationErrors([
+                                new ValidationError(err.stack ?? err.message),
+                            ]);
+                            this.model.setStage("idle");
+                        }
+                    }
+                    return false;
+                }}
+            >
+                {this.makeComponentControls()}
+            </form>
+        );
+    }
+
+    /** Makes the bulk of the controls used in the editor component */
+    protected makeComponentControls(): JSX.Element {
+        const config = this.config;
+        const model = this.model;
+        return (
+            <>
+                <TextField class="border-none w-full flex-grow py-0 items-start justify-between">
+                    <TextFieldTextArea
+                        tabindex="0"
+                        placeholder={config.bodyPlaceholder}
+                        class="resize-none overflow-hidden px-3 py-2 text-md border-2 rounded-md"
+                        disabled={this.busy()}
+                        onInput={(e) => {
+                            model.set("body", e.currentTarget.value);
+                        }}
+                        value={model.document.body}
+                    ></TextFieldTextArea>
+                </TextField>
+                <TextField
+                    class="border-none w-full flex-shrink"
+                    hidden={!model.document.cwVisible}
+                >
+                    <TextFieldInput
+                        type="text"
+                        class="resize-none px-3 py-2 text-sm border-2 rounded-md focus-visible:ring-0"
+                        placeholder="content warnings"
+                        disabled={this.busy()}
+                        onInput={(e) => {
+                            model.set("cwContent", e.currentTarget.value);
+                        }}
+                        value={model.document.cwContent}
+                    ></TextFieldInput>
+                </TextField>
+                <div class="flex flex-row gap-2">
+                    <MenuButton
+                        onClick={() => {
+                            model.set("cwVisible", !model.document.cwVisible);
+                        }}
+                    >
+                        <IoWarningOutline class="size-5" />
+                    </MenuButton>
+                    <DropdownMenu>
+                        <DropdownMenuTrigger
+                            as={MenuButton<"button">}
+                            type="button"
+                        >
+                            <VisibilityIcon
+                                value={model.document.visibility}
+                                class="size-4"
+                            />
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent class="w-48">
+                            <DropdownMenuRadioGroup
+                                value={model.document.visibility}
+                                onChange={(val) => {
+                                    if (isValidVisibility(val)) {
+                                        model.set("visibility", val);
+                                    } // TODO: ignore it for now, but otherwise uh, explode or something
+                                }}
+                            >
+                                <DropdownMenuRadioItem value="public">
+                                    Public
+                                </DropdownMenuRadioItem>
+                                <DropdownMenuRadioItem value="unlisted">
+                                    Unlisted
+                                </DropdownMenuRadioItem>
+                                <DropdownMenuRadioItem value="private">
+                                    Private
+                                </DropdownMenuRadioItem>
+                                <DropdownMenuRadioItem value="direct">
+                                    Mentioned Only
+                                </DropdownMenuRadioItem>
+                            </DropdownMenuRadioGroup>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                    <div class="flex-1" />
+                    {this.actionButtons()}
+                </div>
+                <Show when={model.validationErrors.length > 0}>
+                    <div>
+                        Failed to post
+                        <ul>
+                            <For each={model.validationErrors}>
+                                {(e) => <li>{e.message}</li>}
+                            </For>
+                        </ul>
+                    </div>
+                </Show>
+            </>
+        );
+    }
+
+    /** action buttons */
+    protected actionButtons(): JSX.Element {
+        return (
+            <Button type="submit" disabled={this.busy()}>
+                Post
+            </Button>
+        );
+    }
+}

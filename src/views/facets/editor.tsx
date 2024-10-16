@@ -12,13 +12,11 @@ import { Timestamp } from "~/components/post/timestamp";
 import { Card, CardHeader, CardTitle, CardContent } from "~/components/ui/card";
 import { PersistentFlagNames, useSettings } from "~/lib/settings-manager";
 import PostEditor from "../editdialog";
-import { EditorComponent } from "~/components/editor/component";
 import {
     EditorConfig,
     EditorDocument,
     EditorDocumentModel,
     EditorSubmitter,
-    EditorValidator,
 } from "~/components/editor/editor-types";
 
 const EditorFacet: Component = () => {
@@ -33,6 +31,7 @@ const EditorFacet: Component = () => {
         cwVisible: false,
         visibility: "unlisted",
     };
+    /*
     const model = new EditorDocumentModel(initialDoc);
     const validator = new EditorValidator();
     const submitter = new EditorSubmitter();
@@ -49,6 +48,13 @@ const EditorFacet: Component = () => {
                 class="h-full p-2"
             ></EditorComponent>
         </>
+    );
+    */
+    return (
+        <div>
+            temporarily not here. maybe see{" "}
+            <a href="/dev/editDialog">the dev version?</a>
+        </div>
     );
 };
 
