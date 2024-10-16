@@ -5,7 +5,6 @@ import HtmlSandbox, { HtmlSandboxSpan } from "./htmlsandbox";
 import { Timestamp } from "~/components/post/timestamp";
 import { DateTime } from "luxon";
 import { AvatarLink } from "~/components/user/avatar";
-import { NewCommentEditor } from "~/components/post/comments";
 import { BsReply } from "solid-icons/bs";
 import {
     ContextMenu,
@@ -17,6 +16,7 @@ import { TextField, TextFieldTextArea } from "~/components/ui/text-field";
 import { VisibilityIcon } from "~/components/visibility-icon";
 import { ContentGuard } from "~/components/content-guard";
 import { ImageBox } from "~/components/post/image-box";
+import { NewCommentEditor } from "~/components/editor/comments";
 
 export type CommentProps = {
     status: Status;

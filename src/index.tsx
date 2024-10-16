@@ -16,6 +16,7 @@ const root = document.getElementById("root");
 const App = lazy(() => import("./App"));
 const HomeView = lazy(() => import("./views/home"));
 const SettingsFacet = lazy(() => import("./views/facets/settings"));
+const EditorFacet = lazy(() => import("./views/facets/editor"));
 const NotificationsFacet = lazy(() => import("./views/facets/notifications"));
 const AboutPillbugView = lazy(() => import("./views/aboutpillbug"));
 const Feed = lazy(() => import("./views/feed"));
@@ -23,7 +24,6 @@ const UserProfile = lazy(() => import("./views/userprofile"));
 const LoginView = lazy(() => import("./views/login"));
 const PostPage = lazy(() => import("./views/postpage"));
 const DevEditDialogPage = lazy(() => import("./views/dev/editdialogpage"));
-const FacetNavigationFrame = lazy(() => import("./views/facetnavigation"));
 const ErrorBox = lazy(() => import("./components/error"));
 const ErrorView = lazy(() => import("./views/error"));
 
@@ -48,51 +48,37 @@ render(
                 <Route
                     path="/feed"
                     component={() => {
-                        return (
-                            <FacetNavigationFrame>
-                                <Feed />
-                            </FacetNavigationFrame>
-                        );
+                        return <Feed />;
                     }}
                 />
                 <Route
                     path="/notifications"
                     component={() => {
-                        return (
-                            <FacetNavigationFrame>
-                                <NotificationsFacet />
-                            </FacetNavigationFrame>
-                        );
+                        return <NotificationsFacet />;
                     }}
                 />
                 <Route
                     path="/search"
                     component={() => {
-                        return (
-                            <FacetNavigationFrame>
-                                placeholder for search
-                            </FacetNavigationFrame>
-                        );
+                        return <div>placeholder for search</div>;
                     }}
                 />
                 <Route
                     path="/profile"
                     component={() => {
-                        return (
-                            <FacetNavigationFrame>
-                                placeholder for profile
-                            </FacetNavigationFrame>
-                        );
+                        return <div>placeholder for profile</div>;
+                    }}
+                />
+                <Route
+                    path="/editor/:target"
+                    component={() => {
+                        return <EditorFacet />;
                     }}
                 />
                 <Route
                     path="/settings"
                     component={() => {
-                        return (
-                            <FacetNavigationFrame>
-                                <SettingsFacet />
-                            </FacetNavigationFrame>
-                        );
+                        return <SettingsFacet />;
                     }}
                 />
                 <Route path="/about" component={AboutPillbugView} />

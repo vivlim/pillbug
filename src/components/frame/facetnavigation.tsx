@@ -10,9 +10,13 @@ import {
     FaSolidQuestion,
 } from "solid-icons/fa";
 import { Component, createResource, For, JSX, Show } from "solid-js";
-import { useExpandMenuSignalContext } from "~/Frame";
 import { useAuth } from "~/auth/auth-manager";
+import {
+    LayoutLeftColumn,
+    LayoutMainColumn,
+} from "~/components/layout/columns";
 import { cn } from "~/lib/utils";
+import { useFrameContext } from "./context";
 
 class FacetDefinition {
     constructor(public label: string, public url: string) {}
@@ -22,7 +26,7 @@ const FacetNavigationItem: Component<{
     children: JSX.Element;
     href: string;
 }> = (props) => {
-    const expandMenuContext = useExpandMenuSignalContext();
+    const frameContext = useFrameContext();
     const activeClasses = ["active-facet", "font-bold"];
     const classes = [
         "facet-navigation-item",
@@ -46,7 +50,7 @@ const FacetNavigationItem: Component<{
             <a
                 class={cn(classes)}
                 href={props.href}
-                onClick={() => expandMenuContext.setMenuOpen(false)}
+                onClick={() => frameContext.setNavPopupMenuOpen(false)}
             >
                 {props.children}
             </a>
@@ -54,9 +58,7 @@ const FacetNavigationItem: Component<{
     );
 };
 
-export const FacetNavigationFrame: Component<{ children: JSX.Element }> = (
-    props
-) => {
+export const FacetNavigation: Component = (props) => {
     const auth = useAuth();
 
     const profileUrl = () => {
@@ -66,25 +68,24 @@ export const FacetNavigationFrame: Component<{ children: JSX.Element }> = (
         return undefined;
     };
 
-    const expandMenuContext = useExpandMenuSignalContext();
+    const frameContext = useFrameContext();
 
     return (
-        <div class="flex flex-grow flex-row mx-4 gap-4 md:justify-center">
+        <Show when={frameContext.showNav() || frameContext.navPopupMenuOpen()}>
             <div
                 classList={{
-                    "w-64": true,
+                    "m-2": true,
+                    "w-full": true,
                     "rounded-lg": true,
                     border: true,
                     "bg-card": true,
                     "text-card-foreground": true,
                     "shadow-sm": true,
                     fixed: true,
-                    hidden: !expandMenuContext.menuOpen(),
-                    "md:flex-none": true,
-                    "md:mt-4": true,
-                    "md:flex": true,
+                    "col-span-full": true,
+                    hidden: !frameContext.navPopupMenuOpen(),
+                    "md:block": true,
                     "md:static": true,
-                    "md:h-fit": true,
                 }}
             >
                 <ul id="facet-menu" class="flex flex-col list-none p-6 gap-1">
@@ -112,12 +113,8 @@ export const FacetNavigationFrame: Component<{ children: JSX.Element }> = (
                     </FacetNavigationItem>
                 </ul>
             </div>
-
-            <div class="overflow-auto flex-grow max-w-4xl ">
-                {props.children}
-            </div>
-        </div>
+        </Show>
     );
 };
 
-export default FacetNavigationFrame;
+export default FacetNavigation;
