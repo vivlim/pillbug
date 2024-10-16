@@ -232,7 +232,7 @@ const AppFrame: Component<{ children: JSX.Element }> = (props) => {
                 setNavPopupMenuOpen,
             }}
         >
-            <div>
+            <>
                 <FrameTopBar />
                 <LayoutColumnsRoot>
                     <LayoutLeftColumn />
@@ -241,7 +241,7 @@ const AppFrame: Component<{ children: JSX.Element }> = (props) => {
                 <LayoutLeftColumnPortal>
                     <FacetNavigation />
                 </LayoutLeftColumnPortal>
-            </div>
+            </>
         </FrameContext.Provider>
     );
 };

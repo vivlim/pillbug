@@ -38,12 +38,12 @@ import {
 } from "./editor-types";
 import { unwrap } from "solid-js/store";
 
-export const EditorComponent: Component<EditorProps> = ({
-    model,
-    validator,
-    submitter,
-    config,
-}) => {
+export const EditorComponent: Component<EditorProps> = (props) => {
+    const model = props.model;
+    const validator = props.validator;
+    const submitter = props.submitter;
+    const config = props.config;
+
     // shorthand for whether controls should be active or not.
     const busy = createMemo(() => {
         return model.stage !== "idle";
@@ -51,6 +51,7 @@ export const EditorComponent: Component<EditorProps> = ({
 
     return (
         <form
+            class={`flex flex-col gap-3 ${props.class}`}
             onsubmit={async (ev) => {
                 ev.preventDefault();
                 try {
@@ -85,94 +86,90 @@ export const EditorComponent: Component<EditorProps> = ({
                 return false;
             }}
         >
-            <div class="flex flex-col gap-3">
-                <TextField class="border-none w-full flex-grow py-0 items-start justify-between">
-                    <TextFieldTextArea
-                        tabindex="0"
-                        placeholder={config.bodyPlaceholder}
-                        class="resize-none overflow-hidden px-3 py-2 text-md border-2 rounded-md"
-                        disabled={busy()}
-                        onInput={(e) => {
-                            model.set("body", e.currentTarget.value);
-                        }}
-                        value={model.document.body}
-                    ></TextFieldTextArea>
-                </TextField>
-                <TextField
-                    class="border-none w-full flex-shrink"
-                    hidden={!model.document.cwVisible}
+            <TextField class="border-none w-full flex-grow py-0 items-start justify-between">
+                <TextFieldTextArea
+                    tabindex="0"
+                    placeholder={config.bodyPlaceholder}
+                    class="resize-none overflow-hidden px-3 py-2 text-md border-2 rounded-md"
+                    disabled={busy()}
+                    onInput={(e) => {
+                        model.set("body", e.currentTarget.value);
+                    }}
+                    value={model.document.body}
+                ></TextFieldTextArea>
+            </TextField>
+            <TextField
+                class="border-none w-full flex-shrink"
+                hidden={!model.document.cwVisible}
+            >
+                <TextFieldInput
+                    type="text"
+                    class="resize-none px-3 py-2 text-sm border-2 rounded-md focus-visible:ring-0"
+                    placeholder="content warnings"
+                    disabled={busy()}
+                    onInput={(e) => {
+                        model.set("cwContent", e.currentTarget.value);
+                    }}
+                    value={model.document.cwContent}
+                ></TextFieldInput>
+            </TextField>
+            <div class="flex flex-row gap-2">
+                <MenuButton
+                    onClick={() => {
+                        model.set("cwVisible", !model.document.cwVisible);
+                    }}
                 >
-                    <TextFieldInput
-                        type="text"
-                        class="resize-none px-3 py-2 text-sm border-2 rounded-md focus-visible:ring-0"
-                        placeholder="content warnings"
-                        disabled={busy()}
-                        onInput={(e) => {
-                            model.set("cwContent", e.currentTarget.value);
-                        }}
-                        value={model.document.cwContent}
-                    ></TextFieldInput>
-                </TextField>
-            </div>
-            <div>
-                <div class="flex-grow flex flex-row gap-2">
-                    <MenuButton
-                        onClick={() => {
-                            model.set("cwVisible", !model.document.cwVisible);
-                        }}
+                    <IoWarningOutline class="size-5" />
+                </MenuButton>
+                <DropdownMenu>
+                    <DropdownMenuTrigger
+                        as={MenuButton<"button">}
+                        type="button"
                     >
-                        <IoWarningOutline class="size-5" />
-                    </MenuButton>
-                    <DropdownMenu>
-                        <DropdownMenuTrigger
-                            as={MenuButton<"button">}
-                            type="button"
+                        <VisibilityIcon
+                            value={model.document.visibility}
+                            class="size-4"
+                        />
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent class="w-48">
+                        <DropdownMenuRadioGroup
+                            value={model.document.visibility}
+                            onChange={(val) => {
+                                if (isValidVisibility(val)) {
+                                    model.set("visibility", val);
+                                } // TODO: ignore it for now, but otherwise uh, explode or something
+                            }}
                         >
-                            <VisibilityIcon
-                                value={model.document.visibility}
-                                class="size-4"
-                            />
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent class="w-48">
-                            <DropdownMenuRadioGroup
-                                value={model.document.visibility}
-                                onChange={(val) => {
-                                    if (isValidVisibility(val)) {
-                                        model.set("visibility", val);
-                                    } // TODO: ignore it for now, but otherwise uh, explode or something
-                                }}
-                            >
-                                <DropdownMenuRadioItem value="public">
-                                    Public
-                                </DropdownMenuRadioItem>
-                                <DropdownMenuRadioItem value="unlisted">
-                                    Unlisted
-                                </DropdownMenuRadioItem>
-                                <DropdownMenuRadioItem value="private">
-                                    Private
-                                </DropdownMenuRadioItem>
-                                <DropdownMenuRadioItem value="direct">
-                                    Mentioned Only
-                                </DropdownMenuRadioItem>
-                            </DropdownMenuRadioGroup>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                    <div class="flex-1" />
-                    <Button type="submit" disabled={busy()}>
-                        Post
-                    </Button>
-                </div>
-                <Show when={model.validationErrors.length > 0}>
-                    <div>
-                        Failed to post:
-                        <ul>
-                            <For each={model.validationErrors}>
-                                {(e) => <li>{e.message}</li>}
-                            </For>
-                        </ul>
-                    </div>
-                </Show>
+                            <DropdownMenuRadioItem value="public">
+                                Public
+                            </DropdownMenuRadioItem>
+                            <DropdownMenuRadioItem value="unlisted">
+                                Unlisted
+                            </DropdownMenuRadioItem>
+                            <DropdownMenuRadioItem value="private">
+                                Private
+                            </DropdownMenuRadioItem>
+                            <DropdownMenuRadioItem value="direct">
+                                Mentioned Only
+                            </DropdownMenuRadioItem>
+                        </DropdownMenuRadioGroup>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+                <div class="flex-1" />
+                <Button type="submit" disabled={busy()}>
+                    Post
+                </Button>
             </div>
+            <Show when={model.validationErrors.length > 0}>
+                <div>
+                    Failed to post
+                    <ul>
+                        <For each={model.validationErrors}>
+                            {(e) => <li>{e.message}</li>}
+                        </For>
+                    </ul>
+                </div>
+            </Show>
         </form>
     );
 };
