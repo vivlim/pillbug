@@ -25,6 +25,13 @@ export interface SignedInState {
     accountData: Account;
     domain: string;
     signedIn: true;
+    software:
+    | "mastodon"
+    | "pleroma"
+    | "friendica"
+    | "firefish"
+    | "gotosocial"
+    | undefined;
 }
 
 export interface SignedOutState {

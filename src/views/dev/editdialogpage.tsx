@@ -43,6 +43,7 @@ import {
 import { CommentTransformer } from "~/components/editor/comment-transformer";
 import { ShareTransformer } from "~/components/editor/share-transformer";
 import { Status } from "megalodon/lib/src/entities/status";
+import { useAuth } from "~/auth/auth-manager";
 
 type EditorVariant<T> = {
     name: string;
@@ -101,7 +102,13 @@ const DevEditDialogPage: Component = () => {
         {
             name: "share",
             transformer: new MockTransformerWrapper(
-                new ShareTransformer("FAKE_SHARE_TARGET_ID"),
+                new ShareTransformer(
+                    {
+                        id: "FAKE_SHARE_TARGET_ID",
+                        uri: "FAKE_SHARE_TARGET_URI",
+                    } as Status,
+                    useAuth()
+                ),
                 allowValidation
             ),
             submitter: new MockSubmitter(allowSubmit, setSubmission),
