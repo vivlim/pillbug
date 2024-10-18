@@ -54,6 +54,7 @@ export const NewCommentEditor: Component<NewCommentEditorProps> = (props) => {
                 postId: loadProps().postId,
                 lastRefresh: Date.now(),
                 newCommentId: postId(),
+                shareEditorMode: loadProps().shareEditorMode,
             });
         }
     });

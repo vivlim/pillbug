@@ -70,7 +70,13 @@ render(
                     }}
                 />
                 <Route
-                    path="/editor/:target"
+                    path="/editor/new"
+                    component={() => {
+                        return <EditorFacet />;
+                    }}
+                />
+                <Route
+                    path="/share/:shareTarget"
                     component={() => {
                         return <EditorFacet />;
                     }}

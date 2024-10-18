@@ -32,7 +32,9 @@ import { MegalodonPostSubmitter } from "~/components/editor/megalodon-status-sub
 import { MegalodonStatusEditorComponent } from "~/components/editor/component";
 import { TrackedBlockingLoadComponent } from "~/components/tracked-blocking-load";
 import { BlockingLoadProgressTracker } from "~/lib/blocking-load";
-import { useNavigate } from "@solidjs/router";
+import { useNavigate, useParams } from "@solidjs/router";
+import { PostWithShared } from "~/components/post";
+import { PostPageContext, PostPageForId } from "../postpage";
 
 export type EditorFacetProps = {
     sharing_post_id?: string | undefined;
@@ -40,6 +42,9 @@ export type EditorFacetProps = {
 };
 
 const EditorFacet: Component = () => {
+    const params = useParams();
+    const postId: string | undefined = params.shareTarget;
+
     const [newPostId, setNewPostId] = createSignal<string | undefined>();
     const navigate = useNavigate();
 
@@ -49,7 +54,23 @@ const EditorFacet: Component = () => {
             navigate(`/post/${newPostId()}`);
         }
     });
-    return <EditorFacetEditor setNewPostId={setNewPostId} />;
+    return (
+        <div id="editorRoot">
+            <Show when={postId !== undefined}>
+                <div id="editorShareTarget" class="pbCard">
+                    NOTE: this doesn't actually share the post yet
+                    <h1 class="px-4">you're sharing this post:</h1>
+                    <PostPageForId postId={postId} shareEditorMode={true} />
+                </div>
+            </Show>
+            <div id="editorEditor">
+                <EditorFacetEditor
+                    setNewPostId={setNewPostId}
+                    sharing_post_id={postId}
+                />
+            </div>
+        </div>
+    );
 };
 
 const EditorFacetEditor: Component<EditorFacetProps> = (props) => {

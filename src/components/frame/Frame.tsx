@@ -181,14 +181,6 @@ const FrameTopBar: Component = (props) => {
                                             >
                                                 Toggle light/dark
                                             </MenubarItem>
-
-                                            <MenubarItem
-                                                onClick={() => {
-                                                    navigate("/dev/editDialog");
-                                                }}
-                                            >
-                                                Dev tools: edit dialog
-                                            </MenubarItem>
                                         </MenubarContent>
                                     </MenubarMenu>
                                 </Menubar>

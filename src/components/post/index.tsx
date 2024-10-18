@@ -1,4 +1,4 @@
-import { A } from "@solidjs/router";
+import { A, useNavigate } from "@solidjs/router";
 import { Entity, MegalodonInterface } from "megalodon";
 import { Status } from "megalodon/lib/src/entities/status";
 import {
@@ -28,7 +28,15 @@ import { TextField, TextFieldTextArea } from "~/components/ui/text-field";
 import { FaSolidArrowsRotate } from "solid-icons/fa";
 import createUrlRegExp from "url-regex-safe";
 import { VisibilityIcon } from "~/components/visibility-icon";
-import { IoHeart, IoHeartOutline } from "solid-icons/io";
+import {
+    IoChatboxEllipses,
+    IoChatboxEllipsesOutline,
+    IoHeart,
+    IoHeartOutline,
+    IoShare,
+    IoSyncCircle,
+    IoSyncOutline,
+} from "solid-icons/io";
 import { BsPinAngleFill } from "solid-icons/bs";
 import { IconProps } from "solid-icons";
 import { cn } from "~/lib/utils";
@@ -38,6 +46,14 @@ import { ImageBox } from "~/components/post/image-box";
 import { Timestamp } from "~/components/post/timestamp";
 import { DateTime } from "luxon";
 import { AvatarLink } from "~/components/user/avatar";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
+import { MenuButton } from "../ui/menubutton";
+import { unwrapResponse } from "~/lib/clientUtil";
 
 export type PostWithSharedProps = {
     status: Status;
@@ -204,6 +220,57 @@ async function toggleLike(
     return res.data;
 }
 
+type ShareButtonProps = { status: Status };
+const ShareButton: Component<ShareButtonProps> = (props) => {
+    const navigate = useNavigate();
+    const auth = useAuth();
+    const [status, setStatus] = createSignal<string>("");
+    return (
+        <>
+            <span>{status()}</span>
+            <DropdownMenu>
+                <DropdownMenuTrigger as={MenuButton<"button">} type="button">
+                    <IoSyncOutline class="size-6" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent class="w-48">
+                    <DropdownMenuItem
+                        class="py-4 md:py-2"
+                        onClick={async () => {
+                            try {
+                                setStatus("sharing...");
+                                const result =
+                                    await auth.assumeSignedIn.client.reblogStatus(
+                                        props.status.id
+                                    );
+                                unwrapResponse(result);
+                                setStatus("shared!");
+                            } catch (e) {
+                                if (e instanceof Error) {
+                                    setStatus("error: " + e.message);
+                                } else {
+                                    setStatus("error");
+                                }
+                            }
+                        }}
+                    >
+                        <IoSyncOutline class="size-6 mr-2" />
+                        quick share
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                        class="py-4 md:py-2"
+                        onClick={() => {
+                            navigate(`/share/${props.status.id}`);
+                        }}
+                    >
+                        <IoChatboxEllipsesOutline class="size-6 mr-2" />
+                        share in editor
+                    </DropdownMenuItem>
+                </DropdownMenuContent>
+            </DropdownMenu>
+        </>
+    );
+};
+
 const Post: Component<PostProps> = (postData) => {
     const auth = useAuth();
     const [status, updateStatus] = createSignal(postData.status);
@@ -246,9 +313,10 @@ const Post: Component<PostProps> = (postData) => {
                             </ContextMenuContent>
                         </ContextMenu>
                         <Show when={auth.signedIn}>
+                            <ShareButton status={status()} />
                             <Button
                                 variant="ghost"
-                                class="hover:bg-transparent p-0"
+                                class="hover:bg-transparent p-0 px-2 ml-2"
                                 aria-label="Like Post"
                                 onClick={async () => {
                                     const updated = await toggleLike(
