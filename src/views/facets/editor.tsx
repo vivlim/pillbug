@@ -107,7 +107,7 @@ const EditorFacetEditor: Component<EditorFacetProps> = (props) => {
             );
             const status = unwrapResponse(statusReq);
 
-            return new ShareTransformer(status.uri);
+            return new ShareTransformer(status, auth);
         } else {
             return new PostTransformer();
         }

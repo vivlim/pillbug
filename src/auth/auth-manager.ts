@@ -36,7 +36,6 @@ export class SessionAuthManagerAssumingSignedIn {
         }
         return state;
     }
-
 }
 
 export class SessionAuthManager extends PersistentStoreBacked<PillbugSessionStore, PillbugPersistentStore> {
@@ -404,6 +403,7 @@ export async function updateAuthStateForActiveAccount(accountIndex: number, pers
         accountData: creds,
         domain: domain,
         signedIn: true,
+        software: account.instanceSoftware
     }
 
 }
