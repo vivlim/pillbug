@@ -19,6 +19,9 @@ export class CommentTransformer extends MegalodonEditorTransformer<CommentPreTra
         preTransform: CommentPreTransform | undefined
     ): Promise<MegalodonPostStatus> {
         status.options.in_reply_to_id = this.inReplyTo.id;
+        if (status.options.in_reply_to_id === undefined) {
+            throw new Error("Failed to set in-reply-to id");
+        }
         return status;
     }
 }

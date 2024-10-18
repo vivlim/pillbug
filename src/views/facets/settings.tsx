@@ -55,6 +55,16 @@ const SettingsFacet: Component = () => {
                     </PersistentFlagCheckbox>
                 </CardContent>
             </Card>
+            <Card>
+                <CardHeader>
+                    <CardTitle>misc</CardTitle>
+                </CardHeader>
+                <CardContent class="px-4 pb-2">
+                    <PersistentFlagCheckbox flag="enableDevTools">
+                        Enable developer tools
+                    </PersistentFlagCheckbox>
+                </CardContent>
+            </Card>
         </div>
     );
 };

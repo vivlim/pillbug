@@ -8,8 +8,17 @@ import {
     FaSolidMagnifyingGlass,
     FaSolidPerson,
     FaSolidQuestion,
+    FaSolidWrench,
 } from "solid-icons/fa";
-import { Component, createResource, For, JSX, Show } from "solid-js";
+import {
+    Component,
+    createEffect,
+    createMemo,
+    createResource,
+    For,
+    JSX,
+    Show,
+} from "solid-js";
 import { useAuth } from "~/auth/auth-manager";
 import {
     LayoutLeftColumn,
@@ -17,6 +26,7 @@ import {
 } from "~/components/layout/columns";
 import { cn } from "~/lib/utils";
 import { useFrameContext } from "./context";
+import { useSettings } from "~/lib/settings-manager";
 
 class FacetDefinition {
     constructor(public label: string, public url: string) {}
@@ -27,28 +37,28 @@ const FacetNavigationItem: Component<{
     href: string;
 }> = (props) => {
     const frameContext = useFrameContext();
-    const activeClasses = ["active-facet", "font-bold"];
-    const classes = [
-        "facet-navigation-item",
-        "block",
-        "w-full",
-        "p-3",
-        "border-2",
-        "border-transparent",
-        "hover:border-fuchsia-900",
-        "rounded-xl",
-    ];
-    const location = useLocation();
-    if (location.pathname.startsWith(props.href)) {
-        for (let c of activeClasses) {
-            classes.push(c);
-        }
-    }
+    const classList = createMemo(() => {
+        const location = useLocation();
+        const isActive = location.pathname.startsWith(props.href);
+
+        return {
+            ["facet-navigation-item"]: true,
+            ["block"]: true,
+            ["w-full"]: true,
+            ["p-3"]: true,
+            ["border-2"]: true,
+            ["border-transparent"]: true,
+            ["hover:border-fuchsia-900"]: true,
+            ["rounded-xl"]: true,
+            ["active-facet"]: isActive,
+            ["font-bold"]: isActive,
+        };
+    });
 
     return (
         <li class="flex flex-initial">
             <a
-                class={cn(classes)}
+                classList={classList()}
                 href={props.href}
                 onClick={() => frameContext.setNavPopupMenuOpen(false)}
             >
@@ -60,6 +70,7 @@ const FacetNavigationItem: Component<{
 
 export const FacetNavigation: Component = (props) => {
     const auth = useAuth();
+    const settings = useSettings();
 
     const profileUrl = () => {
         if (auth.signedIn) {
@@ -111,6 +122,12 @@ export const FacetNavigation: Component = (props) => {
                         <FaSolidQuestion />
                         about pillbug
                     </FacetNavigationItem>
+                    <Show when={settings.getPersistent().enableDevTools}>
+                        <FacetNavigationItem href="/dev/editDialog">
+                            <FaSolidWrench />
+                            Test Editor
+                        </FacetNavigationItem>
+                    </Show>
                 </ul>
             </div>
         </Show>

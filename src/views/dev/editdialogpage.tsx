@@ -58,7 +58,7 @@ const DevEditDialogPage: Component = () => {
         setTime(DateTime.now());
     }, 5000);
     const initialDoc: EditorDocument = {
-        body: "",
+        body: "hi",
         cwContent: "",
         cwVisible: false,
         visibility: "unlisted",
@@ -91,7 +91,7 @@ const DevEditDialogPage: Component = () => {
             name: "comment",
             transformer: new MockTransformerWrapper(
                 new CommentTransformer({
-                    in_reply_to_id: "FAKE_REPLY_TO_ID",
+                    id: "FAKE_REPLY_TO_ID",
                 } as Status),
                 allowValidation
             ),
@@ -219,11 +219,9 @@ const DevEditDialogPage: Component = () => {
                     <h1>document model</h1>
 
                     <RawDataViewer data={model.document} show={true} />
-                    <h2>validation errors</h2>
-                    <RawDataViewer data={model.validationErrors} show={true} />
                 </div>
                 <div class="grow pbCard p-3 m-4">
-                    <h1>submitted document</h1>
+                    <h1>would submit this</h1>
                     <RawDataViewer data={submission()} show={true} />
                 </div>
             </div>
