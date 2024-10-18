@@ -42,6 +42,7 @@ import {
 } from "~/components/ui/dropdown-menu";
 import { CommentTransformer } from "~/components/editor/comment-transformer";
 import { ShareTransformer } from "~/components/editor/share-transformer";
+import { Status } from "megalodon/lib/src/entities/status";
 
 type EditorVariant<T> = {
     name: string;
@@ -89,7 +90,9 @@ const DevEditDialogPage: Component = () => {
         {
             name: "comment",
             transformer: new MockTransformerWrapper(
-                new CommentTransformer("FAKE_REPLY_TO_ID"),
+                new CommentTransformer({
+                    in_reply_to_id: "FAKE_REPLY_TO_ID",
+                } as Status),
                 allowValidation
             ),
             submitter: new MockSubmitter(allowSubmit, setSubmission),
