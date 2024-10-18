@@ -20,7 +20,6 @@ import {
     EditorDocument,
     EditorDocumentModel,
     EditorProps,
-    EditorSubmitter,
     EditorTransformerBase,
     IEditorSubmitter,
     IEditorTransformer,
@@ -48,7 +47,7 @@ type EditorVariant<T> = {
     name: string;
     transformer: MockTransformerWrapper<T>;
     submitter: MockSubmitter;
-    component: Component<EditorProps<MegalodonPostStatus>>;
+    component: Component<EditorProps<MegalodonPostStatus, string>>;
 };
 
 const DevEditDialogPage: Component = () => {
@@ -109,6 +108,10 @@ const DevEditDialogPage: Component = () => {
 
     const variantNames = variants.map((variant) => variant.name);
 
+    const [newPostId, setNewPostId] = createSignal<string | undefined>(
+        undefined
+    );
+
     const activeVariantComponent: Accessor<JSX.Element> = createMemo(() => {
         const selectedName = selectedVariant();
         const variant = variants.filter(
@@ -120,6 +123,7 @@ const DevEditDialogPage: Component = () => {
             transformer: variant.transformer,
             submitter: variant.submitter,
             config: config(),
+            setNewPostId: setNewPostId,
         });
     });
 
@@ -248,28 +252,21 @@ class MockTransformerWrapper<T> implements IEditorTransformer<T> {
     }
 }
 
-class MockSubmitter
-    extends EditorSubmitter<MegalodonPostStatus>
-    implements IEditorSubmitter<MegalodonPostStatus>
-{
+class MockSubmitter implements IEditorSubmitter<MegalodonPostStatus, string> {
     public constructor(
         public readonly allow: Accessor<boolean>,
         public readonly setSubmission: Setter<MegalodonPostStatus | undefined>
-    ) {
-        super();
-    }
+    ) {}
 
     public async submit(
         transformedDoc: MegalodonPostStatus,
         action: EditorActions
-    ): Promise<ValidationError[]> {
+    ): Promise<string> {
         const errs = [];
         await sleep(1000);
         if (!this.allow()) {
-            errs.push(
-                new ValidationError(
-                    "Blocked because MockSubmitter 'allow' isn't set to true."
-                )
+            throw new Error(
+                "Blocked because MockSubmitter 'allow' isn't set to true."
             );
         }
 
@@ -277,7 +274,7 @@ class MockSubmitter
             this.setSubmission(transformedDoc);
         }
 
-        return errs;
+        return "NEW_POST_ID";
     }
 }
 

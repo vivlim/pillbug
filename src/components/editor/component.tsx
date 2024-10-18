@@ -7,6 +7,7 @@ import {
     For,
     JSX,
     Match,
+    Setter,
     Show,
     Switch,
 } from "solid-js";
@@ -44,11 +45,10 @@ import {
     ValidationError,
 } from "./editor-types";
 import { unwrap } from "solid-js/store";
-import { Status } from "megalodon/lib/src/entities/status";
 import { MegalodonPostStatus } from "./megalodon-status-transformer";
 
 export const MegalodonStatusEditorComponent: Component<
-    EditorProps<MegalodonPostStatus>
+    EditorProps<MegalodonPostStatus, string>
 > = (props) => {
     return new EditorComponentBase<MegalodonPostStatus>(props).makeComponent();
 };
@@ -57,18 +57,20 @@ export const MegalodonStatusEditorComponent: Component<
 class EditorComponentBase<TOutput> {
     protected model: EditorDocumentModel;
     protected transformer: IEditorTransformer<TOutput>;
-    protected submitter: IEditorSubmitter<TOutput>;
+    protected submitter: IEditorSubmitter<TOutput, string>;
     protected config: EditorConfig;
+    protected setNewPostId: Setter<string | undefined>;
     protected class: string | undefined;
 
     /** controls whether controls should be active or not. */
     protected busy: Accessor<boolean>;
 
-    constructor(props: EditorProps<TOutput>) {
+    constructor(props: EditorProps<TOutput, string>) {
         this.model = props.model;
         this.transformer = props.transformer;
         this.submitter = props.submitter;
         this.config = props.config;
+        this.setNewPostId = props.setNewPostId;
         this.class = props.class;
 
         // shorthand for whether controls should be active or not.
@@ -103,12 +105,19 @@ class EditorComponentBase<TOutput> {
         }
 
         this.model.setStage("submitting");
-        const submitErrors = await this.submitter.submit(
-            transformResult.output,
-            action
-        );
-        this.model.setValidationErrors(submitErrors);
-        if (submitErrors.length > 0) {
+        try {
+            const newPostId = await this.submitter.submit(
+                transformResult.output,
+                action
+            );
+
+            this.setNewPostId(newPostId);
+        } catch (e) {
+            if (e instanceof Error) {
+                this.model.setValidationErrors([
+                    new ValidationError(e.stack ?? e.message),
+                ]);
+            }
             this.model.setStage("idle");
             return;
         }
