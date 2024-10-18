@@ -9,7 +9,7 @@ import { cn } from "~/lib/utils";
 
 const TextField = TextFieldPrimitive.Root;
 
-type TextFieldInputProps<T extends ValidComponent = "input"> =
+export type TextFieldInputProps<T extends ValidComponent = "input"> =
     TextFieldPrimitive.TextFieldInputProps<T> & {
         class?: string | undefined;
         type:
@@ -56,7 +56,7 @@ const TextFieldInput = <T extends ValidComponent = "input">(
     );
 };
 
-type TextFieldTextAreaProps<T extends ValidComponent = "textarea"> =
+export type TextFieldTextAreaProps<T extends ValidComponent = "textarea"> =
     TextFieldPrimitive.TextFieldTextAreaProps<T> & {
         class?: string | undefined;
     };

@@ -25,6 +25,7 @@ export interface PersistentSettings {
     kind: 'persistent'
     useInternetTime?: Flag
     alignColumnsLeft?: Flag
+    enableDevTools?: Flag
 }
 
 /** Configurable on-off flags which may be undefined until a user configures them. */
@@ -72,6 +73,7 @@ export class SettingsManager extends PersistentStoreBacked<EphemeralSettings, Pe
     private updateDocumentClassesFromSettings() {
         // Update document classes based on setting values.
         this.updateDocumentClass("alignColumnsLeft")
+        this.updateDocumentClass("enableDevTools")
     }
 
 

@@ -46,6 +46,8 @@ import {
 } from "./editor-types";
 import { unwrap } from "solid-js/store";
 import { MegalodonPostStatus } from "./megalodon-status-transformer";
+import { KeyboardShortcutTextArea } from "../ui/keyboard-shortcut-text-field";
+import { KeyBindingMap } from "tinykeys";
 
 export const MegalodonStatusEditorComponent: Component<
     EditorProps<MegalodonPostStatus, string>
@@ -163,19 +165,27 @@ class EditorComponentBase<TOutput> {
     protected makeComponentControls(): JSX.Element {
         const config = this.config;
         const model = this.model;
+
+        const keyboardShortcuts: Accessor<KeyBindingMap> = createMemo(() => {
+            return {
+                "Control+Enter": () => {
+                    console.log("pushed ctrl+enter");
+                    this.performAction("submit");
+                },
+            };
+        });
         return (
             <>
                 <TextField class="border-none w-full flex-grow py-0 items-start justify-between">
-                    <TextFieldTextArea
-                        tabindex="0"
+                    <KeyboardShortcutTextArea
+                        tabindex={0}
                         placeholder={config.bodyPlaceholder}
                         class="resize-none overflow-hidden px-3 py-2 text-md border-2 rounded-md"
                         disabled={this.busy()}
-                        onInput={(e) => {
-                            model.set("body", e.currentTarget.value);
-                        }}
                         value={model.document.body}
-                    ></TextFieldTextArea>
+                        setValue={(b: string) => model.set("body", b)}
+                        shortcuts={keyboardShortcuts()}
+                    ></KeyboardShortcutTextArea>
                 </TextField>
                 <TextField
                     class="border-none w-full flex-shrink"
