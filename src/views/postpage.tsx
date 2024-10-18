@@ -308,6 +308,7 @@ export interface LoadPostsProps {
     postId: string;
     lastRefresh: number;
     newCommentId?: string | undefined;
+    shareEditorMode: boolean;
 }
 
 export interface PostPageContextValue {
@@ -318,13 +319,25 @@ export const PostPageContext = createContext<PostPageContextValue>();
 /** A page showing a root post and nested tree of comments */
 const PostPage: Component = () => {
     const params = useParams();
+    return (
+        <PostPageForId
+            postId={params.postId}
+            shareEditorMode={false}
+        ></PostPageForId>
+    );
+};
+
+export const PostPageForId: Component<{
+    postId: string;
+    shareEditorMode: boolean;
+}> = ({ postId, shareEditorMode }) => {
     const postContext: PostPageContextValue = {
         loadProps: createSignal<LoadPostsProps>({
             lastRefresh: Date.now(),
-            postId: params.postId,
+            postId: postId,
+            shareEditorMode: shareEditorMode,
         }),
     };
-
     return (
         <PostPageContext.Provider value={postContext}>
             <ErrorBoundary
@@ -368,13 +381,19 @@ const PostWithCommentTree: Component = () => {
             signedInState: auth.state,
         };
     }, threadInfoFetcher);
+
+    // i don't like the nested show here for share mode.
     return (
         <>
-            <Show
-                when={threadInfo()?.tryGetStatus() !== undefined}
-                fallback={<div>Loading</div>}
-            >
-                <ProfileZone userInfo={threadInfo()!.tryGetStatus()!.account} />
+            <Show when={!loadProps().shareEditorMode}>
+                <Show
+                    when={threadInfo()?.tryGetStatus() !== undefined}
+                    fallback={<div>Loading</div>}
+                >
+                    <ProfileZone
+                        userInfo={threadInfo()!.tryGetStatus()!.account}
+                    />
+                </Show>
             </Show>
             <ErrorBoundary fallback={(err) => err}>
                 <Switch>
@@ -389,16 +408,18 @@ const PostWithCommentTree: Component = () => {
                             }
                             fetchShareParentDepth={5}
                         />
-                        <For each={threadInfo()?.children}>
-                            {(node, index) => <Comment node={node} />}
-                        </For>
-                        <Card class="p-4 m-4">
-                            <NewCommentEditor
-                                parentStatus={
-                                    threadInfo()?.tryGetStatus() as Status
-                                }
-                            ></NewCommentEditor>
-                        </Card>
+                        <Show when={!loadProps().shareEditorMode}>
+                            <For each={threadInfo()?.children}>
+                                {(node, index) => <Comment node={node} />}
+                            </For>
+                            <Card class="p-4 m-4">
+                                <NewCommentEditor
+                                    parentStatus={
+                                        threadInfo()?.tryGetStatus() as Status
+                                    }
+                                ></NewCommentEditor>
+                            </Card>
+                        </Show>
                     </Match>
                     <Match when={threadInfo.error}>
                         <div>error: {threadInfo.error}</div>

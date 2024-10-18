@@ -150,6 +150,21 @@ a {
     margin: auto;
 }
 
+#editorRoot {
+    display: grid;
+    height: 100%;
+    grid-template-rows: 50% 50%;
+}
+
+#editorEditor {
+    grid-row: span 2;
+}
+
+#editorShareTarget {
+    overflow: auto;
+    margin: 0.5rem;
+    padding: 0.5rem;
+}
 @media (min-width: 768px) {
     #layoutColumnsRoot {
         grid-template-columns: 18rem auto;
@@ -168,7 +183,7 @@ a {
     }
 }
 
-@media (min-width: 1280) {
+@media (min-width: 1280px) {
     #layoutMainColumn {
         padding: 1.5rem;
     }
