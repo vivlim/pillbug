@@ -115,26 +115,14 @@ export abstract class EditorTransformerBase<T>
     protected abstract transform(doc: EditorDocument): Promise<T>;
 }
 
-export abstract class EditorSubmitter<T> implements IEditorSubmitter<T> {
-    public async submit(
-        doc: T,
-        action: EditorActions
-    ): Promise<ValidationError[]> {
-        const errors: ValidationError[] = [];
-        return errors;
-    }
-}
 export interface IEditorTransformer<T> {
     validateAndTransform(
         doc: EditorDocument
     ): Promise<{ output: T | undefined; errors: ValidationError[] }>;
 }
 
-export interface IEditorSubmitter<T> {
-    submit(
-        transformedDoc: T,
-        action: EditorActions
-    ): Promise<ValidationError[]>;
+export interface IEditorSubmitter<T, TRet> {
+    submit(transformedDoc: T, action: EditorActions): Promise<TRet>;
 }
 
 /** Possible actions, like "submit" and "preview" */
@@ -148,10 +136,11 @@ export interface EditorConfig {
     bodyPlaceholder: string;
 }
 
-export interface EditorProps<T> {
+export interface EditorProps<TPost, TRet> {
     model: EditorDocumentModel;
-    transformer: IEditorTransformer<T>;
-    submitter: IEditorSubmitter<T>;
+    transformer: IEditorTransformer<TPost>;
+    submitter: IEditorSubmitter<TPost, TRet>;
     config: EditorConfig;
     class?: string | undefined;
+    setNewPostId: Setter<TRet | undefined>;
 }
