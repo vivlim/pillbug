@@ -361,52 +361,51 @@ const PostWithCommentTree: Component = () => {
         true
     > = (loadProps, { value, refetching }) =>
         fetchPostInfoTree(loadProps, value);
+    const [loadProps, setLoadProps] = postPageContext.loadProps;
     const [threadInfo, mutateThreadInfo] = createResource(() => {
         return {
-            loadProps: postPageContext.loadProps[0](),
+            loadProps: loadProps(),
             signedInState: auth.state,
         };
     }, threadInfoFetcher);
     return (
-        <LayoutColumnsRoot>
+        <>
             <Show
                 when={threadInfo()?.tryGetStatus() !== undefined}
                 fallback={<div>Loading</div>}
             >
                 <ProfileZone userInfo={threadInfo()!.tryGetStatus()!.account} />
             </Show>
-            <LayoutMainColumn>
-                <ErrorBoundary fallback={(err) => err}>
-                    <Switch>
-                        <Match when={threadInfo.loading}>
-                            <div>loading post</div>
-                        </Match>
-                        <Match when={threadInfo.state === "ready"}>
-                            <Post
-                                class="md:px-0"
-                                status={
-                                    threadInfo()?.tryGetStatus() as Status /* i don't think a placeholder should ever become root? Unless maybe it can't be found? unclear */
+            <ErrorBoundary fallback={(err) => err}>
+                <Switch>
+                    <Match when={threadInfo.loading}>
+                        <div>loading post</div>
+                    </Match>
+                    <Match when={threadInfo.state === "ready"}>
+                        <Post
+                            class="md:px-0"
+                            status={
+                                threadInfo()?.tryGetStatus() as Status /* i don't think a placeholder should ever become root? Unless maybe it can't be found? unclear */
+                            }
+                            fetchShareParentDepth={5}
+                        />
+                        <For each={threadInfo()?.children}>
+                            {(node, index) => <Comment node={node} />}
+                        </For>
+                        <Card class="p-4 m-4">
+                            <NewCommentEditor
+                                parentStatus={
+                                    threadInfo()?.tryGetStatus() as Status
                                 }
-                                fetchShareParentDepth={5}
-                            />
-                            <For each={threadInfo()?.children}>
-                                {(node, index) => <Comment node={node} />}
-                            </For>
-                            <Card class="p-4 m-4">
-                                <NewCommentEditor
-                                    parentStatus={
-                                        threadInfo()?.tryGetStatus() as Status
-                                    }
-                                ></NewCommentEditor>
-                            </Card>
-                        </Match>
-                        <Match when={threadInfo.error}>
-                            <div>error: {threadInfo.error}</div>
-                        </Match>
-                    </Switch>
-                </ErrorBoundary>
-            </LayoutMainColumn>
-        </LayoutColumnsRoot>
+                            ></NewCommentEditor>
+                        </Card>
+                    </Match>
+                    <Match when={threadInfo.error}>
+                        <div>error: {threadInfo.error}</div>
+                    </Match>
+                </Switch>
+            </ErrorBoundary>
+        </>
     );
 };
 
