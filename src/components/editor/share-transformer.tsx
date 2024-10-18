@@ -8,7 +8,7 @@ type SharePreTransform = {};
 
 /** Megalodon status transformer for share posts */
 export class ShareTransformer extends MegalodonEditorTransformer<SharePreTransform> {
-    constructor(private inReplyToId: string) {
+    constructor(private shareTargetUrl: string) {
         super();
     }
 
@@ -17,7 +17,8 @@ export class ShareTransformer extends MegalodonEditorTransformer<SharePreTransfo
         status: MegalodonPostStatus,
         preTransform: SharePreTransform | undefined
     ): Promise<MegalodonPostStatus> {
-        status.options.in_reply_to_id = this.inReplyToId;
+        status.status = `${status.status}\n\nRE: ${this.shareTargetUrl}`;
+
         return status;
     }
 }

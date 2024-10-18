@@ -35,6 +35,7 @@ import { BlockingLoadProgressTracker } from "~/lib/blocking-load";
 import { useNavigate, useParams } from "@solidjs/router";
 import { PostWithShared } from "~/components/post";
 import { PostPageContext, PostPageForId } from "../postpage";
+import { unwrapResponse } from "~/lib/clientUtil";
 
 export type EditorFacetProps = {
     sharing_post_id?: string | undefined;
@@ -58,7 +59,10 @@ const EditorFacet: Component = () => {
         <div id="editorRoot">
             <Show when={postId !== undefined}>
                 <div id="editorShareTarget" class="pbCard">
-                    NOTE: this doesn't actually share the post yet
+                    <b>
+                        warning: sharing has not been tested very much yet, so
+                        things might be weird
+                    </b>
                     <h1 class="px-4">you're sharing this post:</h1>
                     <PostPageForId postId={postId} shareEditorMode={true} />
                 </div>
@@ -96,14 +100,18 @@ const EditorFacetEditor: Component<EditorFacetProps> = (props) => {
         return new EditorDocumentModel(initialDoc);
     });
 
-    const transformer: Accessor<IEditorTransformer<MegalodonPostStatus>> =
-        createMemo(() => {
-            if (props.sharing_post_id !== undefined) {
-                return new ShareTransformer(props.sharing_post_id);
-            } else {
-                return new PostTransformer();
-            }
-        });
+    const [transformer] = createResource(async () => {
+        if (props.sharing_post_id !== undefined) {
+            const statusReq = await auth.assumeSignedIn.client.getStatus(
+                props.sharing_post_id
+            );
+            const status = unwrapResponse(statusReq);
+
+            return new ShareTransformer(status.uri);
+        } else {
+            return new PostTransformer();
+        }
+    });
 
     const submitter: Accessor<IEditorSubmitter<MegalodonPostStatus, string>> =
         createMemo(() => {
@@ -124,12 +132,18 @@ const EditorFacetEditor: Component<EditorFacetProps> = (props) => {
         editorModel
     );
 
+    blockingLoadProgressTracker.pushNewResourceOperation(
+        "getting share target if any",
+        "getShareTarget",
+        transformer
+    );
+
     return (
         <>
             <TrackedBlockingLoadComponent tracker={blockingLoadProgressTracker}>
                 <MegalodonStatusEditorComponent
                     model={editorModel()!}
-                    transformer={transformer()}
+                    transformer={transformer()!}
                     submitter={submitter()}
                     config={config()}
                     setNewPostId={props.setNewPostId}
