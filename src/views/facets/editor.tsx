@@ -91,6 +91,7 @@ const EditorFacetEditor: Component<EditorFacetProps> = (props) => {
             cwContent: "",
             cwVisible: false,
             visibility: "unlisted",
+            attachments: [],
         };
 
         if (props.sharing_post_id !== undefined) {
@@ -109,13 +110,14 @@ const EditorFacetEditor: Component<EditorFacetProps> = (props) => {
 
             return new ShareTransformer(status, auth);
         } else {
-            return new PostTransformer();
+            return new PostTransformer(auth);
         }
     });
 
     const submitter: Accessor<IEditorSubmitter<MegalodonPostStatus, string>> =
         createMemo(() => {
             const client = auth.assumeSignedIn.client;
+            client.updateMedia;
 
             return new MegalodonPostSubmitter(client);
         });

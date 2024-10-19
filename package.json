@@ -32,6 +32,7 @@
         "class-variance-authority": "^0.7.0",
         "clsx": "^2.1.1",
         "digraph-js": "^2.2.3",
+        "filesize": "^10.1.6",
         "get-urls": "^12.1.0",
         "hast-util-find-and-replace": "^5.0.1",
         "hastscript": "^9.0.0",

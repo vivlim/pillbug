@@ -18,9 +18,28 @@ export interface EditorDocument {
     cwContent: string;
     body: string;
     visibility: Entity.StatusVisibility;
+    attachments: EditorAttachment[];
+}
+
+export interface EditorAttachment {
+    name: string;
+    type: string;
+    size: number;
+    file: File;
+    description?: string;
+    focus?: { x: number; y: number };
 }
 
 type EditorDocumentPropertyNames = keyof EditorDocument;
+type ArrayProperties<T> = {
+    [P in keyof T as T[P] extends (infer _)[] ? P : never]: T[P];
+};
+type ArrayItemProperties<T> = {
+    [P in keyof T as T[P] extends (infer _)[]
+        ? P
+        : never]: T[P] extends (infer T2)[] ? T2 : never;
+};
+type EditorDocumentArrayPropertyNames = keyof ArrayProperties<EditorDocument>;
 
 type EditorStage = "idle" | "validating" | "submitting" | "submitted";
 
@@ -45,6 +64,23 @@ export class EditorDocumentModel extends StoreBacked<EditorDocument> {
         value: EditorDocument[K]
     ) {
         this.setStore(key, value);
+    }
+
+    /*
+    // i tried pretty hard but this isn't working so just make setAttachment :'(
+    public setArray<
+        K extends EditorDocumentArrayPropertyNames,
+        V extends ArrayItemProperties<EditorDocument>
+    >(key: K, index: number, value: V[K]) {
+        this.setStore(key, index, value);
+    }
+    */
+
+    public setAttachment(
+        index: number,
+        value: EditorAttachment | ((e: EditorAttachment) => EditorAttachment)
+    ) {
+        this.setStore("attachments", index, value);
     }
 
     public get stage(): EditorStage {
@@ -122,7 +158,11 @@ export interface IEditorTransformer<T> {
 }
 
 export interface IEditorSubmitter<T, TRet> {
-    submit(transformedDoc: T, action: EditorActions): Promise<TRet>;
+    submit(
+        transformedDoc: T,
+        attachment: EditorAttachment[],
+        action: EditorActions
+    ): Promise<TRet>;
 }
 
 /** Possible actions, like "submit" and "preview" */

@@ -16,6 +16,7 @@ import { PersistentFlagNames, useSettings } from "~/lib/settings-manager";
 import PostEditor from "../editdialog";
 import {
     EditorActions,
+    EditorAttachment,
     EditorConfig,
     EditorDocument,
     EditorDocumentModel,
@@ -63,6 +64,7 @@ const DevEditDialogPage: Component = () => {
         cwContent: "",
         cwVisible: false,
         visibility: "unlisted",
+        attachments: [],
     };
     const model = new EditorDocumentModel(initialDoc);
 
@@ -82,7 +84,7 @@ const DevEditDialogPage: Component = () => {
         {
             name: "post",
             transformer: new MockTransformerWrapper(
-                new PostTransformer(),
+                new PostTransformer(useAuth()),
                 allowValidation
             ),
             submitter: new MockSubmitter(allowSubmit, setSubmission),
@@ -91,7 +93,7 @@ const DevEditDialogPage: Component = () => {
         {
             name: "comment",
             transformer: new MockTransformerWrapper(
-                new CommentTransformer({
+                new CommentTransformer(useAuth(), {
                     id: "FAKE_REPLY_TO_ID",
                 } as Status),
                 allowValidation
@@ -268,6 +270,7 @@ class MockSubmitter implements IEditorSubmitter<MegalodonPostStatus, string> {
 
     public async submit(
         transformedDoc: MegalodonPostStatus,
+        attachments: EditorAttachment[],
         action: EditorActions
     ): Promise<string> {
         const errs = [];
@@ -275,6 +278,14 @@ class MockSubmitter implements IEditorSubmitter<MegalodonPostStatus, string> {
         if (!this.allow()) {
             throw new Error(
                 "Blocked because MockSubmitter 'allow' isn't set to true."
+            );
+        }
+
+        // mimic attachments
+        transformedDoc.options.media_ids = [];
+        for (let attachment of attachments) {
+            transformedDoc.options.media_ids.push(
+                `(media_id for ${attachment.name})`
             );
         }
 

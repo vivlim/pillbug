@@ -36,6 +36,7 @@ import { MenuButton } from "../ui/menubutton";
 import { Button } from "../ui/button";
 import {
     EditorActions,
+    EditorAttachment,
     EditorConfig,
     EditorDocumentModel,
     EditorProps,
@@ -48,6 +49,7 @@ import { unwrap } from "solid-js/store";
 import { MegalodonPostStatus } from "./megalodon-status-transformer";
 import { KeyboardShortcutTextArea } from "../ui/keyboard-shortcut-text-field";
 import { KeyBindingMap } from "tinykeys";
+import { filesize } from "filesize";
 
 export const MegalodonStatusEditorComponent: Component<
     EditorProps<MegalodonPostStatus, string>
@@ -118,6 +120,7 @@ class EditorComponentBase<TOutput> {
             console.log(`editor ${action}: submitting the post`);
             const newPostId = await this.submitter.submit(
                 transformResult.output,
+                this.model.document.attachments,
                 action
             );
 
@@ -174,6 +177,39 @@ class EditorComponentBase<TOutput> {
                 },
             };
         });
+
+        const onPaste = (e: ClipboardEvent) => {
+            console.log("entering clipboard handler");
+            if (e.clipboardData === null) {
+                console.log("no clipboard data.");
+                return;
+            }
+
+            // Does the clipboard being pasted contain files?
+            if (e.clipboardData.types.includes("Files")) {
+                console.log("clipboard has files");
+                for (let i = 0; i < e.clipboardData.items.length; i++) {
+                    let transferItem = e.clipboardData.items[i];
+                    let file = e.clipboardData.files[i];
+                    /*
+                    const image_types = ['image/png', 'image/jpg', 'image/jpeg', 'image/gif'];
+                    if (!image_types.includes(transferItem.type)){
+                        continue; // not an image.
+                    }
+                    */
+
+                    model.setAttachment(model.document.attachments.length, {
+                        name: file.name,
+                        type: file.type,
+                        size: file.size,
+                        file: file,
+                    });
+                }
+            } else {
+                console.log("clipboard has no files");
+            }
+        };
+
         return (
             <>
                 <TextField class="border-none w-full flex-grow py-0 items-start justify-between">
@@ -185,6 +221,7 @@ class EditorComponentBase<TOutput> {
                         value={model.document.body}
                         setValue={(b: string) => model.set("body", b)}
                         shortcuts={keyboardShortcuts()}
+                        onPaste={onPaste}
                     ></KeyboardShortcutTextArea>
                 </TextField>
                 <TextField
@@ -257,6 +294,15 @@ class EditorComponentBase<TOutput> {
                         </ul>
                     </div>
                 </Show>
+                <For each={model.document.attachments}>
+                    {(a, idx) => (
+                        <AttachmentComponent
+                            attachment={a}
+                            index={idx()}
+                            model={model}
+                        />
+                    )}
+                </For>
             </>
         );
     }
@@ -270,3 +316,32 @@ class EditorComponentBase<TOutput> {
         );
     }
 }
+
+const AttachmentComponent: Component<{
+    attachment: EditorAttachment;
+    index: number;
+    model: EditorDocumentModel;
+}> = ({ attachment, index, model }) => {
+    const imgUrl = URL.createObjectURL(attachment.file);
+    return (
+        <div class="border-2 rounded-md p-4">
+            <p>
+                {attachment.name}: {filesize(attachment.size)} {attachment.type}
+            </p>
+            <img src={imgUrl} style="max-height: 25vh" />
+            <input
+                type="text"
+                class="resize-none px-3 py-2 text-sm border-2 rounded-md focus-visible:ring-0
+flex h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50
+                "
+                placeholder="image description"
+                onInput={(e) => {
+                    const newAttachment = { ...attachment };
+                    newAttachment.description = e.currentTarget.value;
+                    model.setAttachment(index, newAttachment);
+                }}
+                value={attachment.description ?? ""}
+            ></input>
+        </div>
+    );
+};

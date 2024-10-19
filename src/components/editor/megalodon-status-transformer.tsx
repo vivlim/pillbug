@@ -5,6 +5,7 @@ import {
     ValidationError,
 } from "./editor-types";
 import { Entity } from "megalodon";
+import { SessionAuthManager } from "~/auth/auth-manager";
 
 /** This type is copied from megalodon.d.ts MegalodonInterface.postStatus; it's not a named type, so I can't reference it. */
 export type MegalodonPostStatusOptions = {
@@ -32,6 +33,10 @@ export type MegalodonPostStatus = {
 export class MegalodonEditorTransformer<
     TPreTransform
 > extends EditorTransformerBase<MegalodonPostStatus> {
+    constructor(protected auth: SessionAuthManager) {
+        super();
+    }
+
     protected async validate(doc: EditorDocument): Promise<ValidationError[]> {
         const errors = await super.validate(doc);
         // do extra validation needed for megalodon statuses

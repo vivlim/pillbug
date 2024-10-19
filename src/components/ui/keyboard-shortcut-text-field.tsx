@@ -24,6 +24,7 @@ export interface KeyboardShortcutTextAreaProps {
     disabled?: boolean | undefined;
     setValue: (s: string) => void;
     value: string;
+    onPaste?: (e: ClipboardEvent) => void;
 }
 export const KeyboardShortcutTextArea: Component<
     KeyboardShortcutTextAreaProps
@@ -41,6 +42,7 @@ export const KeyboardShortcutTextArea: Component<
                 props.setValue(e.currentTarget.value);
             }}
             onKeyDown={handler()}
+            onPaste={props.onPaste}
         />
     );
 };
