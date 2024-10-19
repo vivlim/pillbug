@@ -64,9 +64,10 @@ export const NewCommentEditor: Component<NewCommentEditorProps> = (props) => {
         cwContent: props.parentStatus.spoiler_text,
         cwVisible: props.parentStatus.sensitive,
         visibility: props.parentStatus.visibility,
+        attachments: [],
     });
 
-    const transformer = new CommentTransformer(props.parentStatus);
+    const transformer = new CommentTransformer(auth, props.parentStatus);
     const submitter = new MegalodonPostSubmitter(auth.assumeSignedIn.client);
     const config: EditorConfig = {
         bodyPlaceholder: "write a comment...",
