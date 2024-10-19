@@ -4,13 +4,14 @@ import {
     MegalodonEditorTransformer,
     MegalodonPostStatus,
 } from "./megalodon-status-transformer";
+import { SessionAuthManager } from "~/auth/auth-manager";
 
 type CommentPreTransform = {};
 
 /** Megalodon status transformer that attaches an in_reply_to_id, for use with comments */
 export class CommentTransformer extends MegalodonEditorTransformer<CommentPreTransform> {
-    constructor(private inReplyTo: Status) {
-        super();
+    constructor(auth: SessionAuthManager, private inReplyTo: Status) {
+        super(auth);
     }
 
     protected override async postTransform(

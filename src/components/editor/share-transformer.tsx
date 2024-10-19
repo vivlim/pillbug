@@ -10,8 +10,8 @@ type SharePreTransform = {};
 
 /** Megalodon status transformer for share posts */
 export class ShareTransformer extends MegalodonEditorTransformer<SharePreTransform> {
-    constructor(private shareTarget: Status, private auth: SessionAuthManager) {
-        super();
+    constructor(private shareTarget: Status, auth: SessionAuthManager) {
+        super(auth);
     }
 
     protected override async postTransform(
