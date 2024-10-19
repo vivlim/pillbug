@@ -64,8 +64,8 @@ export const CommentPostComponent: Component<CommentProps> = (postData) => {
             </div>
             <div class="md:px-3 pt-2">
                 <ContentGuard warnings={status.spoiler_text}>
-                    <ImageBox attachments={status.media_attachments} />
                     <HtmlSandbox html={status.content} emoji={status.emojis} />
+                    <ImageBox attachments={status.media_attachments} />
                 </ContentGuard>
             </div>
             <div>

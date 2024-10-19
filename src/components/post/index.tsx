@@ -167,13 +167,13 @@ const PostBody: Component<PostBodyProps> = (props) => {
     return (
         <CardContent class={cn(props.class)} {...rest}>
             <ContentGuard warnings={props.status.spoiler_text}>
-                <ImageBox attachments={props.status.media_attachments} />
                 <div class="p-3">
                     <HtmlSandbox
                         html={props.status.content}
                         emoji={props.status.emojis}
                     />
                 </div>
+                <ImageBox attachments={props.status.media_attachments} />
             </ContentGuard>
         </CardContent>
     );
