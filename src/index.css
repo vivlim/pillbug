@@ -139,6 +139,27 @@ a {
     .post-content a {
         text-decoration: underline;
 }
+
+.post-content ul, .post-content ul li {
+    list-style: disc;
+    margin-left: 1em;
+}
+.post-content ol, .post-content ol li  {
+    list-style: decimal;
+    margin-left: 1em;
+
+}
+
+.post-content h1 {
+    font-size: x-large;
+}
+.post-content h2 {
+    font-size: larger;
+}
+.post-content h3 {
+    font-size: large;
+}
+
 #layoutColumnsRoot {
     display: grid;
     width: 100vw;
