@@ -46,6 +46,8 @@
     --ring: 240 5.9% 10%;
 
     --radius: 0.5rem;
+
+    --top-bar-height: 4rem;
   }
 
   .dark,
@@ -140,13 +142,15 @@ a {
 #layoutColumnsRoot {
     display: grid;
     width: 100%;
+    flex: 1 1 auto; /* fill containing flexbox */
+
     max-width: 76rem;
 
     grid-template-columns: auto;
     /* The first grid item should only occupy the minimum height needed, it could be a user profile or maybe empty space */
         grid-template-rows: min-content auto;
     grid-auto-flow: columns;
-    overflow: hidden;
+    overflow: auto;
     margin: auto;
 }
 
@@ -188,19 +192,19 @@ a {
         padding: 1.5rem;
     }
 }
-#layoutColumnsRoot {
-    flex: 1 1 auto;
-}
-
 /* Singular left column that may contain blocks. Stacks above main column if the viewport is too narrow */
 #layoutLeftColumn {}
 
 #layoutMainColumn {
-    min-height: 100%;
+    padding-bottom: 2em;
+}
+
+#layoutTopBar {
+    height: var(--top-bar-height)
+
 }
 
 #root {
-    min-height: 100vh;
 }
 #notifications-facet {
     display: grid;

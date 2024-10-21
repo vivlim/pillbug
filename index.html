@@ -13,6 +13,26 @@
         } else {
             document.documentElement.classList.remove('dark')
         }
+
+    /* need to manually set the height to fill the screen; there are lots of corner cases with mobile devices so it can't really be done cleanly in css */
+    let root;
+    function updateHeight() {
+        try {
+            if (!root) {
+                root = document.getElementById("root");
+            }
+            root.style.height = window.visualViewport.height + "px";
+            console.log("new root element height:" + root.style.height)
+        }
+        catch { }
+    }
+
+    window.visualViewport.onresize = () => {
+        updateHeight();
+    }
+    window.onload = () => {
+        updateHeight();
+    }
     </script>
   </head>
   <body>
