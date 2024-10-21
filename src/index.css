@@ -141,7 +141,7 @@ a {
 }
 #layoutColumnsRoot {
     display: grid;
-    width: 100%;
+    width: 100vw;
     flex: 1 1 auto; /* fill containing flexbox */
 
     max-width: 76rem;
@@ -151,12 +151,16 @@ a {
         grid-template-rows: min-content auto;
     grid-auto-flow: columns;
     overflow: auto;
-    margin: auto;
+    margin: 0px;
+    min-width: 0;
+    min-height: 0;
 }
 
 #editorRoot {
     display: grid;
     height: 100%;
+    width: 100%;
+    overflow: auto;
     grid-template-rows: 50% 50%;
 }
 
@@ -197,6 +201,7 @@ a {
 
 #layoutMainColumn {
     padding-bottom: 2em;
+    overflow: auto;
 }
 
 #layoutTopBar {
@@ -205,7 +210,7 @@ a {
 }
 
 #root {
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
 }
 
 button {
@@ -265,4 +270,9 @@ summary::marker {
 
 html.setting-alignColumnsLeft #layoutColumnsRoot {
     margin-left: 0px;
+}
+
+* {
+    scrollbar-width: 32px;
+    scrollbar-color: red;
 }

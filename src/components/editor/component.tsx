@@ -53,7 +53,7 @@ import { MegalodonPostStatus } from "./megalodon-status-transformer";
 import { KeyboardShortcutTextArea } from "../ui/keyboard-shortcut-text-field";
 import { KeyBindingMap } from "tinykeys";
 import { filesize } from "filesize";
-import { AddAttachmentMenu, AttachmentList } from "./attachments";
+import { AddAttachmentMenu, AttachmentComponent } from "./attachments";
 import { BeforeLeaveEventArgs, useBeforeLeave } from "@solidjs/router";
 
 export const MegalodonStatusEditorComponent: Component<
@@ -162,7 +162,7 @@ export class EditorComponentBase<TOutput, TDoc extends EditorDocument> {
     public makeComponent(): JSX.Element {
         return (
             <form
-                class={`flex flex-col gap-3 ${this.class}`}
+                class={`flex flex-col gap-3 overflow-auto ${this.class}`}
                 onsubmit={async (ev) => {
                     ev.preventDefault();
                     try {
@@ -327,15 +327,17 @@ export class EditorComponentBase<TOutput, TDoc extends EditorDocument> {
                         </ul>
                     </div>
                 </Show>
-                <For each={model.document.attachments}>
-                    {(a, idx) => (
-                        <AttachmentList
-                            attachment={a}
-                            index={idx()}
-                            model={model}
-                        />
-                    )}
-                </For>
+                <div style="max-height: 50%; width: 100%; overflow: auto">
+                    <For each={model.document.attachments}>
+                        {(a, idx) => (
+                            <AttachmentComponent
+                                attachment={a}
+                                index={idx()}
+                                model={model}
+                            />
+                        )}
+                    </For>
+                </div>
             </>
         );
     }

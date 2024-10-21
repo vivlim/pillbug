@@ -2,6 +2,7 @@ import {
     Accessor,
     Component,
     createMemo,
+    createResource,
     createSignal,
     ErrorBoundary,
     For,
@@ -51,6 +52,7 @@ import { MegalodonPostStatus } from "./megalodon-status-transformer";
 import { KeyboardShortcutTextArea } from "../ui/keyboard-shortcut-text-field";
 import { KeyBindingMap } from "tinykeys";
 import { filesize } from "filesize";
+import * as ExifReader from "exifreader";
 
 interface GetFilesFromInputOptions {
     accept?: string;
@@ -66,17 +68,21 @@ function getFilesFromInput(options: GetFilesFromInputOptions): Promise<File[]> {
         input.type = "file";
         input = Object.assign(input, options);
         input.onchange = (_) => {
+            console.log("file input element changed");
             if (input === null || input === undefined) {
+                console.log("input element was null or undefined");
                 reject(new Error("input element was null or undefined"));
                 return;
             }
 
             const fileList = input.files;
             if (fileList === null) {
+                console.log("no files were picked");
                 reject(new Error("no files were picked"));
                 return;
             }
             const filesArray = Array.from(fileList);
+            console.log(`${fileList.length} files`);
             resolve(filesArray);
         };
 
@@ -99,6 +105,10 @@ export const AddAttachmentMenu: Component<AddAttachmentMenuProps> = (props) => {
                 ...options,
             };
             const files = await getFilesFromInput(combinedOptions);
+
+            if (files.length === 0) {
+                setStatus("no files added");
+            }
 
             for (const f of files) {
                 props.onFileAdded(f);
@@ -142,12 +152,39 @@ export const AddAttachmentMenu: Component<AddAttachmentMenuProps> = (props) => {
     );
 };
 
-export const AttachmentList: Component<{
+type ExifTagAnalysis = {
+    tags: {
+        tag: string;
+        value: ExifReader.XmpTag & ExifReader.ValueTag & ExifReader.PngTag;
+    }[];
+    warningTags: string[];
+};
+
+export const AttachmentComponent: Component<{
     attachment: EditorAttachment;
     index: number;
     model: EditorDocumentModel<any>;
 }> = ({ attachment, index, model }) => {
     const imgUrl = URL.createObjectURL(attachment.file);
+
+    const [exifTagAnalysis] = createResource<ExifTagAnalysis>(async () => {
+        const buf = await attachment.file.arrayBuffer();
+        const tags = await ExifReader.load(buf);
+
+        const tagArr = [];
+        const warningTags = [];
+        for (let tag in tags) {
+            if (tag.indexOf("GPS") >= 0) {
+                warningTags.push(tag);
+            }
+            tagArr.push({ tag: tag, value: tags[tag] });
+        }
+
+        return {
+            tags: tagArr,
+            warningTags: warningTags,
+        };
+    });
     return (
         <div class="border-2 rounded-md p-4">
             <p>
@@ -167,6 +204,23 @@ flex h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm
                 }}
                 value={attachment.description ?? ""}
             ></input>
+            <Show when={exifTagAnalysis() !== undefined}>
+                <Show when={exifTagAnalysis()!.warningTags.length > 0}>
+                    WARNING: image contains location data!
+                </Show>
+                <details>
+                    <summary>exif tags</summary>
+                    <ul class="max-h-48 overflow-auto">
+                        <For each={exifTagAnalysis()!.tags}>
+                            {(t) => (
+                                <li class="break-all">
+                                    {t.tag}: {t.value.value}
+                                </li>
+                            )}
+                        </For>
+                    </ul>
+                </details>
+            </Show>
         </div>
     );
 };
