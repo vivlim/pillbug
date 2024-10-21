@@ -25,6 +25,7 @@ export interface PersistentSettings {
     kind: 'persistent'
     useInternetTime?: Flag
     alignColumnsLeft?: Flag
+    useFullQualityImagesAsThumbnails?: Flag
     enableDevTools?: Flag
 }
 

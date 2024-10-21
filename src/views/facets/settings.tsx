@@ -45,6 +45,12 @@ const SettingsFacet: Component = () => {
                     <CardTitle>appearance</CardTitle>
                 </CardHeader>
                 <CardContent class="px-4 pb-2">
+                    <PersistentFlagCheckbox flag="useFullQualityImagesAsThumbnails">
+                        Show full quality images without having to click into
+                        them first
+                    </PersistentFlagCheckbox>
+                </CardContent>
+                <CardContent class="px-4 pb-2">
                     <p>
                         Currently this setting is mainly an example of how to
                         create a setting which, when set, applies a class to the

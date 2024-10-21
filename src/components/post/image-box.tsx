@@ -2,6 +2,7 @@ import { Attachment } from "megalodon/lib/src/entities/attachment";
 import { Component, createSignal, For, JSX, splitProps } from "solid-js";
 import { cn } from "~/lib/utils";
 import { ImageLightbox } from "./image-lightbox";
+import { useSettings } from "~/lib/settings-manager";
 
 interface ImageAttachmentProps {
     attachment: Attachment;
@@ -11,7 +12,11 @@ interface ImageAttachmentProps {
 }
 
 const ImageAttachment: Component<ImageAttachmentProps> = (props) => {
+    const settings = useSettings();
     let src = props.attachment.preview_url;
+    if (settings.getPersistent().useFullQualityImagesAsThumbnails) {
+        src = props.attachment.url;
+    }
     let srcset = "";
     let sizes = "";
     if (props.attachment.preview_url && props.attachment.meta) {
