@@ -22,13 +22,14 @@ import { Card } from "../ui/card";
 import { useAuth } from "~/auth/auth-manager";
 import { Entity, MegalodonInterface } from "megalodon";
 import { isValidVisibility, PostOptions } from "~/views/editdialog";
-import { IoWarningOutline } from "solid-icons/io";
+import { IoAttachOutline, IoWarningOutline } from "solid-icons/io";
 import {
     DropdownMenuTrigger,
     DropdownMenuContent,
     DropdownMenuRadioGroup,
     DropdownMenuRadioItem,
     DropdownMenu,
+    DropdownMenuItem,
 } from "../ui/dropdown-menu";
 import { TextFieldTextArea, TextFieldInput, TextField } from "../ui/text-field";
 import { VisibilityIcon } from "../visibility-icon";
@@ -50,6 +51,7 @@ import { MegalodonPostStatus } from "./megalodon-status-transformer";
 import { KeyboardShortcutTextArea } from "../ui/keyboard-shortcut-text-field";
 import { KeyBindingMap } from "tinykeys";
 import { filesize } from "filesize";
+import { AddAttachmentMenu, AttachmentList } from "./attachments";
 
 export const MegalodonStatusEditorComponent: Component<
     EditorProps<MegalodonPostStatus, string>
@@ -281,6 +283,20 @@ class EditorComponentBase<TOutput> {
                             </DropdownMenuRadioGroup>
                         </DropdownMenuContent>
                     </DropdownMenu>
+                    <AddAttachmentMenu
+                        accept="image/*,audio/*,video/*"
+                        onFileAdded={(file: File) => {
+                            model.setAttachment(
+                                model.document.attachments.length,
+                                {
+                                    name: file.name,
+                                    type: file.type,
+                                    size: file.size,
+                                    file: file,
+                                }
+                            );
+                        }}
+                    ></AddAttachmentMenu>
                     <div class="flex-1" />
                     {this.actionButtons()}
                 </div>
@@ -296,7 +312,7 @@ class EditorComponentBase<TOutput> {
                 </Show>
                 <For each={model.document.attachments}>
                     {(a, idx) => (
-                        <AttachmentComponent
+                        <AttachmentList
                             attachment={a}
                             index={idx()}
                             model={model}
@@ -316,32 +332,3 @@ class EditorComponentBase<TOutput> {
         );
     }
 }
-
-const AttachmentComponent: Component<{
-    attachment: EditorAttachment;
-    index: number;
-    model: EditorDocumentModel;
-}> = ({ attachment, index, model }) => {
-    const imgUrl = URL.createObjectURL(attachment.file);
-    return (
-        <div class="border-2 rounded-md p-4">
-            <p>
-                {attachment.name}: {filesize(attachment.size)} {attachment.type}
-            </p>
-            <img src={imgUrl} style="max-height: 25vh" />
-            <input
-                type="text"
-                class="resize-none px-3 py-2 text-sm border-2 rounded-md focus-visible:ring-0
-flex h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50
-                "
-                placeholder="image description"
-                onInput={(e) => {
-                    const newAttachment = { ...attachment };
-                    newAttachment.description = e.currentTarget.value;
-                    model.setAttachment(index, newAttachment);
-                }}
-                value={attachment.description ?? ""}
-            ></input>
-        </div>
-    );
-};
