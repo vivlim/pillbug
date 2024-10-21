@@ -80,7 +80,7 @@ class CommentEditorComponentBase<TOutput> extends EditorComponentBase<
         const toggleTagId = `toggle-tag-replying-to-${this.uniqueId}`;
         let replyingToName = this.model.store.replyingTo.account.acct;
         const indexOfAt = replyingToName.indexOf("@");
-        if (indexOfAt > 0 && false) {
+        if (indexOfAt > 0) {
             replyingToName = replyingToName.substring(0, indexOfAt);
         }
         return (
@@ -99,7 +99,7 @@ class CommentEditorComponentBase<TOutput> extends EditorComponentBase<
                 <label
                     for={toggleTagId}
                     class="pr-3 select-none"
-                    style="align-content: center;"
+                    style="align-content: center; font-size:smaller;"
                 >
                     <span>tag </span>
                     <span>{replyingToName}?</span>
