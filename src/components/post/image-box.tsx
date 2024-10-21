@@ -32,7 +32,6 @@ const ImageAttachment: Component<ImageAttachmentProps> = (props) => {
     }
     let srcset = "";
     let sizes = "";
-    let w = 400;
 
     if (props.attachment.preview_url && props.attachment.meta) {
         // Most implementations other than Pleroma/Akkoma
@@ -41,9 +40,9 @@ const ImageAttachment: Component<ImageAttachmentProps> = (props) => {
         const orig_width = props.attachment.meta.original?.width;
         srcset += `${props.attachment.url} ${orig_width}px `;
         sizes += `(max-width: ${small_width}px) ${small_width}px, ${orig_width}px`;
-        w = Math.round(small_width);
     }
 
+    let w = Math.round(props.attachment.meta?.width ?? 256);
     let h = Math.round(
         props.attachment.meta?.height ?? 256 * props.aspectRatio
     );

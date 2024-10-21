@@ -104,49 +104,44 @@ export const PostFeed: Component<PostFeedProps> = (props) => {
 
     return (
         <FeedContext.Provider value={feedContext}>
-            <div>
-                <ErrorBoundary
-                    fallback={(e) => (
-                        <ErrorBox
-                            error={e}
-                            description="Failed to load posts"
-                        />
+            <ErrorBoundary
+                fallback={(e) => (
+                    <ErrorBox error={e} description="Failed to load posts" />
+                )}
+            >
+                <For each={postList()}>
+                    {(status, index) => (
+                        <Post status={status} fetchShareParentDepth={5} />
                     )}
-                >
-                    <For each={postList()}>
-                        {(status, index) => (
-                            <Post status={status} fetchShareParentDepth={5} />
-                        )}
-                    </For>
-                    <PageNav>
-                        {/* TODO: figure out how to go back reliably */}
-                        <Button
-                            classList={{
-                                invisible: searchParams.after == undefined,
-                            }}
-                            disabled={true}
-                        >
-                            Back
-                        </Button>
-                        <Button
-                            onClick={() => {
-                                const p = postList();
-                                if (p != null) {
-                                    const last = p[p.length - 1];
-                                    if (last != null) {
-                                        setSearchParams(
-                                            { after: last.id },
-                                            { scroll: true }
-                                        );
-                                    }
+                </For>
+                <PageNav>
+                    {/* TODO: figure out how to go back reliably */}
+                    <Button
+                        classList={{
+                            invisible: searchParams.after == undefined,
+                        }}
+                        disabled={true}
+                    >
+                        Back
+                    </Button>
+                    <Button
+                        onClick={() => {
+                            const p = postList();
+                            if (p != null) {
+                                const last = p[p.length - 1];
+                                if (last != null) {
+                                    setSearchParams(
+                                        { after: last.id },
+                                        { scroll: true }
+                                    );
                                 }
-                            }}
-                        >
-                            Next
-                        </Button>
-                    </PageNav>
-                </ErrorBoundary>
-            </div>
+                            }
+                        }}
+                    >
+                        Next
+                    </Button>
+                </PageNav>
+            </ErrorBoundary>
         </FeedContext.Provider>
     );
 };

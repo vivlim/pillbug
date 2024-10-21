@@ -4,7 +4,7 @@ export function unwrapResponse<T>(response: Response<T>, label?: string | undefi
     if (label === undefined) {
         label = "Request";
     }
-    if (response.status !== 200) {
+    if (response.status !== 200 && response.status !== 202) {
         throw new Error(`${label} failed with code ${response.status}: ${response.statusText}`)
     }
 

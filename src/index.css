@@ -206,6 +206,8 @@ a {
 
 #layoutMainColumn {
     padding-bottom: 2em;
+    display: flex;
+    flex-direction: column;
 }
 
 #layoutTopBar {
@@ -214,7 +216,7 @@ a {
 }
 
 #root {
-    overflow-wrap: break-word;
+    overflow-wrap: anywhere;
 }
 
 button {
@@ -282,6 +284,15 @@ summary::marker {
 
 html.setting-alignColumnsLeft #layoutColumnsRoot {
     margin-left: 0px;
+}
+
+.pbPostOutside {
+    display: grid;
+    grid-template-columns: min-content 1fr;
+    grid-template-rows: max-content;
+    word-break: break-word;
+    word-wrap: break-word;
+
 }
 
 * {
