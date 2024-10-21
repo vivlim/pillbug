@@ -84,7 +84,10 @@ const FrameTopBar: Component = (props) => {
     return (
         <div class="sticky top-0 z-40 w-full backdrop-blur flex-none overflow-clip">
             <div class="mx-auto">
-                <div class="border-b-2 border-slate-950/10 lg:px-8 dark:border-slate-300/10 px-3 lg:mx-0 flex flex-row items-center h-16 w-full overflow-clip">
+                <div
+                    id="layoutTopBar"
+                    class="border-b-2 border-slate-950/10 lg:px-8 dark:border-slate-300/10 px-3 lg:mx-0 flex flex-row items-center w-full overflow-clip"
+                >
                     <a
                         class="flex-0 p-4 md:hidden cursor-pointer select-none"
                         onClick={() =>

@@ -45,12 +45,13 @@ import { CommentTransformer } from "~/components/editor/comment-transformer";
 import { ShareTransformer } from "~/components/editor/share-transformer";
 import { Status } from "megalodon/lib/src/entities/status";
 import { useAuth } from "~/auth/auth-manager";
+import { CommentEditorComponent } from "~/components/editor/comment-component";
 
-type EditorVariant<T> = {
+type EditorVariant<TDoc extends EditorDocument, T> = {
     name: string;
-    transformer: MockTransformerWrapper<T>;
+    transformer: MockTransformerWrapper<TDoc, T>;
     submitter: MockSubmitter;
-    component: Component<EditorProps<MegalodonPostStatus, string>>;
+    component: Component<EditorProps<MegalodonPostStatus, string, TDoc>>;
 };
 
 const DevEditDialogPage: Component = () => {
@@ -80,7 +81,7 @@ const DevEditDialogPage: Component = () => {
 
     const [selectedVariant, setSelectedVariant] = createSignal<string>("post");
 
-    const variants: EditorVariant<any>[] = [
+    const variants: EditorVariant<any, any>[] = [
         {
             name: "post",
             transformer: new MockTransformerWrapper(
@@ -99,7 +100,7 @@ const DevEditDialogPage: Component = () => {
                 allowValidation
             ),
             submitter: new MockSubmitter(allowSubmit, setSubmission),
-            component: MegalodonStatusEditorComponent,
+            component: CommentEditorComponent,
         },
         {
             name: "share",
@@ -238,14 +239,16 @@ const DevEditDialogPage: Component = () => {
     );
 };
 
-class MockTransformerWrapper<T> implements IEditorTransformer<T> {
+class MockTransformerWrapper<TDoc extends EditorDocument, T>
+    implements IEditorTransformer<TDoc, T>
+{
     public constructor(
-        public inner: EditorTransformerBase<T>,
+        public inner: EditorTransformerBase<TDoc, T>,
         public readonly allow: Accessor<boolean>
     ) {}
 
     public async validateAndTransform(
-        doc: EditorDocument
+        doc: TDoc
     ): Promise<{ output: T | undefined; errors: ValidationError[] }> {
         const output = await this.inner.validateAndTransform(doc);
 

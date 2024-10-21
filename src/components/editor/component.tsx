@@ -38,7 +38,9 @@ import { Button } from "../ui/button";
 import {
     EditorActions,
     EditorAttachment,
+    EditorCommentDocument,
     EditorConfig,
+    EditorDocument,
     EditorDocumentModel,
     EditorProps,
     IEditorSubmitter,
@@ -46,23 +48,26 @@ import {
     NewCommentEditorProps,
     ValidationError,
 } from "./editor-types";
-import { unwrap } from "solid-js/store";
+import { SetStoreFunction, unwrap } from "solid-js/store";
 import { MegalodonPostStatus } from "./megalodon-status-transformer";
 import { KeyboardShortcutTextArea } from "../ui/keyboard-shortcut-text-field";
 import { KeyBindingMap } from "tinykeys";
 import { filesize } from "filesize";
 import { AddAttachmentMenu, AttachmentList } from "./attachments";
+import { BeforeLeaveEventArgs, useBeforeLeave } from "@solidjs/router";
 
 export const MegalodonStatusEditorComponent: Component<
-    EditorProps<MegalodonPostStatus, string>
+    EditorProps<MegalodonPostStatus, string, EditorDocument>
 > = (props) => {
-    return new EditorComponentBase<MegalodonPostStatus>(props).makeComponent();
+    return new EditorComponentBase<MegalodonPostStatus, EditorDocument>(
+        props
+    ).makeComponent();
 };
 
 /** Extensible base for constructing different editor components */
-class EditorComponentBase<TOutput> {
-    protected model: EditorDocumentModel;
-    protected transformer: IEditorTransformer<TOutput>;
+export class EditorComponentBase<TOutput, TDoc extends EditorDocument> {
+    protected model: EditorDocumentModel<TDoc>;
+    protected transformer: IEditorTransformer<TDoc, TOutput>;
     protected submitter: IEditorSubmitter<TOutput, string>;
     protected config: EditorConfig;
     protected setNewPostId: Setter<string | undefined>;
@@ -71,13 +76,24 @@ class EditorComponentBase<TOutput> {
     /** controls whether controls should be active or not. */
     protected busy: Accessor<boolean>;
 
-    constructor(props: EditorProps<TOutput, string>) {
+    constructor(props: EditorProps<TOutput, string, TDoc>) {
         this.model = props.model;
         this.transformer = props.transformer;
         this.submitter = props.submitter;
         this.config = props.config;
         this.setNewPostId = props.setNewPostId;
         this.class = props.class;
+
+        useBeforeLeave((e: BeforeLeaveEventArgs) => {
+            if (this.model.stage !== "submitted") {
+                if (!e.defaultPrevented && this.model.store.body.length > 0) {
+                    e.preventDefault();
+                    if (window.confirm("Abandon in-progress post?")) {
+                        e.retry(true);
+                    }
+                }
+            }
+        });
 
         // shorthand for whether controls should be active or not.
         this.busy = createMemo(() => {
@@ -126,6 +142,10 @@ class EditorComponentBase<TOutput> {
                 action
             );
 
+            console.log(`editor ${action}: submitted successfully`);
+            this.model.setStage("submitted");
+
+            // Setting the new post id may trigger navigation or other behavior in the calling page
             this.setNewPostId(newPostId);
         } catch (e) {
             if (e instanceof Error) {
@@ -137,9 +157,6 @@ class EditorComponentBase<TOutput> {
             this.model.setStage("idle");
             return;
         }
-
-        console.log(`editor ${action}: submitted successfully`);
-        this.model.setStage("submitted");
     }
 
     public makeComponent(): JSX.Element {

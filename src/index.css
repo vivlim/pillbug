@@ -205,7 +205,13 @@ a {
 }
 
 #root {
+    overflow-wrap: anywhere;
 }
+
+button {
+    overflow-wrap: normal;
+}
+
 #notifications-facet {
     display: grid;
     width: 100%;

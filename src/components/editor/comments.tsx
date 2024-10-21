@@ -33,13 +33,16 @@ import { MenuButton } from "../ui/menubutton";
 import { Button } from "../ui/button";
 import { Status } from "megalodon/lib/src/entities/status";
 import {
+    EditorCommentDocument,
     EditorConfig,
+    EditorDocument,
     EditorDocumentModel,
     NewCommentEditorProps,
 } from "./editor-types";
 import { MegalodonStatusEditorComponent } from "./component";
 import { CommentTransformer } from "./comment-transformer";
 import { MegalodonPostSubmitter } from "./megalodon-status-submitter";
+import { CommentEditorComponent } from "./comment-component";
 
 export const NewCommentEditor: Component<NewCommentEditorProps> = (props) => {
     const auth = useAuth();
@@ -59,12 +62,14 @@ export const NewCommentEditor: Component<NewCommentEditorProps> = (props) => {
         }
     });
 
-    const editorModel = new EditorDocumentModel({
-        body: `@${props.parentStatus.account.acct} `,
+    const editorModel = new EditorDocumentModel<EditorCommentDocument>({
+        body: "",
         cwContent: props.parentStatus.spoiler_text,
         cwVisible: props.parentStatus.sensitive,
         visibility: props.parentStatus.visibility,
         attachments: [],
+        tagRepliedAuthor: true, // default. todo: read a setting?
+        replyingTo: props.parentStatus,
     });
 
     const transformer = new CommentTransformer(auth, props.parentStatus);
@@ -75,7 +80,7 @@ export const NewCommentEditor: Component<NewCommentEditorProps> = (props) => {
 
     return (
         <>
-            <MegalodonStatusEditorComponent
+            <CommentEditorComponent
                 model={editorModel}
                 transformer={transformer}
                 submitter={submitter}

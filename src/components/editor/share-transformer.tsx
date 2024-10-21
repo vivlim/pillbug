@@ -9,7 +9,10 @@ import { Status } from "megalodon/lib/src/entities/status";
 type SharePreTransform = {};
 
 /** Megalodon status transformer for share posts */
-export class ShareTransformer extends MegalodonEditorTransformer<SharePreTransform> {
+export class ShareTransformer extends MegalodonEditorTransformer<
+    EditorDocument,
+    SharePreTransform
+> {
     constructor(private shareTarget: Status, auth: SessionAuthManager) {
         super(auth);
     }

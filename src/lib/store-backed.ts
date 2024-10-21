@@ -4,8 +4,8 @@ import { createStore, SetStoreFunction } from "solid-js/store";
 
 /** Abstract class for implementing on top of an ephemeral, session-lifetime reactive Store. */
 export abstract class StoreBacked<TStore extends object> {
-    protected readonly store: TStore;
-    protected readonly setStore: SetStoreFunction<TStore>;
+    public readonly store: TStore;
+    public readonly setStore: SetStoreFunction<TStore>;
 
     constructor(initial: TStore) {
 
@@ -17,8 +17,8 @@ export abstract class StoreBacked<TStore extends object> {
 
 /** Abstract class for implementing on top of both an ephemeral session-lifetime reactive Store, as well as a persistent (in localStorage) one. */
 export abstract class PersistentStoreBacked<TEphemeralStore extends object, TPersistentStore extends object> extends StoreBacked<TEphemeralStore> {
-    protected readonly persistentStore: TPersistentStore;
-    protected readonly setPersistentStore: SetStoreFunction<TPersistentStore>;
+    public readonly persistentStore: TPersistentStore;
+    public readonly setPersistentStore: SetStoreFunction<TPersistentStore>;
 
     constructor(initialEphemeral: TEphemeralStore, initialPersistent: TPersistentStore, persistentOptions: PersistenceOptions<any, any>) {
         super(initialEphemeral);

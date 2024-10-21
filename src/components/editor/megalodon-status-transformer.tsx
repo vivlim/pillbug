@@ -31,21 +31,20 @@ export type MegalodonPostStatus = {
 };
 
 export class MegalodonEditorTransformer<
+    TDoc extends EditorDocument,
     TPreTransform
-> extends EditorTransformerBase<MegalodonPostStatus> {
+> extends EditorTransformerBase<TDoc, MegalodonPostStatus> {
     constructor(protected auth: SessionAuthManager) {
         super();
     }
 
-    protected async validate(doc: EditorDocument): Promise<ValidationError[]> {
+    protected async validate(doc: TDoc): Promise<ValidationError[]> {
         const errors = await super.validate(doc);
         // do extra validation needed for megalodon statuses
 
         return errors;
     }
-    protected async transform(
-        doc: EditorDocument
-    ): Promise<MegalodonPostStatus> {
+    protected async transform(doc: TDoc): Promise<MegalodonPostStatus> {
         const preTransform = await this.preTransform(doc);
 
         const output: MegalodonPostStatus = {
@@ -67,14 +66,14 @@ export class MegalodonEditorTransformer<
 
     /** Optionally rewrite the status body and produce an object to be passed to postTransform */
     protected async preTransform(
-        doc: EditorDocument
+        doc: TDoc
     ): Promise<{ newStatus: string; extra: TPreTransform | undefined }> {
         return { newStatus: doc.body, extra: undefined };
     }
 
     /** By default this has no effect, but derived classes may use it do to things like add reply ids */
     protected async postTransform(
-        doc: EditorDocument,
+        doc: TDoc,
         status: MegalodonPostStatus,
         preTransform: TPreTransform | undefined
     ): Promise<MegalodonPostStatus> {

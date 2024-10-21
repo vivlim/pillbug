@@ -77,6 +77,8 @@ const EditorFacet: Component = () => {
     );
 };
 
+type EditorFacetDocument = EditorDocument;
+
 const EditorFacetEditor: Component<EditorFacetProps> = (props) => {
     const settings = useSettings();
     const auth = useAuth();
@@ -85,7 +87,9 @@ const EditorFacetEditor: Component<EditorFacetProps> = (props) => {
         setTime(DateTime.now());
     }, 5000);
 
-    const [editorModel] = createResource<EditorDocumentModel>(async () => {
+    const [editorModel] = createResource<
+        EditorDocumentModel<EditorFacetDocument>
+    >(async () => {
         const initialDoc: EditorDocument = {
             body: "",
             cwContent: "",

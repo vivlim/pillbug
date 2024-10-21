@@ -7,6 +7,7 @@ import {
     Setter,
     Signal,
 } from "solid-js";
+import { SetStoreFunction } from "solid-js/store";
 import { PersistentStoreBacked, StoreBacked } from "~/lib/store-backed";
 
 export interface NewCommentEditorProps {
@@ -19,6 +20,11 @@ export interface EditorDocument {
     body: string;
     visibility: Entity.StatusVisibility;
     attachments: EditorAttachment[];
+}
+
+export interface EditorCommentDocument extends EditorDocument {
+    tagRepliedAuthor: boolean;
+    replyingTo: Status;
 }
 
 export interface EditorAttachment {
@@ -43,18 +49,20 @@ type EditorDocumentArrayPropertyNames = keyof ArrayProperties<EditorDocument>;
 
 type EditorStage = "idle" | "validating" | "submitting" | "submitted";
 
-export class EditorDocumentModel extends StoreBacked<EditorDocument> {
+export class EditorDocumentModel<
+    TDoc extends EditorDocument
+> extends StoreBacked<TDoc> {
     /** Whether the editor document has been submitted by the user. */
     private readonly stageSignal: Signal<EditorStage>;
     private readonly validationErrorsSignal: Signal<ValidationError[]>;
 
-    constructor(doc: EditorDocument) {
+    constructor(doc: TDoc) {
         super(doc);
         this.stageSignal = createSignal<EditorStage>("idle");
         this.validationErrorsSignal = createSignal<ValidationError[]>([]);
     }
 
-    public get document(): EditorDocument {
+    public get document(): TDoc {
         return this.store;
     }
 
@@ -63,7 +71,8 @@ export class EditorDocumentModel extends StoreBacked<EditorDocument> {
         key: K,
         value: EditorDocument[K]
     ) {
-        this.setStore(key, value);
+        // I don't know why this type assertion is necessary, but the type definition for SetStoreFunction does not like having a generic type passed in
+        (this.setStore as SetStoreFunction<EditorDocument>)(key, value);
     }
 
     /*
@@ -80,7 +89,12 @@ export class EditorDocumentModel extends StoreBacked<EditorDocument> {
         index: number,
         value: EditorAttachment | ((e: EditorAttachment) => EditorAttachment)
     ) {
-        this.setStore("attachments", index, value);
+        // I don't know why this type assertion is necessary, but the type definition for SetStoreFunction does not like having a generic type passed in
+        (this.setStore as SetStoreFunction<EditorDocument>)(
+            "attachments",
+            index,
+            value
+        );
     }
 
     public get stage(): EditorStage {
@@ -100,12 +114,12 @@ export class EditorDocumentModel extends StoreBacked<EditorDocument> {
     }
 }
 
-export abstract class EditorTransformerBase<T>
-    implements IEditorTransformer<T>
+export abstract class EditorTransformerBase<TDoc extends EditorDocument, T>
+    implements IEditorTransformer<TDoc, T>
 {
     /** Validate that the document is OK to attempt posting. Override to add additional checks. */
     public async validateAndTransform(
-        doc: EditorDocument
+        doc: TDoc
     ): Promise<{ output: T | undefined; errors: ValidationError[] }> {
         const errors = await this.validate(doc);
         if (errors.length > 0) {
@@ -139,7 +153,7 @@ export abstract class EditorTransformerBase<T>
         }
     }
 
-    protected async validate(doc: EditorDocument): Promise<ValidationError[]> {
+    protected async validate(doc: TDoc): Promise<ValidationError[]> {
         const errors: ValidationError[] = [];
         if (doc.body.length === 0) {
             errors.push(new ValidationError("No post body provided"));
@@ -148,12 +162,12 @@ export abstract class EditorTransformerBase<T>
         return errors;
     }
 
-    protected abstract transform(doc: EditorDocument): Promise<T>;
+    protected abstract transform(doc: TDoc): Promise<T>;
 }
 
-export interface IEditorTransformer<T> {
+export interface IEditorTransformer<TDoc extends EditorDocument, T> {
     validateAndTransform(
-        doc: EditorDocument
+        doc: TDoc
     ): Promise<{ output: T | undefined; errors: ValidationError[] }>;
 }
 
@@ -176,9 +190,9 @@ export interface EditorConfig {
     bodyPlaceholder: string;
 }
 
-export interface EditorProps<TPost, TRet> {
-    model: EditorDocumentModel;
-    transformer: IEditorTransformer<TPost>;
+export interface EditorProps<TPost, TRet, TDoc extends EditorDocument> {
+    model: EditorDocumentModel<TDoc>;
+    transformer: IEditorTransformer<TDoc, TPost>;
     submitter: IEditorSubmitter<TPost, TRet>;
     config: EditorConfig;
     class?: string | undefined;

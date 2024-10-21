@@ -145,7 +145,7 @@ export const AddAttachmentMenu: Component<AddAttachmentMenuProps> = (props) => {
 export const AttachmentList: Component<{
     attachment: EditorAttachment;
     index: number;
-    model: EditorDocumentModel;
+    model: EditorDocumentModel<any>;
 }> = ({ attachment, index, model }) => {
     const imgUrl = URL.createObjectURL(attachment.file);
     return (
