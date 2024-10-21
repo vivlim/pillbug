@@ -45,30 +45,22 @@ const SettingsFacet: Component = () => {
                     <CardTitle>appearance</CardTitle>
                 </CardHeader>
                 <CardContent class="px-4 pb-2">
-                    <ul>
-                        <li>
-                            <PersistentFlagCheckbox flag="useFullQualityImagesAsThumbnails">
-                                Show full quality images without having to click
-                                into them first
-                            </PersistentFlagCheckbox>
-                        </li>
-                        <li>
-                            <PersistentFlagCheckbox flag="imagesInPostsExpandToFullWidth">
-                                Images in posts expand to the full width of the
-                                post
-                            </PersistentFlagCheckbox>
-                        </li>
+                    <ul class="flex flex-col gap-4">
+                        <PersistentFlagCheckbox flag="useFullQualityImagesAsThumbnails">
+                            Show full quality images without having to click
+                            into them first
+                        </PersistentFlagCheckbox>
+                        <PersistentFlagCheckbox flag="imagesInPostsExpandToFullWidth">
+                            Images in posts expand to the full width of the post
+                        </PersistentFlagCheckbox>
+                        <PersistentFlagCheckbox flag="skipBlurHashClickThroughOnSensitiveMedia">
+                            Skip needing to click through blurred previews of
+                            sensitive media
+                        </PersistentFlagCheckbox>
+                        <PersistentFlagCheckbox flag="alignColumnsLeft">
+                            Align columns to the left instead of centering them
+                        </PersistentFlagCheckbox>
                     </ul>
-                </CardContent>
-                <CardContent class="px-4 pb-2">
-                    <p>
-                        Currently this setting is mainly an example of how to
-                        create a setting which, when set, applies a class to the
-                        document (so css selectors may use it)
-                    </p>
-                    <PersistentFlagCheckbox flag="alignColumnsLeft">
-                        Align columns to the left instead of centering them
-                    </PersistentFlagCheckbox>
                 </CardContent>
             </Card>
             <Card>
@@ -93,7 +85,7 @@ const PersistentFlagCheckbox: Component<{
     const settings = useSettings();
 
     return (
-        <>
+        <li>
             <input
                 type="checkbox"
                 id={checkboxId}
@@ -107,7 +99,7 @@ const PersistentFlagCheckbox: Component<{
             <label for={checkboxId} class="pl-2 select-none">
                 {props.children}
             </label>
-        </>
+        </li>
     );
 };
 

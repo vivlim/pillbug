@@ -27,6 +27,7 @@ export interface PersistentSettings {
     alignColumnsLeft?: Flag
     useFullQualityImagesAsThumbnails?: Flag
     imagesInPostsExpandToFullWidth?: Flag
+    skipBlurHashClickThroughOnSensitiveMedia?: Flag
     enableDevTools?: Flag
 }
 

@@ -48,6 +48,13 @@ const ImageAttachment: Component<ImageAttachmentProps> = (props) => {
         props.attachment.meta?.height ?? 256 * props.aspectRatio
     );
 
+    if (
+        settings.getPersistent().skipBlurHashClickThroughOnSensitiveMedia &&
+        hidingSensitiveContent()
+    ) {
+        setHidingSensitiveContent(false);
+    }
+
     const [blurHashImage] = createResource(async () => {
         if (!props.sensitive) {
             return undefined;
