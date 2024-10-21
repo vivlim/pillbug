@@ -66,8 +66,9 @@ function getFilesFromInput(options: GetFilesFromInputOptions): Promise<File[]> {
         );
         let input = document.createElement("input");
         input.type = "file";
+        input.value = "";
         input = Object.assign(input, options);
-        input.onchange = (_) => {
+        var handler = (_: any) => {
             console.log("file input element changed");
             if (input === null || input === undefined) {
                 console.log("input element was null or undefined");
@@ -85,6 +86,7 @@ function getFilesFromInput(options: GetFilesFromInputOptions): Promise<File[]> {
             console.log(`${fileList.length} files`);
             resolve(filesArray);
         };
+        input.addEventListener("change", handler);
 
         input.click();
     });
@@ -100,6 +102,7 @@ export const AddAttachmentMenu: Component<AddAttachmentMenuProps> = (props) => {
 
     const getAttachment = async (options: GetFilesFromInputOptions = {}) => {
         try {
+            setStatus("awaiting attachment...");
             const combinedOptions = {
                 accept: props.accept,
                 ...options,
@@ -114,7 +117,7 @@ export const AddAttachmentMenu: Component<AddAttachmentMenuProps> = (props) => {
                 props.onFileAdded(f);
             }
 
-            setStatus(`ok`);
+            setStatus(`attachment ok`);
         } catch (e) {
             if (e instanceof Error) {
                 setStatus(`Failed to add attachment: ${e.message}`);
@@ -124,7 +127,6 @@ export const AddAttachmentMenu: Component<AddAttachmentMenuProps> = (props) => {
 
     return (
         <>
-            <span>{status()}</span>
             <DropdownMenu>
                 <DropdownMenuTrigger as={MenuButton<"button">} type="button">
                     <IoAttachOutline class="size-6" />
@@ -138,16 +140,9 @@ export const AddAttachmentMenu: Component<AddAttachmentMenuProps> = (props) => {
                     >
                         attach a file
                     </DropdownMenuItem>
-                    <DropdownMenuItem
-                        class="py-4 md:py-2"
-                        onClick={() => {
-                            getAttachment({ capture: "environment" });
-                        }}
-                    >
-                        take a picture
-                    </DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>
+            <span style="align-content: center;">{status()}</span>
         </>
     );
 };
@@ -164,7 +159,8 @@ export const AttachmentComponent: Component<{
     attachment: EditorAttachment;
     index: number;
     model: EditorDocumentModel<any>;
-}> = ({ attachment, index, model }) => {
+    onRemoveClicked: () => void;
+}> = ({ attachment, index, model, onRemoveClicked }) => {
     const imgUrl = URL.createObjectURL(attachment.file);
 
     const [exifTagAnalysis] = createResource<ExifTagAnalysis>(async () => {
@@ -187,6 +183,9 @@ export const AttachmentComponent: Component<{
     });
     return (
         <div class="border-2 rounded-md p-4">
+            <div style="float: right;">
+                <Button onClick={onRemoveClicked}>remove</Button>
+            </div>
             <p>
                 {attachment.name}: {filesize(attachment.size)} {attachment.type}
             </p>
@@ -197,7 +196,7 @@ export const AttachmentComponent: Component<{
 flex h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50
                 "
                 placeholder="image description"
-                onInput={(e) => {
+                onChange={(e) => {
                     const newAttachment = { ...attachment };
                     newAttachment.description = e.currentTarget.value;
                     model.setAttachment(index, newAttachment);

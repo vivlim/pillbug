@@ -142,7 +142,7 @@ a {
 #layoutColumnsRoot {
     display: grid;
     width: 100vw;
-    flex: 1 1 auto; /* fill containing flexbox */
+    height: 100%;
 
     max-width: 76rem;
 
@@ -150,10 +150,15 @@ a {
     /* The first grid item should only occupy the minimum height needed, it could be a user profile or maybe empty space */
         grid-template-rows: min-content auto;
     grid-auto-flow: columns;
-    overflow: auto;
-    margin: 0px;
+    margin: auto;
     min-width: 0;
     min-height: 0;
+}
+#scrollableArea {
+    overflow:auto;
+    width: 100vw;
+    flex: 1 1 auto; /* fill containing flexbox */
+    flex-grow: 1;
 }
 
 #editorRoot {
@@ -201,7 +206,6 @@ a {
 
 #layoutMainColumn {
     padding-bottom: 2em;
-    overflow: auto;
 }
 
 #layoutTopBar {
@@ -262,6 +266,14 @@ button {
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
+}
+
+.pbPostEditor {
+    min-height: 5em;
+}
+
+#editorRoot .pbPostEditor {
+    min-height: 50vh;
 }
 
 summary::marker {

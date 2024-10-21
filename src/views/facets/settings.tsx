@@ -45,10 +45,20 @@ const SettingsFacet: Component = () => {
                     <CardTitle>appearance</CardTitle>
                 </CardHeader>
                 <CardContent class="px-4 pb-2">
-                    <PersistentFlagCheckbox flag="useFullQualityImagesAsThumbnails">
-                        Show full quality images without having to click into
-                        them first
-                    </PersistentFlagCheckbox>
+                    <ul>
+                        <li>
+                            <PersistentFlagCheckbox flag="useFullQualityImagesAsThumbnails">
+                                Show full quality images without having to click
+                                into them first
+                            </PersistentFlagCheckbox>
+                        </li>
+                        <li>
+                            <PersistentFlagCheckbox flag="imagesInPostsExpandToFullWidth">
+                                Images in posts expand to the full width of the
+                                post
+                            </PersistentFlagCheckbox>
+                        </li>
+                    </ul>
                 </CardContent>
                 <CardContent class="px-4 pb-2">
                     <p>

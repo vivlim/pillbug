@@ -173,7 +173,10 @@ const PostBody: Component<PostBodyProps> = (props) => {
                         emoji={props.status.emojis}
                     />
                 </div>
-                <ImageBox attachments={props.status.media_attachments} />
+                <ImageBox
+                    attachments={props.status.media_attachments}
+                    sensitive={props.status.sensitive}
+                />
             </ContentGuard>
         </CardContent>
     );

@@ -26,6 +26,7 @@ export interface PersistentSettings {
     useInternetTime?: Flag
     alignColumnsLeft?: Flag
     useFullQualityImagesAsThumbnails?: Flag
+    imagesInPostsExpandToFullWidth?: Flag
     enableDevTools?: Flag
 }
 

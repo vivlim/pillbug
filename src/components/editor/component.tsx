@@ -235,7 +235,7 @@ export class EditorComponentBase<TOutput, TDoc extends EditorDocument> {
                     <KeyboardShortcutTextArea
                         tabindex={0}
                         placeholder={config.bodyPlaceholder}
-                        class="resize-none overflow-hidden px-3 py-2 text-md border-2 rounded-md"
+                        class="pbPostEditor resize-none overflow-hidden px-3 py-2 text-md border-2 rounded-md"
                         disabled={this.busy()}
                         value={model.document.body}
                         setValue={(b: string) => model.set("body", b)}
@@ -327,13 +327,24 @@ export class EditorComponentBase<TOutput, TDoc extends EditorDocument> {
                         </ul>
                     </div>
                 </Show>
-                <div style="max-height: 50%; width: 100%; overflow: auto">
+                <div style="width: 100%">
                     <For each={model.document.attachments}>
                         {(a, idx) => (
                             <AttachmentComponent
                                 attachment={a}
                                 index={idx()}
                                 model={model}
+                                onRemoveClicked={() => {
+                                    const newAtt: EditorAttachment[] = [];
+                                    const att = model.document.attachments;
+                                    for (let i = 0; i < att.length; i++) {
+                                        if (i === idx()) {
+                                            continue;
+                                        }
+                                        newAtt.push(att[i]);
+                                    }
+                                    model.set("attachments", newAtt);
+                                }}
                             />
                         )}
                     </For>
