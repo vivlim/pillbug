@@ -229,15 +229,13 @@ const AppFrame: Component<{ children: JSX.Element }> = (props) => {
         >
             <>
                 <FrameTopBar />
-                <div id="scrollableArea">
-                    <LayoutColumnsRoot>
-                        <LayoutLeftColumn />
-                        <LayoutMainColumn>{props.children}</LayoutMainColumn>
-                    </LayoutColumnsRoot>
-                    <LayoutLeftColumnPortal>
-                        <FacetNavigation />
-                    </LayoutLeftColumnPortal>
-                </div>
+                <LayoutColumnsRoot>
+                    <LayoutLeftColumn />
+                    <LayoutMainColumn>{props.children}</LayoutMainColumn>
+                </LayoutColumnsRoot>
+                <LayoutLeftColumnPortal>
+                    <FacetNavigation />
+                </LayoutLeftColumnPortal>
             </>
         </FrameContext.Provider>
     );

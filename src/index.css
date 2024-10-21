@@ -175,19 +175,11 @@ a {
     min-width: 0;
     min-height: 0;
 }
-#scrollableArea {
-    overflow:auto;
-    width: 100vw;
-    flex: 1 1 auto; /* fill containing flexbox */
-    flex-grow: 1;
-}
-
 #editorRoot {
     display: grid;
     height: 100%;
     width: 100%;
-    overflow: auto;
-    grid-template-rows: 50% 50%;
+    grid-template-rows: auto;
 }
 
 #editorEditor {
@@ -198,6 +190,7 @@ a {
     overflow: auto;
     margin: 0.5rem;
     padding: 0.5rem;
+    max-height: 50vh;
 }
 @media (min-width: 768px) {
     #layoutColumnsRoot {
