@@ -29,6 +29,7 @@ import {
 } from "~/components/layout/columns";
 import { useFrameContext } from "~/components/frame/context";
 import { NewCommentEditor } from "~/components/editor/comments";
+import { unwrapResponse } from "~/lib/clientUtil";
 
 /** Fetch the info for a post and arrange its context in a nested tree structure before returning. */
 export async function fetchPostInfoTree(
@@ -125,28 +126,48 @@ export async function fetchPostInfoTree(
             );
         }
 
-        const requestedStatusContext = await client.getStatusContext(postId);
-        if (requestedStatusContext.status !== 200) {
-            throw new Error(
-                `Failed to get post ${postId}: ${requestedStatus.statusText}`
+        try {
+            const requestedStatusContext = unwrapResponse(
+                await client.getStatusContext(postId)
             );
+            if (requestedStatusContext === undefined) {
+                throw new Error("status context undefined");
+            }
+
+            let unsortedStatuses: Status[] = [];
+            unsortedStatuses.push(...requestedStatusContext.ancestors);
+            unsortedStatuses.push(...requestedStatusContext.descendants);
+
+            let idMap: Map<string, IPostTreeNode> = new Map();
+
+            const rootPost = locateRootNode(
+                requestedStatus.data,
+                idMap,
+                unsortedStatuses
+            );
+
+            // Try to attach all the remaining statuses to the tree somewhere
+            attachStatusesToTree(rootPost, idMap, unsortedStatuses);
+            return rootPost;
+        } catch (e) {
+            if (e instanceof Error) {
+                console.log(
+                    `Failed to get context for post ${postId}: ${e.stack}`
+                );
+                const root = new PostTreeStatusNode(
+                    requestedStatus.data,
+                    [
+                        new PostTreePlaceholderNode(
+                            `Failed to get context for post ${postId}: ${e.message}`,
+                            [],
+                            false
+                        ),
+                    ],
+                    true
+                );
+                return root;
+            }
         }
-
-        let unsortedStatuses: Status[] = [];
-        unsortedStatuses.push(...requestedStatusContext.data.ancestors);
-        unsortedStatuses.push(...requestedStatusContext.data.descendants);
-
-        let idMap: Map<string, IPostTreeNode> = new Map();
-
-        const rootPost = locateRootNode(
-            requestedStatus.data,
-            idMap,
-            unsortedStatuses
-        );
-
-        // Try to attach all the remaining statuses to the tree somewhere
-        attachStatusesToTree(rootPost, idMap, unsortedStatuses);
-        return rootPost;
     }
 }
 
