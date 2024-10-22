@@ -306,10 +306,19 @@ html.setting-alignColumnsLeft #layoutColumnsRoot {
     margin-left: 0px;
 }
 
+html.setting-unlimitedColumnWidth #layoutColumnsRoot {
+    max-width: unset;
+}
+
 .pbPostOutside {
     display: grid;
     grid-template-columns: min-content 1fr;
     grid-template-rows: max-content;
     word-break: break-word;
     word-wrap: break-word;
+}
+
+.pbPostHeightLimiter{
+    overflow: hidden;
+    max-height: 50vh;
 }

@@ -57,8 +57,14 @@ const SettingsFacet: Component = () => {
                             Skip needing to click through blurred previews of
                             sensitive media
                         </PersistentFlagCheckbox>
+                        <PersistentFlagCheckbox flag="unlimitedPostHeightInFeed">
+                            Unlimited post height in feed (no 'show more')
+                        </PersistentFlagCheckbox>
                         <PersistentFlagCheckbox flag="alignColumnsLeft">
                             Align columns to the left instead of centering them
+                        </PersistentFlagCheckbox>
+                        <PersistentFlagCheckbox flag="unlimitedColumnWidth">
+                            UNLIMITED COLUMN WIDTH
                         </PersistentFlagCheckbox>
                     </ul>
                 </CardContent>

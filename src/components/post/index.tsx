@@ -2,6 +2,7 @@ import { A, useNavigate } from "@solidjs/router";
 import { Entity, MegalodonInterface } from "megalodon";
 import { Status } from "megalodon/lib/src/entities/status";
 import {
+    createEffect,
     createMemo,
     createResource,
     createSignal,
@@ -11,6 +12,7 @@ import {
     Resource,
     Show,
     splitProps,
+    Suspense,
     Switch,
     type Component,
 } from "solid-js";
@@ -54,12 +56,14 @@ import {
 } from "../ui/dropdown-menu";
 import { MenuButton } from "../ui/menubutton";
 import { unwrapResponse } from "~/lib/clientUtil";
+import { useSettings } from "~/lib/settings-manager";
 
 export type PostWithSharedProps = {
     status: Status;
     showRaw: boolean;
     fetchShareParentDepth: number;
     shareParentUrl?: string | null;
+    limitInitialHeight: boolean;
 };
 
 export type PostProps = {
@@ -67,6 +71,7 @@ export type PostProps = {
     status: Status;
     fetchShareParentDepth: number;
     shareParent?: Resource<Status | undefined> | undefined;
+    limitInitialHeight: boolean;
 };
 
 export type StatusPostBlockProps = {
@@ -74,6 +79,7 @@ export type StatusPostBlockProps = {
     showRaw: boolean;
     fetchShareParentDepth: number;
     shareParent?: Resource<Status | undefined> | undefined;
+    limitInitialHeight: boolean;
 };
 
 export async function fetchShareParentPost(
@@ -160,25 +166,96 @@ const PostUserBar: Component<{
 
 interface PostBodyProps extends JSX.HTMLAttributes<HTMLDivElement> {
     status: Status;
+    limitInitialHeight: boolean;
 }
 
 const PostBody: Component<PostBodyProps> = (props) => {
     const [, rest] = splitProps(props, ["status", "class"]);
+    const settings = useSettings();
+    const [heightLimited, setHeightLimited] = createSignal(
+        props.limitInitialHeight &&
+            !settings.getPersistent().unlimitedPostHeightInFeed
+    );
+    const [expandButtonVisible, setExpandButtonVisible] =
+        createSignal<boolean>(false);
+    const [expandButtonClicked, setExpandButtonClicked] =
+        createSignal<boolean>(false);
+
+    const [collapser, setCollapser] = createSignal<HTMLDivElement>();
+    const [collapsee, setCollapsee] = createSignal<HTMLDivElement>();
+
+    const resizeObserver = new ResizeObserver(() => {
+        if (collapser() === undefined || collapsee === undefined) {
+            return;
+        }
+
+        const currentHeight = collapser()?.offsetHeight;
+        const contentHeight = collapsee()?.offsetHeight;
+        if (currentHeight === undefined || contentHeight === undefined) {
+            return false;
+        }
+        setExpandButtonVisible(currentHeight < contentHeight);
+    });
+
+    createEffect(() => {
+        if (!heightLimited()) {
+            return;
+        }
+        const c = collapser();
+        if (c !== undefined) {
+            resizeObserver.observe(c);
+        }
+    });
+    createEffect(() => {
+        if (!heightLimited()) {
+            return;
+        }
+        const c = collapsee();
+        if (c !== undefined) {
+            resizeObserver.observe(c);
+        }
+    });
+
     return (
-        <CardContent class={cn(props.class)} {...rest}>
-            <ContentGuard warnings={props.status.spoiler_text}>
-                <div class="p-3">
-                    <HtmlSandbox
-                        html={props.status.content}
-                        emoji={props.status.emojis}
-                    />
-                </div>
-                <ImageBox
-                    attachments={props.status.media_attachments}
-                    sensitive={props.status.sensitive}
-                />
-            </ContentGuard>
-        </CardContent>
+        <>
+            <CardContent class={cn(props.class)} {...rest}>
+                <Suspense>
+                    <div
+                        class={
+                            heightLimited() && !expandButtonClicked()
+                                ? "pbPostHeightLimiter"
+                                : ""
+                        }
+                        ref={setCollapser}
+                    >
+                        <div ref={setCollapsee}>
+                            <ContentGuard warnings={props.status.spoiler_text}>
+                                <div class="p-3">
+                                    <HtmlSandbox
+                                        html={props.status.content}
+                                        emoji={props.status.emojis}
+                                    />
+                                </div>
+                                <ImageBox
+                                    attachments={props.status.media_attachments}
+                                    sensitive={props.status.sensitive}
+                                />
+                            </ContentGuard>
+                        </div>
+                    </div>
+                    <Show when={expandButtonVisible() || expandButtonClicked()}>
+                        <Button
+                            onClick={() =>
+                                setExpandButtonClicked(!expandButtonClicked())
+                            }
+                            class="w-full"
+                        >
+                            {expandButtonClicked() ? "show less" : "show more"}
+                        </Button>
+                    </Show>
+                </Suspense>
+            </CardContent>
+        </>
     );
 };
 
@@ -299,6 +376,7 @@ const Post: Component<PostProps> = (postData) => {
                             postData.fetchShareParentDepth - 1
                         }
                         showRaw={showRaw()}
+                        limitInitialHeight={postData.limitInitialHeight}
                     />
                     <PostFooter>
                         <ContextMenu>
@@ -360,16 +438,25 @@ const StatusPostBlock: Component<StatusPostBlockProps> = (postData) => {
                                 fetchShareParentDepth={
                                     postData.fetchShareParentDepth - 1
                                 }
+                                limitInitialHeight={postData.limitInitialHeight}
                             />
                             <PostUserBar
                                 status={status}
                                 sharedStatus={postData.shareParent!()}
                             />
-                            <PostBody class="border-b" status={status} />
+                            <PostBody
+                                class="border-b"
+                                status={status}
+                                limitInitialHeight={postData.limitInitialHeight}
+                            />
                         </Match>
                         <Match when={postData.shareParent?.() == null}>
                             <PostUserBar status={status} />
-                            <PostBody class="border-b" status={status} />
+                            <PostBody
+                                class="border-b"
+                                status={status}
+                                limitInitialHeight={postData.limitInitialHeight}
+                            />
                         </Match>
                     </Switch>
                 </Match>
@@ -377,7 +464,11 @@ const StatusPostBlock: Component<StatusPostBlockProps> = (postData) => {
                     <PostUserBar status={status} />
                     <PostUserBar status={status.reblog!} />
 
-                    <PostBody class="border-b" status={status.reblog!} />
+                    <PostBody
+                        class="border-b"
+                        status={status.reblog!}
+                        limitInitialHeight={postData.limitInitialHeight}
+                    />
                 </Match>
             </Switch>
             <Show when={postData.showRaw}>
@@ -418,6 +509,7 @@ export const PostWithShared: Component<PostWithSharedProps> = (postData) => {
             /* @ts-expect-error: 'Status | null' */
             shareParent={shareParentPost}
             showRaw={postData.showRaw}
+            limitInitialHeight={postData.limitInitialHeight}
         ></StatusPostBlock>
     );
 };

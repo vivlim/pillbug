@@ -29,6 +29,8 @@ export interface PersistentSettings {
     imagesInPostsExpandToFullWidth?: Flag
     skipBlurHashClickThroughOnSensitiveMedia?: Flag
     enableDevTools?: Flag
+    unlimitedPostHeightInFeed?: Flag
+    unlimitedColumnWidth?: Flag
 }
 
 /** Configurable on-off flags which may be undefined until a user configures them. */
@@ -77,6 +79,7 @@ export class SettingsManager extends PersistentStoreBacked<EphemeralSettings, Pe
         // Update document classes based on setting values.
         this.updateDocumentClass("alignColumnsLeft")
         this.updateDocumentClass("enableDevTools")
+        this.updateDocumentClass("unlimitedColumnWidth")
     }
 
 
