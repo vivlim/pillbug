@@ -153,6 +153,7 @@ export const FacetNavigation: Component = (props) => {
                     </Show>
                 </ul>
             </div>
+            <div id="webampDropZone" />
         </Show>
     );
 };

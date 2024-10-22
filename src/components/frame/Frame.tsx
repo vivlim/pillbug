@@ -46,6 +46,7 @@ import { MegalodonInterface } from "megalodon";
 import { Account } from "megalodon/lib/src/entities/account";
 import { logger } from "~/logging";
 import ErrorBox from "../error";
+import "webamp";
 
 const CurrentAccountWithAvatar: Component<{
     signInState: SignedInState;
@@ -192,6 +193,18 @@ const FrameTopBar: Component = (props) => {
                                                             "dark"
                                                         );
                                                     }
+                                                }}
+                                            >
+                                                Toggle light/dark
+                                            </MenubarItem>
+                                            <MenubarItem
+                                                onClick={() => {
+                                                    const wa = new Webamp({});
+                                                    wa.renderWhenReady(
+                                                        document.getElementById(
+                                                            "webampDropZone"
+                                                        )
+                                                    );
                                                 }}
                                             >
                                                 Toggle light/dark

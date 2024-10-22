@@ -75,6 +75,7 @@
         "unified": "^11.0.5",
         "unist-util-is": "^6.0.0",
         "unist-util-visit": "^5.0.0",
-        "url-regex-safe": "^4.0.0"
+        "url-regex-safe": "^4.0.0",
+        "webamp": "^0.0.0-next-bd2022a8"
     }
 }
