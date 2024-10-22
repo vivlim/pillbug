@@ -322,3 +322,7 @@ html.setting-unlimitedColumnWidth #layoutColumnsRoot {
     overflow: hidden;
     max-height: 50vh;
 }
+
+* {
+    text-wrap: auto;
+}
