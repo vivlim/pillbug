@@ -122,6 +122,12 @@ a {
     /*text-decoration: underline;*/
 }
 
+body {
+    max-width: 100%;
+    overflow-x: hidden;
+    scrollbar-gutter: stable;
+}
+
 .facet-navigation-item svg {
     display: inline-block;
     margin-right: 0.7em;
@@ -306,10 +312,4 @@ html.setting-alignColumnsLeft #layoutColumnsRoot {
     grid-template-rows: max-content;
     word-break: break-word;
     word-wrap: break-word;
-
-}
-
-* {
-    scrollbar-width: 32px;
-    scrollbar-color: red;
 }
