@@ -119,16 +119,14 @@ export async function fetchPostInfoTree(
 
         console.log(`getting post ${postId}`);
 
-        const requestedStatus = await client.getStatus(postId);
-        if (requestedStatus.status !== 200) {
-            throw new Error(
-                `Failed to get post ${postId}: ${requestedStatus.statusText}`
-            );
-        }
+        const requestedStatus = unwrapResponse(await client.getStatus(postId));
 
         try {
+            // If the post we're looking at is a reblog, get context for the reblog target.
+            const postIdForContext =
+                requestedStatus.reblog?.id ?? requestedStatus.id;
             const requestedStatusContext = unwrapResponse(
-                await client.getStatusContext(postId)
+                await client.getStatusContext(postIdForContext)
             );
             if (requestedStatusContext === undefined) {
                 throw new Error("status context undefined");
@@ -141,7 +139,7 @@ export async function fetchPostInfoTree(
             let idMap: Map<string, IPostTreeNode> = new Map();
 
             const rootPost = locateRootNode(
-                requestedStatus.data,
+                requestedStatus,
                 idMap,
                 unsortedStatuses
             );
@@ -169,7 +167,7 @@ export async function fetchPostInfoTree(
                 );
             }
             const root = new PostTreeStatusNode(
-                requestedStatus.data,
+                requestedStatus,
                 [errorNode],
                 true
             );
