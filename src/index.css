@@ -325,5 +325,5 @@ html.setting-unlimitedColumnWidth #layoutColumnsRoot {
 
 .pbPostHeightLimiter{
     overflow: hidden;
-    max-height: 50vh;
+    max-height: 70vh;
 }
