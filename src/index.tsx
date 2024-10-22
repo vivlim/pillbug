@@ -26,6 +26,7 @@ const PostPage = lazy(() => import("./views/postpage"));
 const DevEditDialogPage = lazy(() => import("./views/dev/editdialogpage"));
 const ErrorBox = lazy(() => import("./components/error"));
 const ErrorView = lazy(() => import("./views/error"));
+const AboutDetailsFacet = lazy(() => import("./views/facets/details"));
 
 if (import.meta.env.DEV && !(root instanceof HTMLElement)) {
     throw new Error(
@@ -88,6 +89,7 @@ render(
                     }}
                 />
                 <Route path="/about" component={AboutPillbugView} />
+                <Route path="/about/details" component={AboutDetailsFacet} />
                 <Route path="/login" component={LoginView} />
                 <Route path="/user/:username" component={UserProfile} />
                 <Route path="/post/:postId" component={PostPage} />

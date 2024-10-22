@@ -11,6 +11,7 @@
     "types": [
       "vite/client"
     ],
+    "resolveJsonModule": true,
     "noEmit": true,
     "isolatedModules": true,
     "paths": {

@@ -37,10 +37,8 @@ const FeatureListItem: Component<{ feature: Feature }> = (props) => {
 };
 
 const features: Feature[] = [
-    new Feature("Sharing posts", false),
     new Feature("Searching for posts and users", false),
-    new Feature("Tagging other users in posts", false),
-    new Feature("Attaching images to new posts", false),
+    new Feature("Easily accessible post urls", false),
     new Feature("Using custom emoji in posts", false),
     new Feature("Previewing posts", false),
     new Feature("Content filtering rules", false),
@@ -60,6 +58,11 @@ const features: Feature[] = [
     new Feature("Viewing notifications", true),
     new Feature("Viewing profiles", true),
     new Feature("Writing new posts", true),
+    new Feature("Sharing posts", true),
+    new Feature("Tagging other users in posts", true, [
+        "you can @-tag other users but there's no completion shown while you're typing",
+    ]),
+    new Feature("Attaching images to new posts", true),
     new Feature("Favoriting posts", true),
     new Feature("Replying to 'comments'", true),
     new Feature("Viewing images attached to posts", true),
@@ -103,6 +106,13 @@ const AboutPillbugView: Component = () => {
                         </a>
                         &nbsp;features are currently missing and you will
                         probably encounter bugs.
+                    </p>
+                    <p>
+                        For a list of third-party dependencies,{" "}
+                        <A href="/about/details" class="underline">
+                            click here
+                        </A>
+                        .
                     </p>
                 </CardContent>
             </Card>

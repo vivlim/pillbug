@@ -8,8 +8,12 @@
         "start": "vite",
         "dev": "vite",
         "dev-host": "vite --host",
-        "build": "vite build",
-        "serve": "vite preview"
+        "vite-build": "vite build",
+        "build": "npm-run-all license-report vite-build",
+        "serve": "vite preview",
+        "license-report-deps": "license-report --only=prod --output=json > license-report.json",
+        "license-report-devDeps": "license-report --only=dev --output=json > license-report-dev.json",
+        "license-report": "npm-run-all license-report-deps license-report-devDeps"
     },
     "license": "MIT",
     "devDependencies": {
@@ -18,6 +22,8 @@
         "@types/node": "^22.5.5",
         "@types/url-regex-safe": "^1.0.2",
         "autoprefixer": "^10.4.20",
+        "license-report": "^6.7.0",
+        "npm-run-all": "^4.1.5",
         "postcss": "^8.4.47",
         "solid-devtools": "^0.29.2",
         "tailwindcss": "^3.4.12",
