@@ -10,7 +10,7 @@ export interface EditingOverlayProps {
 export function useEditOverlayContext(): EditingOverlayProps {
     const value = useContext(EditingOverlayContext);
     if (value === undefined) {
-        throw new Error("useEditOverlayContext must be used within a provider");
+        throw new Error("useEditOverlayContext must be used within a provider (a new version of pillbug may have been deployed; try refreshing)");
     }
     return value;
 }

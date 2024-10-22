@@ -17,7 +17,7 @@ export interface FrameContextProps {
 export function useFrameContext(): FrameContextProps {
     const value = useContext(FrameContext);
     if (value === undefined) {
-        throw new Error("FrameContext must be used within a provider");
+        throw new Error("FrameContext must be used within a provider (a new version of pillbug may have been deployed; try refreshing)");
     }
     return value;
 }

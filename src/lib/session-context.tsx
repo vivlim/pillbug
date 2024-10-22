@@ -17,7 +17,9 @@ export interface PillbugSessionContext {
 export function useSessionContext(): PillbugSessionContext {
     const value = useContext(SessionContext);
     if (value === undefined) {
-        throw new Error("useSessionContext() must be used within a provider");
+        throw new Error(
+            "useSessionContext() must be used within a provider (a new version of pillbug may have been deployed; try refreshing)"
+        );
     }
     return value;
 }

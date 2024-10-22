@@ -150,23 +150,30 @@ export async function fetchPostInfoTree(
             attachStatusesToTree(rootPost, idMap, unsortedStatuses);
             return rootPost;
         } catch (e) {
+            let errorNode;
             if (e instanceof Error) {
                 console.log(
                     `Failed to get context for post ${postId}: ${e.stack}`
                 );
-                const root = new PostTreeStatusNode(
-                    requestedStatus.data,
-                    [
-                        new PostTreePlaceholderNode(
-                            `Failed to get context for post ${postId}: ${e.message}`,
-                            [],
-                            false
-                        ),
-                    ],
-                    true
+                errorNode = new PostTreePlaceholderNode(
+                    `Failed to get context for post ${postId}: ${e.message}`,
+                    [],
+                    false
                 );
-                return root;
             }
+            if (!errorNode) {
+                errorNode = new PostTreePlaceholderNode(
+                    `Failed to get context for post ${postId}: unknown error`,
+                    [],
+                    false
+                );
+            }
+            const root = new PostTreeStatusNode(
+                requestedStatus.data,
+                [errorNode],
+                true
+            );
+            return root;
         }
     }
 }
@@ -378,7 +385,9 @@ export const PostPageForId: Component<{
 export function usePostPageContext(): PostPageContextValue {
     const value = useContext(PostPageContext);
     if (value === undefined) {
-        throw new Error("usePostPageContext must be used within a provider");
+        throw new Error(
+            "usePostPageContext must be used within a provider (a new version of pillbug may have been deployed; try refreshing)"
+        );
     }
     return value;
 }
@@ -428,6 +437,7 @@ const PostWithCommentTree: Component = () => {
                                 threadInfo()?.tryGetStatus() as Status /* i don't think a placeholder should ever become root? Unless maybe it can't be found? unclear */
                             }
                             fetchShareParentDepth={5}
+                            limitInitialHeight={false}
                         />
                         <Show when={!loadProps().shareEditorMode}>
                             <For each={threadInfo()?.children}>

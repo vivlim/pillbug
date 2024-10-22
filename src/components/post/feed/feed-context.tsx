@@ -13,7 +13,7 @@ export function useFeedContext() {
     const context = useContext(FeedContext);
     if (context == undefined) {
         throw new Error(
-            "useFeedContext must be used within a <PostFeed> component"
+            "useFeedContext must be used within a <PostFeed> component (a new version of pillbug may have been deployed; try refreshing)"
         );
     }
     return context;

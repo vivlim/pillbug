@@ -27,17 +27,20 @@ import {
     ContextMenuTrigger,
 } from "~/components/ui/context-menu";
 import { TextField, TextFieldTextArea } from "~/components/ui/text-field";
-import { FaSolidArrowsRotate } from "solid-icons/fa";
+import { FaSolidArrowsRotate, FaSolidScrewdriverWrench } from "solid-icons/fa";
 import createUrlRegExp from "url-regex-safe";
 import { VisibilityIcon } from "~/components/visibility-icon";
 import {
     IoChatboxEllipses,
     IoChatboxEllipsesOutline,
+    IoEllipsisHorizontal,
     IoHeart,
     IoHeartOutline,
+    IoLinkOutline,
     IoShare,
     IoSyncCircle,
     IoSyncOutline,
+    IoTrashBinOutline,
 } from "solid-icons/io";
 import { BsPinAngleFill } from "solid-icons/bs";
 import { IconProps } from "solid-icons";
@@ -353,6 +356,7 @@ const ShareButton: Component<ShareButtonProps> = (props) => {
 
 const Post: Component<PostProps> = (postData) => {
     const auth = useAuth();
+    const settings = useSettings();
     const [status, updateStatus] = createSignal(postData.status);
 
     const [showRaw, setShowRaw] = createSignal<boolean>(false);
@@ -360,6 +364,15 @@ const Post: Component<PostProps> = (postData) => {
 
     const userHref = `/user/${status().account.acct}`;
     const postHref = `/post/${status().id}`;
+
+    const postOriginalUrl = createMemo(() => {
+        let url = postData.status.url;
+        if (url === undefined || url === "") {
+            url = postData.status.uri;
+        }
+
+        return url;
+    });
 
     return (
         <div class={cn("pbPostOutside py-1", postData.class)}>
@@ -393,6 +406,77 @@ const Post: Component<PostProps> = (postData) => {
                                 </ContextMenuItem>
                             </ContextMenuContent>
                         </ContextMenu>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger
+                                as={MenuButton<"button">}
+                                type="button"
+                            >
+                                <IoEllipsisHorizontal class="size-6" />
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent class="w-48">
+                                <DropdownMenuItem
+                                    class="py-4 md:py-2"
+                                    as="a"
+                                    href={postOriginalUrl()}
+                                    target="_blank"
+                                >
+                                    <IoLinkOutline class="size-6 mr-2" />
+                                    view on origin
+                                </DropdownMenuItem>
+                                <Show
+                                    when={
+                                        auth.signedIn &&
+                                        postData.status.account.acct ===
+                                            auth.assumeSignedIn.state
+                                                .accountData.acct
+                                    }
+                                >
+                                    <DropdownMenuItem
+                                        class="py-4 md:py-2"
+                                        onClick={async () => {
+                                            if (
+                                                window.confirm(
+                                                    "are you sure you want to delete this post?"
+                                                )
+                                            ) {
+                                                try {
+                                                    unwrapResponse(
+                                                        await auth.assumeSignedIn.client.deleteStatus(
+                                                            postData.status.id
+                                                        )
+                                                    );
+                                                    alert(
+                                                        "post deleted. (you may need to refresh)"
+                                                    );
+                                                } catch (e) {
+                                                    if (e instanceof Error) {
+                                                        alert(
+                                                            `Failed to delete: ${e.message}`
+                                                        );
+                                                    }
+                                                }
+                                            }
+                                        }}
+                                    >
+                                        <IoTrashBinOutline class="size-6 mr-2" />
+                                        delete post
+                                    </DropdownMenuItem>
+                                </Show>
+                                <Show
+                                    when={
+                                        settings.getPersistent().enableDevTools
+                                    }
+                                >
+                                    <DropdownMenuItem
+                                        class="py-4 md:py-2"
+                                        onClick={() => setShowRaw(!showRaw())}
+                                    >
+                                        <FaSolidScrewdriverWrench class="size-6 mr-2" />
+                                        show post json
+                                    </DropdownMenuItem>
+                                </Show>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
                         <Show when={auth.signedIn}>
                             <ShareButton status={status()} />
                             <Button
