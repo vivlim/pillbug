@@ -12,6 +12,7 @@
       "vite/client"
     ],
     "resolveJsonModule": true,
+    "allowJs": true,
     "noEmit": true,
     "isolatedModules": true,
     "paths": {
