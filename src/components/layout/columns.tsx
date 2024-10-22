@@ -72,6 +72,6 @@ export const LayoutLeftColumn: Component<ComponentProps<"div">> = (props) => {
                 */
             id={LayoutLeftColumnRootId}
             {...others}
-        />
+        ></div>
     );
 };

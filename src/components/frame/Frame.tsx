@@ -37,6 +37,7 @@ import {
     LayoutLeftColumnPortal,
     LayoutMainColumn,
 } from "../layout/columns";
+import "webamp";
 
 const CurrentAccountWithAvatar: Component<{
     signInState: SignedInState;
@@ -180,6 +181,18 @@ const FrameTopBar: Component = (props) => {
                                                             "dark"
                                                         );
                                                     }
+                                                }}
+                                            >
+                                                Toggle light/dark
+                                            </MenubarItem>
+                                            <MenubarItem
+                                                onClick={() => {
+                                                    const wa = new Webamp({});
+                                                    wa.renderWhenReady(
+                                                        document.getElementById(
+                                                            "webampDropZone"
+                                                        )
+                                                    );
                                                 }}
                                             >
                                                 Toggle light/dark
