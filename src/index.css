@@ -117,6 +117,7 @@
 
 * {
     font-family: "Atkinson Hyperlegible", system-ui, sans-serif;
+    text-wrap: auto;
 }
 a {
     /*text-decoration: underline;*/
@@ -290,6 +291,10 @@ button {
     text-overflow: ellipsis;
 }
 
+.pbSingleLineBlock * {
+    text-wrap: nowrap;
+}
+
 .pbPostEditor {
     min-height: 5em;
 }
@@ -321,8 +326,4 @@ html.setting-unlimitedColumnWidth #layoutColumnsRoot {
 .pbPostHeightLimiter{
     overflow: hidden;
     max-height: 50vh;
-}
-
-* {
-    text-wrap: auto;
 }
