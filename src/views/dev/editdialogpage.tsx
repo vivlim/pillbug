@@ -46,6 +46,7 @@ import { ShareTransformer } from "~/components/editor/share-transformer";
 import { Status } from "megalodon/lib/src/entities/status";
 import { useAuth } from "~/auth/auth-manager";
 import { CommentEditorComponent } from "~/components/editor/comment-component";
+import { Checkbox } from "~/components/checkbox";
 
 type EditorVariant<TDoc extends EditorDocument, T> = {
     name: string;
@@ -299,29 +300,6 @@ class MockSubmitter implements IEditorSubmitter<MegalodonPostStatus, string> {
         return "NEW_POST_ID";
     }
 }
-
-const Checkbox: Component<{
-    id: string;
-    getter: Accessor<boolean>;
-    setter: Setter<boolean>;
-    children: JSX.Element;
-}> = (props) => {
-    const checkboxId = `checkbox-${props.id}`;
-
-    return (
-        <>
-            <input
-                type="checkbox"
-                id={checkboxId}
-                checked={props.getter()}
-                onChange={(e) => props.setter(e.currentTarget.checked)}
-            />
-            <label for={checkboxId} class="pl-2 select-none">
-                {props.children}
-            </label>
-        </>
-    );
-};
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 

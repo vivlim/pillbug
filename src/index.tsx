@@ -27,6 +27,7 @@ const DevEditDialogPage = lazy(() => import("./views/dev/editdialogpage"));
 const ErrorBox = lazy(() => import("./components/error"));
 const ErrorView = lazy(() => import("./views/error"));
 const AboutDetailsFacet = lazy(() => import("./views/facets/details"));
+const FollowingFacet = lazy(() => import("./views/facets/following"));
 
 if (import.meta.env.DEV && !(root instanceof HTMLElement)) {
     throw new Error(
@@ -95,6 +96,7 @@ render(
                 <Route path="/post/:postId" component={PostPage} />
                 <Route path="*paramName" component={ErrorView} />
                 <Route path="/dev/editDialog" component={DevEditDialogPage} />
+                <Route path="/following" component={FollowingFacet} />
             </Router>
         </ErrorBoundary>
     ),

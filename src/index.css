@@ -303,6 +303,25 @@ button {
     min-height: 50vh;
 }
 
+.following .pbSingleLineBlock{
+    max-width: 50vw
+
+}
+
+.following ul, #following li {
+    margin-left: 0.5em;
+    list-style: disc;
+}
+
+.following input[type="number"] {
+    color: var(--foreground);
+    background-color: hsl(var(--card));
+    border: 2px solid hsl(var(--border));
+    border-radius: 8px;
+    width: 5em;
+    text-align: right;
+}
+
 summary::marker {
     line-height: auto;
 }
