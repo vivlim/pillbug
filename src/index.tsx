@@ -97,6 +97,7 @@ render(
                 <Route path="*paramName" component={ErrorView} />
                 <Route path="/dev/editDialog" component={DevEditDialogPage} />
                 <Route path="/following" component={FollowingFacet} />
+                <Route path="/following/:username" component={FollowingFacet} />
             </Router>
         </ErrorBoundary>
     ),

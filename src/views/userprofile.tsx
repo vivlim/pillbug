@@ -12,14 +12,15 @@ import { GetTimelineOptions, PostFeed } from "~/components/post/feed";
 import { ErrorBox } from "~/components/error";
 import { MaybeSignedInState } from "~/auth/auth-types";
 
-interface GetAccountFeedOptions extends Omit<GetTimelineOptions, "local"> {
+export interface GetAccountFeedOptions
+    extends Omit<GetTimelineOptions, "local"> {
     pinned?: boolean;
     exclude_replies?: boolean;
     exclude_reblogs?: boolean;
     only_media?: boolean;
 }
 
-const fetchUserInfo = async (
+export const fetchUserInfo = async (
     signedInState: MaybeSignedInState,
     username: string
 ) => {

@@ -20,7 +20,7 @@ import { AvatarImage } from "~/components/user/avatar";
 import { SessionAuthManager, useAuth } from "~/auth/auth-manager";
 import { SignedInAccount } from "~/auth/auth-types";
 
-const LoginView: Component = () => {
+export const LoginView: Component = () => {
     const auth = useAuth();
 
     const [searchParams, setSearchParams] = useSearchParams();

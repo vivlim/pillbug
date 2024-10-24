@@ -223,7 +223,9 @@ body {
     }
 }
 /* Singular left column that may contain blocks. Stacks above main column if the viewport is too narrow */
-#layoutLeftColumn {}
+#layoutLeftColumn {
+
+}
 
 #layoutMainColumn {
     display: flex;
