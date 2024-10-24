@@ -12,6 +12,9 @@ export interface FrameContextProps {
     navPopupMenuOpen: Accessor<boolean>;
     /** Sets whether the nav menu is open if there is not viewport space available to just show it*/
     setNavPopupMenuOpen: Setter<boolean>;
+
+    noColumns: Accessor<boolean>;
+    setNoColumns: Setter<boolean>;
 }
 
 export function useFrameContext(): FrameContextProps {
