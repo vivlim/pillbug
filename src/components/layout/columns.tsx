@@ -6,6 +6,7 @@ import { cn } from "~/lib/utils";
 
 export const LayoutColumnsRootId = "layoutColumnsRoot";
 export const LayoutLeftColumnRootId = "layoutLeftColumn";
+export const OutsideGridPortalId = "layoutOutsideGrid";
 export const LayoutColumnsRoot: Component<ComponentProps<"div">> = (props) => {
     const [local, others] = splitProps(props, ["class"]);
     return (
@@ -39,6 +40,16 @@ export const LayoutLeftColumnPortal: Component<{ children: JSX.Element }> = (
 ) => {
     return (
         <Portal mount={document.getElementById(LayoutLeftColumnRootId)!}>
+            {props.children}
+        </Portal>
+    );
+};
+
+export const LayoutOutsideGridPortal: Component<{ children: JSX.Element }> = (
+    props
+) => {
+    return (
+        <Portal mount={document.getElementById(OutsideGridPortalId)!}>
             {props.children}
         </Portal>
     );
