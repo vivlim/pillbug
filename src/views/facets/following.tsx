@@ -9,6 +9,8 @@ import {
     createResource,
     createSignal,
     For,
+    onCleanup,
+    onMount,
     Show,
 } from "solid-js";
 import { createStore } from "solid-js/store";
@@ -29,6 +31,12 @@ import { A } from "@solidjs/router";
 import { HtmlSandboxSpan } from "../htmlsandbox";
 import { AvatarLink } from "~/components/user/avatar";
 import { useSettings } from "~/lib/settings-manager";
+import { useFrameContext } from "~/components/frame/context";
+import {
+    LayoutLeftColumnPortal,
+    LayoutOutsideGridPortal,
+} from "~/components/layout/columns";
+import "./following.css";
 
 interface AccountInfo {
     acct: string;
@@ -56,6 +64,16 @@ const FollowingFacet: Component = () => {
     if (!settings.getPersistent().enableDevTools) {
         throw new Error("this view is only available if dev tools are enabled");
     }
+
+    // Hide the nav if a profile is visible - the profile replaces it
+    const frameContext = useFrameContext();
+    onMount(() => {
+        frameContext.setShowNav(false);
+    });
+    onCleanup(() => {
+        frameContext.setShowNav(true);
+    });
+
     const auth = useAuth();
     auth.assumeSignedIn; // throws if not
     const [accountStore, setAccountStore] = createStore<AccountInfoMap>({});
@@ -235,126 +253,148 @@ const FollowingFacet: Component = () => {
         }
     };
 
-    followingList();
-    // run once
-    //dataFetcher();
+    // stuff to do on first load
+    const init = async () => {
+        await followingList();
+        await dataFetcher();
+    };
+    init();
 
     let numAccountsInput: HTMLInputElement;
 
     return (
-        <div id="notifications-facet" class="following p-4 m-2">
-            <div class="pbCard p-4 m-2">
-                <p>
-                    hi! this is a *super* rough early 'following' view. you can
-                    make it manually fetch posts by pushing the buttons below.
-                </p>
-                <ul>
-                    <li>
-                        current number of accounts with known last posts:{" "}
-                        {sortedAccountsWithKnownLastPosts().length}.
-                    </li>
-                    <li>
-                        desired number of accounts:
-                        <input
-                            type="number"
-                            ref={numAccountsInput!}
-                            value={numAccountsRequested()}
-                        />
-                    </li>
-                    <li>gap: {accountGapCount()} accounts</li>
-                    <li>
-                        <Button
-                            onClick={() => {
-                                setNumAccountsRequested(
-                                    numAccountsInput!.valueAsNumber
-                                );
-                                dataFetcher();
-                            }}
-                        >
-                            fetch posts by going back in the timeline
-                        </Button>
-                    </li>
-                    <li>
-                        of known following accounts, {missingAccounts().length}{" "}
-                        have unknown last posts.
-                    </li>
-                    <li>
-                        <Button
-                            onClick={() => {
-                                randomFollowerLookup();
-                            }}
-                        >
-                            randomly sample followed accounts
-                        </Button>
-                    </li>
-                    <li>
-                        {facetStore.numberOfPostsScanned} posts scanned total
-                    </li>
-                    <li>
-                        <Checkbox
-                            id="showWithUnknownLastPost"
-                            getter={() =>
-                                facetStore.showAccountsWithUnknownLastPost ??
-                                false
-                            }
-                            setter={(v: boolean) =>
-                                setFacetStore(
-                                    "showAccountsWithUnknownLastPost",
-                                    v
-                                )
-                            }
-                        >
-                            show accounts with unknown last post
-                        </Checkbox>
-                    </li>
-                </ul>
-                <hr />
-                <details>
-                    <summary>
-                        api request log ({facetStore.requestList.length})
-                    </summary>
+        <LayoutOutsideGridPortal>
+            <div id="following-root">
+                <div class="spacer" />
+                <div class="following-user-list">
                     <ul>
-                        <For each={facetStore.requestList}>
-                            {(req, idx) => {
-                                return (
-                                    <li>
-                                        {req.success ? "✅" : "❌"}
-                                        <Timestamp ts={req.ts} />:{" "}
-                                        {req.requestLabel}
-                                        <ul>
-                                            <li>
-                                                took {req.duration.toHuman()}
-                                            </li>
-                                            <li>why: {req.whyLabel}</li>
-                                            <Show
-                                                when={
-                                                    req.responseLabel !==
-                                                    undefined
-                                                }
-                                            >
-                                                <li>
-                                                    result: {req.responseLabel}
-                                                </li>
-                                            </Show>
-                                            <Show when={!req.success}>
-                                                <li>{req.error?.message}</li>
-                                            </Show>
-                                        </ul>
-                                    </li>
-                                );
+                        <For each={filteredSortedAccounts()}>
+                            {(acct, idx) => {
+                                return <FollowingUser acct={acct} />;
                             }}
                         </For>
                     </ul>
-                </details>
+                </div>
+
+                <div class="following-posts">
+                    <div class="pbCard p-4 m-2">
+                        <p>
+                            hi! this is a *super* rough early 'following' view.
+                            you can make it manually fetch posts by pushing the
+                            buttons below.
+                        </p>
+                        <ul>
+                            <li>
+                                current number of accounts with known last
+                                posts:{" "}
+                                {sortedAccountsWithKnownLastPosts().length}.
+                            </li>
+                            <li>
+                                desired number of accounts:
+                                <input
+                                    type="number"
+                                    ref={numAccountsInput!}
+                                    value={numAccountsRequested()}
+                                />
+                            </li>
+                            <li>gap: {accountGapCount()} accounts</li>
+                            <li>
+                                <Button
+                                    onClick={() => {
+                                        setNumAccountsRequested(
+                                            numAccountsInput!.valueAsNumber
+                                        );
+                                        dataFetcher();
+                                    }}
+                                >
+                                    fetch posts by going back in the timeline
+                                </Button>
+                            </li>
+                            <li>
+                                of known following accounts,{" "}
+                                {missingAccounts().length} have unknown last
+                                posts.
+                            </li>
+                            <li>
+                                <Button
+                                    onClick={() => {
+                                        randomFollowerLookup();
+                                    }}
+                                >
+                                    randomly sample followed accounts
+                                </Button>
+                            </li>
+                            <li>
+                                {facetStore.numberOfPostsScanned} posts scanned
+                                total
+                            </li>
+                            <li>
+                                <Checkbox
+                                    id="showWithUnknownLastPost"
+                                    getter={() =>
+                                        facetStore.showAccountsWithUnknownLastPost ??
+                                        false
+                                    }
+                                    setter={(v: boolean) =>
+                                        setFacetStore(
+                                            "showAccountsWithUnknownLastPost",
+                                            v
+                                        )
+                                    }
+                                >
+                                    show accounts with unknown last post
+                                </Checkbox>
+                            </li>
+                        </ul>
+                        <hr />
+                        <details>
+                            <summary>
+                                api request log ({facetStore.requestList.length}
+                                )
+                            </summary>
+                            <ul>
+                                <For each={facetStore.requestList}>
+                                    {(req, idx) => {
+                                        return (
+                                            <li>
+                                                {req.success ? "✅" : "❌"}
+                                                <Timestamp ts={req.ts} />:{" "}
+                                                {req.requestLabel}
+                                                <ul>
+                                                    <li>
+                                                        took{" "}
+                                                        {req.duration.toHuman()}
+                                                    </li>
+                                                    <li>why: {req.whyLabel}</li>
+                                                    <Show
+                                                        when={
+                                                            req.responseLabel !==
+                                                            undefined
+                                                        }
+                                                    >
+                                                        <li>
+                                                            result:{" "}
+                                                            {req.responseLabel}
+                                                        </li>
+                                                    </Show>
+                                                    <Show when={!req.success}>
+                                                        <li>
+                                                            {req.error?.message}
+                                                        </li>
+                                                    </Show>
+                                                </ul>
+                                            </li>
+                                        );
+                                    }}
+                                </For>
+                            </ul>
+                        </details>
+                    </div>
+                </div>
+
+                <div class="spacer" />
             </div>
-            <ul>
-                <For each={filteredSortedAccounts()}>
-                    {(acct, idx) => {
-                        return <FollowingUser acct={acct} />;
-                    }}
-                </For>
-            </ul>
-        </div>
+        </LayoutOutsideGridPortal>
     );
 };
 
@@ -364,7 +404,7 @@ type FollowingUserProps = {
 const FollowingUser: Component<FollowingUserProps> = ({ acct }) => {
     const userHref = `/user/${acct.acct}`;
     return (
-        <li class="flex flex-initial pbCard my-2">
+        <li class="flex flex-initial pbCard my-2 following-user">
             <A
                 class="flex flex-row block w-full p-3 border-2 border-transparent hover:border-fuchsia-900 rounded-xl"
                 href={userHref}
@@ -375,18 +415,32 @@ const FollowingUser: Component<FollowingUserProps> = ({ acct }) => {
                     imgClass="size-8"
                     class="inline-block"
                 />
-                <div class="ml-3">
-                    <p>{acct.acct}</p>
-                    <Show when={acct.lastKnownStatus !== undefined}>
-                        <p>
-                            <Timestamp ts={acct.lastKnownStatusTs}></Timestamp>
-                        </p>
-                        <p class="pbSingleLineBlock">
-                            <HtmlSandboxSpan
-                                html={acct.lastKnownStatus?.content ?? ""}
-                                emoji={acct.lastKnownStatus?.emojis}
-                            />
-                        </p>
+                <div class="ml-3 following-user-info">
+                    <Show
+                        when={acct.lastKnownStatus !== undefined}
+                        fallback={acct.acct}
+                    >
+                        <div class="following-user-and-ts">
+                            <p class="username">{acct.acct}</p>
+                            <p class="timestamp">
+                                <Timestamp
+                                    ts={acct.lastKnownStatusTs}
+                                ></Timestamp>
+                            </p>
+                        </div>
+                        <Show
+                            when={
+                                !acct.lastKnownStatus?.sensitive &&
+                                acct.lastKnownStatus?.spoiler_text === ""
+                            }
+                        >
+                            <p class="pbSingleLineBlock">
+                                <HtmlSandboxSpan
+                                    html={acct.lastKnownStatus?.content ?? ""}
+                                    emoji={acct.lastKnownStatus?.emojis}
+                                />
+                            </p>
+                        </Show>
                     </Show>
                 </div>
             </A>
