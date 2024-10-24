@@ -217,6 +217,7 @@ const FrameTopBar: Component = (props) => {
 const AppFrame: Component<{ children: JSX.Element }> = (props) => {
     const [showNav, setShowNav] = createSignal(true);
     const [navPopupMenuOpen, setNavPopupMenuOpen] = createSignal(false);
+    const [noColumns, setNoColumns] = createSignal(false);
 
     return (
         <FrameContext.Provider
@@ -225,6 +226,8 @@ const AppFrame: Component<{ children: JSX.Element }> = (props) => {
                 setShowNav,
                 navPopupMenuOpen,
                 setNavPopupMenuOpen,
+                noColumns,
+                setNoColumns,
             }}
         >
             <>

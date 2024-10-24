@@ -123,6 +123,10 @@ export const FacetNavigation: Component = (props) => {
                             profile
                         </FacetNavigationItem>
                     </Show>
+                    <FacetNavigationItem href="/following">
+                        <FaSolidPeopleGroup />
+                        following
+                    </FacetNavigationItem>
                     <FacetNavigationItem href="/settings">
                         <FaSolidGear />
                         settings
@@ -132,10 +136,6 @@ export const FacetNavigation: Component = (props) => {
                         about pillbug
                     </FacetNavigationItem>
                     <Show when={settings.getPersistent().enableDevTools}>
-                        <FacetNavigationItem href="/following">
-                            <FaSolidPeopleGroup />
-                            Following (WIP)
-                        </FacetNavigationItem>
                         <FacetNavigationItem href="/dev/editDialog">
                             <FaSolidWrench />
                             Test Editor

@@ -1,6 +1,14 @@
-import { Component, JSX, Match, Switch } from "solid-js";
+import { Component, createSignal, JSX, Match, Show, Switch } from "solid-js";
 import { TextField, TextFieldTextArea } from "./ui/text-field";
-import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import {
+    Card,
+    CardContent,
+    CardFooter,
+    CardHeader,
+    CardTitle,
+} from "./ui/card";
+import { Button } from "./ui/button";
+import LoginView from "~/views/login";
 
 export interface ErrorBoxProps {
     error: any;
@@ -31,34 +39,50 @@ export const ErrorBox: Component<ErrorBoxProps> = (props) => {
 const InnerErrorBox: Component<{ error: Error; description: string }> = (
     props
 ) => {
+    const [showLoginView, setShowLoginView] = createSignal<boolean>(false);
+
     return (
-        <Card>
-            <CardHeader>
-                <CardTitle>{props.description}</CardTitle>
-            </CardHeader>
-            <CardContent>
-                <p>{props.error.message}</p>
-                <div>
-                    <TextField>
-                        <TextFieldTextArea
-                            readOnly={true}
-                            class="h-[40vh]"
-                            value={props.error.stack}
-                        ></TextFieldTextArea>
-                    </TextField>
-                </div>
-                <div>
-                    <a
-                        href="https://github.com/vivlim/pillbug/issues"
-                        class="underline"
-                        target="_blank"
+        <>
+            <Card>
+                <CardHeader>
+                    <CardTitle>{props.description}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <p>{props.error.message}</p>
+                    <div>
+                        <TextField>
+                            <TextFieldTextArea
+                                readOnly={true}
+                                class="h-[40vh]"
+                                value={props.error.stack}
+                            ></TextFieldTextArea>
+                        </TextField>
+                    </div>
+                    <div>
+                        <a
+                            href="https://github.com/vivlim/pillbug/issues"
+                            class="underline"
+                            target="_blank"
+                        >
+                            please consider reporting this problem on github if
+                            it seems like a problem with pillbug.
+                        </a>
+                    </div>
+                </CardContent>
+                <CardFooter>
+                    <Button
+                        onClick={() => {
+                            setShowLoginView(!showLoginView());
+                        }}
                     >
-                        please consider reporting this problem on github if it
-                        seems like a problem with pillbug.
-                    </a>
-                </div>
-            </CardContent>
-        </Card>
+                        access emergency login page
+                    </Button>
+                </CardFooter>
+            </Card>
+            <Show when={showLoginView}>
+                <LoginView />
+            </Show>
+        </>
     );
 };
 

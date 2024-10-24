@@ -99,6 +99,7 @@ render(
                 <Route path="/dev/editDialog" component={DevEditDialogPage} />
                 <Route path="/following" component={FollowingFacet} />
                 <Route path="/feed-builder" component={FeedBuilderFacet} />
+                <Route path="/following/:username" component={FollowingFacet} />
             </Router>
         </ErrorBoundary>
     ),

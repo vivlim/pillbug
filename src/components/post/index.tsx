@@ -380,7 +380,7 @@ const Post: Component<PostProps> = (postData) => {
                 <AvatarLink
                     user={status().account}
                     imgClass="size-16"
-                    class="hidden md:block md:m-4"
+                    class="outsideAvatar hidden md:block md:m-4"
                 />
                 <Card class="m-1 md:m-4 flex-auto">
                     <PostWithShared
