@@ -28,6 +28,7 @@ const ErrorBox = lazy(() => import("./components/error"));
 const ErrorView = lazy(() => import("./views/error"));
 const AboutDetailsFacet = lazy(() => import("./views/facets/details"));
 const FollowingFacet = lazy(() => import("./views/facets/following"));
+const FeedBuilderFacet = lazy(() => import("./views/facets/feed-builder"));
 
 if (import.meta.env.DEV && !(root instanceof HTMLElement)) {
     throw new Error(
@@ -97,6 +98,7 @@ render(
                 <Route path="*paramName" component={ErrorView} />
                 <Route path="/dev/editDialog" component={DevEditDialogPage} />
                 <Route path="/following" component={FollowingFacet} />
+                <Route path="/feed-builder" component={FeedBuilderFacet} />
             </Router>
         </ErrorBoundary>
     ),

@@ -346,3 +346,13 @@ html.setting-unlimitedColumnWidth #layoutColumnsRoot {
     overflow: hidden;
     max-height: 70vh;
 }
+
+.pbInput {
+    color: var(--foreground);
+    background-color: hsl(var(--card));
+    border: 2px solid hsl(var(--border));
+    border-radius: 8px;
+    padding: 0.45em;
+    margin-left: 0.5em;
+    margin-right: 0.5em;
+}

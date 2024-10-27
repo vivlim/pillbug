@@ -1,12 +1,12 @@
-import { Accessor, Component, JSX, Setter } from "solid-js";
+import { Accessor, Component, JSX, Setter, createUniqueId } from "solid-js";
 
 export const Checkbox: Component<{
-    id: string;
     getter: Accessor<boolean>;
     setter: Setter<boolean> | ((b: boolean) => void);
     children: JSX.Element;
 }> = (props) => {
-    const checkboxId = `checkbox-${props.id}`;
+    const id = createUniqueId();
+    const checkboxId = `checkbox-${id}`;
 
     return (
         <>

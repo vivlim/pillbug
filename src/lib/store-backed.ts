@@ -3,7 +3,7 @@ import { createStore, SetStoreFunction } from "solid-js/store";
 
 
 /** Abstract class for implementing on top of an ephemeral, session-lifetime reactive Store. */
-export abstract class StoreBacked<TStore extends object> {
+export class StoreBacked<TStore extends object> {
     public readonly store: TStore;
     public readonly setStore: SetStoreFunction<TStore>;
 

@@ -9,6 +9,7 @@ import {
     FaSolidPeopleGroup,
     FaSolidPerson,
     FaSolidQuestion,
+    FaSolidToolbox,
     FaSolidWrench,
 } from "solid-icons/fa";
 import {
@@ -131,6 +132,10 @@ export const FacetNavigation: Component = (props) => {
                         <FacetNavigationItem href="/dev/editDialog">
                             <FaSolidWrench />
                             Test Editor
+                        </FacetNavigationItem>
+                        <FacetNavigationItem href="/feed-builder">
+                            <FaSolidToolbox />
+                            Feed builder
                         </FacetNavigationItem>
                     </Show>
                 </ul>

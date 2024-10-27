@@ -27,7 +27,7 @@ interface GetTimelineOptionsApi {
 
 export interface GetTimelineOptions extends GetTimelineOptionsApi {}
 
-type RequestHandler = (
+export type RequestHandler = (
     signedInState: MaybeSignedInState,
     timelineOptions: GetTimelineOptions
 ) => Promise<Response<Array<Status>> | undefined> | undefined;
