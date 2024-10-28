@@ -22,6 +22,7 @@ import { unwrapResponse } from "~/lib/clientUtil";
 import ErrorBox from "../error";
 import Post from "../post";
 import { HomeFeedSource } from "./sources/homefeed";
+import { PreprocessedPost } from "../post/preprocessed";
 
 export type FeedComponentProps = {
     onRequest: (options: GetTimelineOptions) => Promise<Response<Status[]>>;
@@ -107,9 +108,8 @@ export const FeedComponentPostList: Component<{
                     <>
                         <div>{JSON.stringify(status.labels)}</div>
                         <Show when={!status.hide}>
-                            <Post
-                                status={status.status}
-                                fetchShareParentDepth={5}
+                            <PreprocessedPost
+                                status={status}
                                 limitInitialHeight={true}
                             />
                         </Show>
