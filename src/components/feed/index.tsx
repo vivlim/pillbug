@@ -23,6 +23,8 @@ import ErrorBox from "../error";
 import Post from "../post";
 import { HomeFeedSource } from "./sources/homefeed";
 import { PreprocessedPost } from "../post/preprocessed";
+import { Button } from "../ui/button";
+import { cache } from "@solidjs/router";
 
 export type FeedComponentProps = {
     onRequest: (options: GetTimelineOptions) => Promise<Response<Status[]>>;
@@ -83,13 +85,16 @@ export const FeedComponentPostList: Component<{
     const feed = useFeed();
     const auth = useAuth();
     const client = auth.assumeSignedIn.client;
-    const [posts, postsResourceActions] = createResource(async () => {
-        // todo: paginate
+    const fetchCount = createMemo(() => createSignal(0));
+    const getPosts = cache(async (num) => {
         props.engine();
         console.log("fetching posts");
         const posts = await props.engine().getPosts(1);
         console.log(`successfully fetched ${posts.length} posts`);
         return posts;
+    }, "posts");
+    const [posts, postsResourceActions] = createResource(async () => {
+        return await getPosts(1);
     });
 
     createEffect(() => {
@@ -103,6 +108,14 @@ export const FeedComponentPostList: Component<{
                 <ErrorBox error={e} description="Failed to load posts" />
             )}
         >
+            <Button
+                onClick={() => {
+                    fetchCount()[1](fetchCount()[0]() + 1);
+                }}
+            >
+                bump
+            </Button>
+            fetches:{fetchCount()[0]()}
             <For each={posts()}>
                 {(status, index) => (
                     <>
