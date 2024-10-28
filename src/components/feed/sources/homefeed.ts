@@ -16,7 +16,7 @@ export class HomeFeedSource extends FeedSource {
             max_id: after
         }))
         // if we got fewer than expected, infer that there are no more.
-        const moreAvailable: boolean = statuses.length < (manifest.postsToFetchPerBatch ?? statuses.length)
+        const moreAvailable: boolean = statuses.length >= (manifest.postsToFetchPerBatch ?? statuses.length)
         return { statuses, moreAvailable }
     }
 

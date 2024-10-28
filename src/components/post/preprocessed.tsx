@@ -493,6 +493,7 @@ const PreprocessedStatusPostBlock: Component<
                                                         : undefined
                                                 }
                                             />
+                                            <PostLabels post={linkedAncestor} />
                                             <PreprocessedPostBody
                                                 class="border-b"
                                                 status={linkedAncestor.status}
@@ -511,6 +512,7 @@ const PreprocessedStatusPostBlock: Component<
                                     linkedAncestors().slice(-1)[0].status
                                 }
                             />
+                            <PostLabels post={postData.status} />
                             <PreprocessedPostBody
                                 class="border-b"
                                 status={status}
@@ -521,6 +523,7 @@ const PreprocessedStatusPostBlock: Component<
                             when={postData.status.linkedAncestors.length === 0}
                         >
                             <PreprocessedPostUserBar status={status} />
+                            <PostLabels post={postData.status} />
                             <PreprocessedPostBody
                                 class="border-b"
                                 status={status}
@@ -532,6 +535,7 @@ const PreprocessedStatusPostBlock: Component<
                 <Match when={status.reblog !== null}>
                     <PreprocessedPostUserBar status={status} />
                     <PreprocessedPostUserBar status={status.reblog!} />
+                    <PostLabels post={postData.status} />
 
                     <PreprocessedPostBody
                         class="border-b"
@@ -546,11 +550,19 @@ const PreprocessedStatusPostBlock: Component<
                         <TextFieldTextArea
                             readOnly={true}
                             class="h-[40vh]"
-                            value={JSON.stringify(status, null, 2)}
+                            value={JSON.stringify(postData.status, null, 2)}
                         ></TextFieldTextArea>
                     </TextField>
                 </div>
             </Show>
         </>
+    );
+};
+
+const PostLabels: Component<{ post: ProcessedStatus }> = (props) => {
+    return (
+        <For each={props.post.labels}>
+            {(label) => <span class="postLabel">{label}</span>}
+        </For>
     );
 };

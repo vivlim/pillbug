@@ -48,8 +48,8 @@ export const FeedComponent: Component<FeedComponentProps> = (props) => {
         const manifest: FeedManifest = {
             source: new HomeFeedSource(useAuth()),
             fetchReferencedPosts: 5, // unused??
-            postsPerPage: 10,
-            postsToFetchPerBatch: 20,
+            postsPerPage: 20,
+            postsToFetchPerBatch: 40,
         };
         return new FeedEngine(manifest, props.rules);
     });
@@ -106,7 +106,6 @@ export const FeedComponentPostList: Component<{
             <For each={posts()}>
                 {(status, index) => (
                     <>
-                        <div>{JSON.stringify(status.labels)}</div>
                         <Show when={!status.hide}>
                             <PreprocessedPost
                                 status={status}

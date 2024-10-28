@@ -356,3 +356,15 @@ html.setting-unlimitedColumnWidth #layoutColumnsRoot {
     margin-left: 0.5em;
     margin-right: 0.5em;
 }
+
+.postLabel {
+    color: var(--foreground);
+    display: inline-block;
+    background-color: hsl(var(--card));
+    border: 2px solid hsl(var(--border));
+    border-radius: 8px;
+    padding: 0.45em;
+    margin-left: 0.5em;
+    margin-right: 0.5em;
+    margin-top: 0.25em;
+}

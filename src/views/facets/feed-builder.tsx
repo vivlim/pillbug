@@ -34,6 +34,7 @@ import {
     FeedRuleEventType,
     FeedRuleProperties,
 } from "~/components/feed/feed-engine";
+import { defaultFeedRules } from "~/components/feed/preset-rules";
 import {
     AnyPropertyTextboxes,
     MultiTextbox,
@@ -61,11 +62,12 @@ type FeedSource = "homeTimeline";
 class FeedBuilderFacetStore {
     constructor(
         public source: FeedSource = "homeTimeline",
-        public rules: FeedRuleProperties[] = [initialRule]
+        public rules: FeedRuleProperties[] = defaultFeedRules
     ) {}
 }
 
 const initialRule: FeedRuleProperties = new FeedRuleProperties(
+    "testing rule",
     {
         all: [
             {
@@ -89,12 +91,15 @@ const FeedBuilderFacet: Component = (props) => {
             return new StoreBacked<RuleProperties[]>(rules);
         }
     );
+    // TODO: don't transform feedruleproperties to be able to edit them.
     const toFeedRules: () => FeedRuleProperties[] = () => {
         return unwrap(editingRules().store).map(
             (r) =>
                 new FeedRuleProperties(
+                    "placeholder description",
                     r.conditions,
                     r.event as FeedRuleEvent,
+                    true,
                     r.name,
                     r.priority
                 )

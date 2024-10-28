@@ -37,6 +37,7 @@ export class FeedEngine {
     private statusIds: string[] = []
     //** ordered statuses with processing applied */
     private processedStatuses: ProcessedStatus[] = []
+    private fetching: boolean = false;
 
     constructor(public readonly manifest: FeedManifest, rules: FeedRuleProperties[]) {
         const options: EngineOptions = {}
@@ -51,56 +52,72 @@ export class FeedEngine {
     }
 
     public async getPosts(pageNumber?: number): Promise<ProcessedStatus[]> {
-        if (pageNumber !== undefined && this.manifest.postsPerPage !== null) {
-            if (pageNumber < 1) {
-                throw new Error("page number can't be less than 1")
-            }
-
-            const numberOfPostsNeeded = pageNumber * this.manifest.postsPerPage
-
-            while (numberOfPostsNeeded > this.processedStatuses.length) {
-                let afterId = undefined;
-                if (this.statusIds.length > 0) {
-                    afterId = this.statusIds[this.statusIds.length - 1]
-                }
-
-                const { moreAvailable } = await this.getAndProcessPosts(afterId)
-                if (!moreAvailable) {
-                    break;
-                }
-            }
-            return this.processedStatuses.slice((pageNumber - 1) * this.manifest.postsPerPage, numberOfPostsNeeded)
+        if (this.fetching) {
+            console.log(`Tried to get posts but another call to get posts is ongoing (requested page ${pageNumber})`)
+            return []
         }
-        else {
-            await this.getAndProcessPosts();
-            return this.processedStatuses;
+        this.fetching = true;
+        try {
+            if (pageNumber !== undefined && this.manifest.postsPerPage !== null) {
+                if (pageNumber < 1) {
+                    throw new Error("page number can't be less than 1")
+                }
+
+                const numberOfPostsNeeded = pageNumber * this.manifest.postsPerPage
+                let remainingNumberOfRequests = 5;
+
+                while (numberOfPostsNeeded > this.processedStatuses.length && remainingNumberOfRequests > 0) {
+                    console.log(`need to fetch more posts; have ${this.processedStatuses.length} after filtering, trying to get ${numberOfPostsNeeded}. ${remainingNumberOfRequests} requests remain (request batch size: ${this.manifest.postsToFetchPerBatch}). last id: ${this.lastRetrievedStatusId}`)
+                    remainingNumberOfRequests -= 1;
+
+                    const { moreAvailable } = await this.getAndProcessPosts(this.lastRetrievedStatusId)
+                    if (!moreAvailable) {
+                        break;
+                    }
+                }
+                return this.processedStatuses.slice((pageNumber - 1) * this.manifest.postsPerPage, numberOfPostsNeeded)
+            }
+            else {
+                await this.getAndProcessPosts();
+                return this.processedStatuses;
+            }
+        }
+        finally {
+            this.fetching = false;
         }
     }
 
     private async getAndProcessPosts(after?: string): Promise<{ moreAvailable: boolean }> {
-        const { statuses, moreAvailable } = await this.manifest.source.fetch(this.manifest, after)
-        if (statuses.length === 0) {
+        try {
+            const { statuses, moreAvailable } = await this.manifest.source.fetch(this.manifest, after)
+            if (statuses.length === 0) {
+                return { moreAvailable: false }
+            }
+            for (let status of statuses) {
+                if (status.id in this.retrievedStatusIds) {
+                    // no action since we have already retrieved and processed it
+                    continue;
+                }
+
+                const processed = await this.process(status)
+                if (!processed.hide) {
+                    this.processedStatuses.push(processed)
+                }
+                this.retrievedStatusIds.add(status.id)
+            }
+            this.lastRetrievedStatusId = statuses[statuses.length - 1].id
+            return { moreAvailable };
+        }
+        catch (e) {
+            if (e instanceof Error) {
+                console.log(`Error getting and processing posts: ${e.message}`)
+            }
             return { moreAvailable: false }
         }
-        for (let status of statuses) {
-            if (status.id in this.retrievedStatusIds) {
-                // no action since we have already retrieved and processed it
-                continue;
-            }
-
-            const processed = await this.process(status)
-            if (!processed.hide) {
-                this.processedStatuses.push(processed)
-            }
-            this.retrievedStatusIds.add(status.id)
-        }
-        this.lastRetrievedStatusId = statuses[statuses.length - 1].id
-        return { moreAvailable };
     }
 
     private async process(s: Status, inner?: boolean): Promise<ProcessedStatus> {
         const result: EngineResult = await this.ruleEngine.run(s)
-        console.log(`Rule result:${JSON.stringify(result)}`)
         const labels: string[] = [];
         const processedStatus: ProcessedStatus = { status: s, labels, rawRuleResults: { positive: result.results, negative: result.failureResults }, hide: false, collapseReasons: [], linkedAncestors: [] }
         let attachedLinked = false;
@@ -238,7 +255,7 @@ export const FeedRuleActions: Record<FeedRuleEventType, FeedRuleAction> = {
 }
 
 export class FeedRuleProperties {
-    constructor(public conditions: TopLevelCondition, public ev: FeedRuleEvent, public name?: string, public priority?: number) {
+    constructor(public description: string, public conditions: TopLevelCondition, public ev: FeedRuleEvent, public enabled: boolean = true, public name?: string, public priority?: number) {
 
     }
 
