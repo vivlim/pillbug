@@ -13,7 +13,7 @@ import {
     useContext,
 } from "solid-js";
 import { GetTimelineOptions, RequestHandler } from "../post/feed";
-import { FeedEngine, FeedRuleProperties } from "./feed-engine";
+import { FeedEngine, FeedManifest, FeedRuleProperties } from "./feed-engine";
 import { StoreBacked } from "~/lib/store-backed";
 import { Status } from "megalodon/lib/src/entities/status";
 import { Response } from "megalodon";
@@ -21,6 +21,7 @@ import { useAuth } from "~/auth/auth-manager";
 import { unwrapResponse } from "~/lib/clientUtil";
 import ErrorBox from "../error";
 import Post from "../post";
+import { HomeFeedSource } from "./sources/homefeed";
 
 export type FeedComponentProps = {
     onRequest: (options: GetTimelineOptions) => Promise<Response<Status[]>>;
@@ -43,7 +44,13 @@ const FeedComponentContextCtx = createContext<FeedComponentContext>();
 export const FeedComponent: Component<FeedComponentProps> = (props) => {
     const engine: Accessor<FeedEngine> = createMemo(() => {
         console.log("new engine");
-        return new FeedEngine(props.rules);
+        const manifest: FeedManifest = {
+            source: new HomeFeedSource(useAuth()),
+            fetchReferencedPosts: 5, // unused??
+            postsPerPage: 10,
+            postsToFetchPerBatch: 20,
+        };
+        return new FeedEngine(manifest, props.rules);
     });
 
     const store = new StoreBacked<FeedComponentStore>({
@@ -79,12 +86,9 @@ export const FeedComponentPostList: Component<{
         // todo: paginate
         props.engine();
         console.log("fetching posts");
-        const statuses = unwrapResponse(
-            await feed.onRequest(feed.store.store.options)
-        );
-        console.log(`successfully fetched ${statuses.length} posts`);
-        const processed = await props.engine().process(statuses);
-        return processed;
+        const posts = await props.engine().getPosts(1);
+        console.log(`successfully fetched ${posts.length} posts`);
+        return posts;
     });
 
     createEffect(() => {
