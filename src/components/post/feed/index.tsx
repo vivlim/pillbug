@@ -1,4 +1,4 @@
-import { useSearchParams } from "@solidjs/router";
+import { cache, useSearchParams } from "@solidjs/router";
 import { Response } from "megalodon";
 import { Status } from "megalodon/lib/src/entities/status";
 import {
@@ -67,6 +67,14 @@ async function fetchPostList(
 export const PostFeed: Component<PostFeedProps> = (props) => {
     const auth = useAuth();
     const [searchParams, setSearchParams] = useSearchParams();
+    const cachedPostList = cache(
+        async (
+            handler: RequestHandler,
+            signedInState: MaybeSignedInState,
+            timelineOptions: GetTimelineOptions
+        ) => fetchPostList(handler, signedInState, timelineOptions),
+        "postList"
+    );
     const [postList, listActions] = createResource(
         () => {
             return {
@@ -79,7 +87,7 @@ export const PostFeed: Component<PostFeedProps> = (props) => {
             };
         },
         (args) =>
-            fetchPostList(props.onRequest, args.signedInState, args.options)
+            cachedPostList(props.onRequest, args.signedInState, args.options)
     );
 
     const [lastRefresh, setLastRefresh] = createSignal(
