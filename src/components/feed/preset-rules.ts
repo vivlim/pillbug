@@ -14,6 +14,10 @@ export const defaultFeedRules: FeedRuleProperties[] = [
         },
         { type: "hidePost" }
     ),
+]
+
+/* just an example i don't have somewhere better to stash atm
+
     new FeedRuleProperties(
         "label other pillbug enjoyers",
         {
@@ -28,4 +32,4 @@ export const defaultFeedRules: FeedRuleProperties[] = [
         },
         { type: "applyLabel", params: { label: "pillbug enjoyer" } }
     )
-]
+*/

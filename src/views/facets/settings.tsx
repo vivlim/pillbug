@@ -77,6 +77,22 @@ const SettingsFacet: Component = () => {
                     <PersistentFlagCheckbox flag="enableDevTools">
                         Enable developer tools
                     </PersistentFlagCheckbox>
+                    <hr />
+                    <PersistentFlagCheckbox flag="v2Feeds">
+                        Enable rewritten 'feed engine'.
+                        <ul>
+                            <li>
+                                This shows up as a separate nav item, and
+                                functionality might be behave unexpectedly,
+                                especially the filters.
+                            </li>
+                            <li>
+                                the filter editor is unfinished and you probably
+                                shouldn't try to use it.
+                            </li>
+                            <li>pagination should be a lot better though.</li>
+                        </ul>
+                    </PersistentFlagCheckbox>
                 </CardContent>
             </Card>
         </div>

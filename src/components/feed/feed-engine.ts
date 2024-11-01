@@ -51,9 +51,15 @@ export class FeedEngine {
         })
     }
 
-    public async getPosts(pageNumber?: number): Promise<ProcessedStatus[]> {
+    public async getPosts(pageNumber?: number, logCallback?: (msg: string) => void): Promise<ProcessedStatus[]> {
+        const log = (msg: string) => {
+            console.log(msg);
+            if (logCallback !== undefined) {
+                logCallback(msg);
+            }
+        }
         if (this.fetching) {
-            console.log(`Tried to get posts but another call to get posts is ongoing (requested page ${pageNumber})`)
+            log(`Tried to get posts but another call to get posts is ongoing (requested page ${pageNumber})`)
             return []
         }
         this.fetching = true;
@@ -67,7 +73,7 @@ export class FeedEngine {
                 let remainingNumberOfRequests = 5;
 
                 while (numberOfPostsNeeded > this.processedStatuses.length && remainingNumberOfRequests > 0) {
-                    console.log(`need to fetch more posts; have ${this.processedStatuses.length} after filtering, trying to get ${numberOfPostsNeeded}. ${remainingNumberOfRequests} requests remain (request batch size: ${this.manifest.postsToFetchPerBatch}). last id: ${this.lastRetrievedStatusId}`)
+                    log(`need to fetch more posts; have ${this.processedStatuses.length} after filtering, trying to get ${numberOfPostsNeeded}. ${remainingNumberOfRequests} requests remain (request batch size: ${this.manifest.postsToFetchPerBatch}). last id: ${this.lastRetrievedStatusId}`)
                     remainingNumberOfRequests -= 1;
 
                     const { moreAvailable } = await this.getAndProcessPosts(this.lastRetrievedStatusId)

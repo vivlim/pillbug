@@ -3,8 +3,10 @@ import {
     Component,
     ErrorBoundary,
     For,
+    Match,
     Setter,
     Show,
+    Switch,
     createContext,
     createEffect,
     createMemo,
@@ -24,7 +26,9 @@ import Post from "../post";
 import { HomeFeedSource } from "./sources/homefeed";
 import { PreprocessedPost } from "../post/preprocessed";
 import { Button } from "../ui/button";
-import { cache } from "@solidjs/router";
+import { cache, useSearchParams } from "@solidjs/router";
+import { createStore } from "solid-js/store";
+import { PageNav } from "../ui/page-footer";
 
 export type FeedComponentProps = {
     onRequest: (options: GetTimelineOptions) => Promise<Response<Status[]>>;
@@ -50,7 +54,7 @@ export const FeedComponent: Component<FeedComponentProps> = (props) => {
         const manifest: FeedManifest = {
             source: new HomeFeedSource(useAuth()),
             fetchReferencedPosts: 5, // unused??
-            postsPerPage: 20,
+            postsPerPage: 10,
             postsToFetchPerBatch: 40,
         };
         return new FeedEngine(manifest, props.rules);
@@ -82,19 +86,35 @@ function useFeed(): FeedComponentContext {
 export const FeedComponentPostList: Component<{
     engine: Accessor<FeedEngine>;
 }> = (props) => {
+    const [searchParams, setSearchParams] = useSearchParams();
+    const [inProgressStatusMessage, setInProgressStatusMessage] = createSignal<
+        string | undefined
+    >();
     const feed = useFeed();
     const auth = useAuth();
     const client = auth.assumeSignedIn.client;
-    const fetchCount = createMemo(() => createSignal(0));
     const getPosts = cache(async (num) => {
         props.engine();
         console.log("fetching posts");
-        const posts = await props.engine().getPosts(1);
+        const posts = await props.engine().getPosts(num, (msg) => {
+            setInProgressStatusMessage(msg);
+        });
         console.log(`successfully fetched ${posts.length} posts`);
         return posts;
     }, "posts");
+
+    const currentPage = createMemo(() => {
+        return Number.parseInt(searchParams.page ?? "1");
+    });
     const [posts, postsResourceActions] = createResource(async () => {
-        return await getPosts(1);
+        console.log("showing posts for page " + currentPage());
+        setInProgressStatusMessage("showing posts for page " + currentPage());
+        return await getPosts(currentPage());
+    });
+
+    createEffect(() => {
+        currentPage();
+        postsResourceActions.refetch();
     });
 
     createEffect(() => {
@@ -108,26 +128,49 @@ export const FeedComponentPostList: Component<{
                 <ErrorBox error={e} description="Failed to load posts" />
             )}
         >
-            <Button
-                onClick={() => {
-                    fetchCount()[1](fetchCount()[0]() + 1);
-                }}
-            >
-                bump
-            </Button>
-            fetches:{fetchCount()[0]()}
-            <For each={posts()}>
-                {(status, index) => (
-                    <>
-                        <Show when={!status.hide}>
-                            <PreprocessedPost
-                                status={status}
-                                limitInitialHeight={true}
-                            />
-                        </Show>
-                    </>
-                )}
-            </For>
+            <div>{inProgressStatusMessage()}</div>
+            <Switch>
+                <Match when={posts.state === "ready"}>
+                    <For each={posts()}>
+                        {(status, index) => (
+                            <>
+                                <Show when={!status.hide}>
+                                    <PreprocessedPost
+                                        status={status}
+                                        limitInitialHeight={true}
+                                    />
+                                </Show>
+                            </>
+                        )}
+                    </For>
+
+                    <PageNav>
+                        <Button
+                            classList={{
+                                invisible: currentPage() === 1,
+                            }}
+                            onClick={() => {
+                                setSearchParams(
+                                    { page: currentPage() - 1 },
+                                    { scroll: true }
+                                );
+                            }}
+                        >
+                            Back ({currentPage() - 1})
+                        </Button>
+                        <Button
+                            onClick={() => {
+                                setSearchParams(
+                                    { page: currentPage() + 1 },
+                                    { scroll: true }
+                                );
+                            }}
+                        >
+                            Next ({currentPage() + 1})
+                        </Button>
+                    </PageNav>
+                </Match>
+            </Switch>
         </ErrorBoundary>
     );
 };

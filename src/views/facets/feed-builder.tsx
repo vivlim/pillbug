@@ -11,6 +11,7 @@ import {
     Component,
     For,
     Match,
+    Show,
     Switch,
     createEffect,
     createMemo,
@@ -69,7 +70,8 @@ class FeedBuilderFacetStore {
         public openSelectedFilterName: string | undefined = undefined,
         public saveSelectedFilterName: string | undefined = undefined,
         public ioState: undefined | "opening" | "saving" = undefined,
-        public feedbackMessage: undefined | string = undefined
+        public feedbackMessage: undefined | string = undefined,
+        public editorVisible: boolean = false
     ) {}
 }
 
@@ -103,7 +105,8 @@ const FeedBuilderFacet: Component = (props) => {
 
     const editingRules: Accessor<StoreBacked<RuleProperties[]>> = createMemo(
         () => {
-            const rules = unwrap(facetStore.rules).map((r) => r.build());
+            const fsr = facetStore.rules;
+            const rules = unwrap(fsr).map((r) => r.build());
             return new StoreBacked<RuleProperties[]>(rules);
         }
     );
@@ -127,216 +130,223 @@ const FeedBuilderFacet: Component = (props) => {
             id="notifications-facet"
             class={"post-content" /* hack so we get list styles.. */}
         >
-            <Card>
-                <CardHeader>
-                    <CardTitle>Feed builder</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <div>{facetStore.feedbackMessage}</div>
-                    <Switch>
-                        <Match when={facetStore.ioState === undefined}>
-                            <Button
-                                onClick={() => {
-                                    setFacetStore("feedbackMessage", undefined);
-                                    setFacetStore("ioState", "opening");
-                                }}
-                            >
-                                Open a filter
-                            </Button>
-                            <Button
-                                onClick={() => {
-                                    setFacetStore("feedbackMessage", undefined);
-                                    setFacetStore("ioState", "saving");
-                                }}
-                            >
-                                Save filter
-                            </Button>
-                        </Match>
-                        <Match when={facetStore.ioState === "opening"}>
-                            <StringChoiceDropdown
-                                choices={feedManager.persistentStore ?? {}}
-                                allowOther={false}
-                                value={facetStore.openSelectedFilterName ?? ""}
-                                setter={(f) =>
-                                    setFacetStore("openSelectedFilterName", f)
-                                }
-                            >
-                                Open filter
-                            </StringChoiceDropdown>
-                            <Button
-                                onClick={() => {
-                                    if (!facetStore.openSelectedFilterName) {
-                                        setFacetStore(
-                                            "feedbackMessage",
-                                            "can't open feed when there isn't one selected"
-                                        );
-                                        return;
-                                    }
-
-                                    var filter =
-                                        feedManager.persistentStore[
-                                            facetStore.openSelectedFilterName
-                                        ];
-                                    if (filter === undefined) {
-                                        setFacetStore(
-                                            "feedbackMessage",
-                                            `the feed ${facetStore.openSelectedFilterName} doesn't actually exist?`
-                                        );
-                                        return;
-                                    }
-                                    // todo, directly use filter here instead of breaking it apart?
-                                    setFacetStore(
-                                        "currentlyEditingFilterName",
-                                        filter.label
-                                    );
-                                    const rules = filter.rules.map(
-                                        (r) =>
-                                            new FeedRuleProperties(
-                                                r.description,
-                                                r.conditions,
-                                                r.ev,
-                                                r.enabled,
-                                                r.name,
-                                                r.priority
-                                            )
-                                    );
-                                    setFacetStore("rules", rules);
-                                    setFacetStore("rules", rules);
-                                    setFacetStore("rules", rules);
+            <div class="pbCard">
+                <div>{facetStore.feedbackMessage}</div>
+                <Switch>
+                    <Match when={facetStore.ioState === undefined}>
+                        <div style="display: inline-block; padding-left: 1em; padding-right: 1em;">
+                            current filter:{" "}
+                            {facetStore.currentlyEditingFilterName ?? "default"}
+                        </div>
+                        <Button
+                            onClick={() => {
+                                setFacetStore("feedbackMessage", undefined);
+                                setFacetStore("ioState", "opening");
+                            }}
+                        >
+                            Open a filter
+                        </Button>
+                        <Button
+                            onClick={() => {
+                                setFacetStore("feedbackMessage", undefined);
+                                setFacetStore("ioState", "saving");
+                            }}
+                        >
+                            Save filter
+                        </Button>
+                        <Button
+                            onClick={() => {
+                                setFacetStore(
+                                    "editorVisible",
+                                    !facetStore.editorVisible
+                                );
+                            }}
+                        >
+                            Toggle editor
+                        </Button>
+                    </Match>
+                    <Match when={facetStore.ioState === "opening"}>
+                        <StringChoiceDropdown
+                            choices={feedManager.persistentStore ?? {}}
+                            allowOther={false}
+                            value={facetStore.openSelectedFilterName ?? ""}
+                            setter={(f) =>
+                                setFacetStore("openSelectedFilterName", f)
+                            }
+                        >
+                            Open filter
+                        </StringChoiceDropdown>
+                        <Button
+                            onClick={() => {
+                                if (!facetStore.openSelectedFilterName) {
                                     setFacetStore(
                                         "feedbackMessage",
-                                        `opened ${filter.label}`
+                                        "can't open feed when there isn't one selected"
                                     );
-                                    setFacetStore("ioState", undefined);
-                                }}
-                            >
-                                Open
-                            </Button>
-                            <Button
-                                onClick={() =>
-                                    setFacetStore("ioState", undefined)
+                                    return;
                                 }
-                                class="redButton"
-                            >
-                                Cancel
-                            </Button>
-                        </Match>
-                        <Match when={facetStore.ioState === "saving"}>
-                            <StringChoiceDropdown
-                                choices={feedManager.persistentStore ?? {}}
-                                allowOther={true}
-                                otherLabel="(new filter)"
-                                otherPlaceholder="name the new filter"
-                                value={facetStore.saveSelectedFilterName ?? ""}
-                                setter={(f) =>
-                                    setFacetStore("saveSelectedFilterName", f)
+
+                                var filter =
+                                    feedManager.persistentStore[
+                                        facetStore.openSelectedFilterName
+                                    ];
+                                if (filter === undefined) {
+                                    setFacetStore(
+                                        "feedbackMessage",
+                                        `the feed ${facetStore.openSelectedFilterName} doesn't actually exist?`
+                                    );
+                                    return;
                                 }
-                            >
-                                Save over filter
-                            </StringChoiceDropdown>
-                            <Button
-                                onClick={() => {
-                                    try {
-                                        const name =
-                                            facetStore.saveSelectedFilterName;
-                                        if (name === undefined || "") {
-                                            setFacetStore(
-                                                "feedbackMessage",
-                                                "you must specify a name for the filter"
-                                            );
-                                            return;
-                                        }
-                                        feedManager.setPersistentStore(name, {
-                                            label: name,
-                                            rules: facetStore.rules,
-                                        });
+                                // todo, directly use filter here instead of breaking it apart?
+                                setFacetStore(
+                                    "currentlyEditingFilterName",
+                                    filter.label
+                                );
+                                const rules = filter.rules.map(
+                                    (r) =>
+                                        new FeedRuleProperties(
+                                            r.description,
+                                            r.conditions,
+                                            r.ev,
+                                            r.enabled,
+                                            r.name,
+                                            r.priority
+                                        )
+                                );
+                                setFacetStore("rules", rules);
+                                setFacetStore("rules", rules);
+                                setFacetStore("rules", rules);
+                                setFacetStore(
+                                    "feedbackMessage",
+                                    `opened ${filter.label}`
+                                );
+                                setFacetStore("ioState", undefined);
+                            }}
+                        >
+                            Open
+                        </Button>
+                        <Button
+                            onClick={() => setFacetStore("ioState", undefined)}
+                            class="redButton"
+                        >
+                            Cancel
+                        </Button>
+                    </Match>
+                    <Match when={facetStore.ioState === "saving"}>
+                        <StringChoiceDropdown
+                            choices={feedManager.persistentStore ?? {}}
+                            allowOther={true}
+                            otherLabel="(new filter)"
+                            otherPlaceholder="name the new filter"
+                            value={facetStore.saveSelectedFilterName ?? ""}
+                            setter={(f) =>
+                                setFacetStore("saveSelectedFilterName", f)
+                            }
+                        >
+                            Save over filter
+                        </StringChoiceDropdown>
+                        <Button
+                            onClick={() => {
+                                try {
+                                    const name =
+                                        facetStore.saveSelectedFilterName;
+                                    if (name === undefined || "") {
                                         setFacetStore(
                                             "feedbackMessage",
-                                            `saved as ${name}`
+                                            "you must specify a name for the filter"
                                         );
-                                        setFacetStore("ioState", undefined);
-                                    } catch (e) {
-                                        if (e instanceof Error) {
-                                            setFacetStore(
-                                                "feedbackMessage",
-                                                "save failed: " + e.message
-                                            );
-                                            console.error(
-                                                "error saving: " + e.stack ??
-                                                    e.message
-                                            );
-                                        }
+                                        return;
                                     }
-                                }}
-                            >
-                                Save
-                            </Button>
-                            <Button
-                                onClick={() =>
-                                    setFacetStore("ioState", undefined)
+                                    feedManager.setPersistentStore(name, {
+                                        label: name,
+                                        rules: facetStore.rules,
+                                    });
+                                    setFacetStore(
+                                        "feedbackMessage",
+                                        `saved as ${name}`
+                                    );
+                                    setFacetStore("ioState", undefined);
+                                } catch (e) {
+                                    if (e instanceof Error) {
+                                        setFacetStore(
+                                            "feedbackMessage",
+                                            "save failed: " + e.message
+                                        );
+                                        console.error(
+                                            "error saving: " + e.stack ??
+                                                e.message
+                                        );
+                                    }
                                 }
-                                class="redButton"
-                            >
-                                Cancel
-                            </Button>
-                        </Match>
-                    </Switch>
-                    <ul>
-                        <li>
-                            Source:
-                            <DropdownMenu>
-                                <DropdownMenuTrigger
-                                    type="button"
-                                    class="border-2 p-2 m-1 rounded-md"
-                                >
-                                    {facetStore.source}
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent class="w-48">
-                                    <DropdownMenuRadioGroup
-                                        value={facetStore.source}
-                                        onChange={(val) => {
-                                            setFacetStore(
-                                                "source",
-                                                val as FeedSource
-                                            );
-                                        }}
+                            }}
+                        >
+                            Save
+                        </Button>
+                        <Button
+                            onClick={() => setFacetStore("ioState", undefined)}
+                            class="redButton"
+                        >
+                            Cancel
+                        </Button>
+                    </Match>
+                    <Match when={false /* not actually using this stuff */}>
+                        <ul>
+                            <li>
+                                Source:
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger
+                                        type="button"
+                                        class="border-2 p-2 m-1 rounded-md"
                                     >
-                                        <DropdownMenuRadioItem value="homeTimeline">
-                                            home timeline
-                                        </DropdownMenuRadioItem>
-                                        <DropdownMenuRadioItem value="comment">
-                                            comment
-                                        </DropdownMenuRadioItem>
-                                        <DropdownMenuRadioItem value="share">
-                                            share
-                                        </DropdownMenuRadioItem>
-                                    </DropdownMenuRadioGroup>
-                                </DropdownMenuContent>
-                            </DropdownMenu>
-                        </li>
-                    </ul>
-                    <Button
-                        onClick={() => {
-                            setFacetStore("rules", toFeedRules());
-                        }}
-                    >
-                        Apply rules
-                    </Button>
-                </CardContent>
-                <CardFooter></CardFooter>
-            </Card>
+                                        {facetStore.source}
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent class="w-48">
+                                        <DropdownMenuRadioGroup
+                                            value={facetStore.source}
+                                            onChange={(val) => {
+                                                setFacetStore(
+                                                    "source",
+                                                    val as FeedSource
+                                                );
+                                            }}
+                                        >
+                                            <DropdownMenuRadioItem value="homeTimeline">
+                                                home timeline
+                                            </DropdownMenuRadioItem>
+                                            <DropdownMenuRadioItem value="comment">
+                                                comment
+                                            </DropdownMenuRadioItem>
+                                            <DropdownMenuRadioItem value="share">
+                                                share
+                                            </DropdownMenuRadioItem>
+                                        </DropdownMenuRadioGroup>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                            </li>
+                        </ul>
+                    </Match>
+                </Switch>
+            </div>
 
-            <Card>
-                <CardHeader>
-                    <CardTitle>Editor</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <FeedRulesEditorComponent rules={editingRules()} />
-                </CardContent>
-                <CardFooter></CardFooter>
-            </Card>
-
-            <hr />
+            <Show when={facetStore.editorVisible}>
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Editor</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <FeedRulesEditorComponent rules={editingRules()} />
+                    </CardContent>
+                    <CardFooter>
+                        <Button
+                            onClick={() => {
+                                setFacetStore("rules", toFeedRules());
+                            }}
+                        >
+                            Reapply rules
+                        </Button>
+                    </CardFooter>
+                </Card>
+            </Show>
 
             <div>
                 <FeedComponent

@@ -31,6 +31,7 @@ export interface PersistentSettings {
     enableDevTools?: Flag
     unlimitedPostHeightInFeed?: Flag
     unlimitedColumnWidth?: Flag
+    v2Feeds?: Flag
 }
 
 /** Configurable on-off flags which may be undefined until a user configures them. */
