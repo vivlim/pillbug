@@ -7,19 +7,16 @@ export const defaultFeedRules: FeedRuleProperties[] = [
             all: [
                 {
                     fact: "in_reply_to_id",
-                    operator: "equal",
+                    operator: "notEqual",
                     value: null,
                 }
             ]
         },
         { type: "hidePost" }
     ),
-]
-
-/* just an example i don't have somewhere better to stash atm
 
     new FeedRuleProperties(
-        "label other pillbug enjoyers",
+        "label posts written with pillbug",
         {
             all: [
                 {
@@ -30,6 +27,6 @@ export const defaultFeedRules: FeedRuleProperties[] = [
                 }
             ]
         },
-        { type: "applyLabel", params: { label: "pillbug enjoyer" } }
+        { type: "applyLabel", params: { label: "pillbug" } }
     )
-*/
+]

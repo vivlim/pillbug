@@ -493,7 +493,6 @@ const PreprocessedStatusPostBlock: Component<
                                                         : undefined
                                                 }
                                             />
-                                            <PostLabels post={linkedAncestor} />
                                             <PreprocessedPostBody
                                                 class="border-b"
                                                 status={linkedAncestor.status}
@@ -501,6 +500,7 @@ const PreprocessedStatusPostBlock: Component<
                                                     postData.limitInitialHeight
                                                 }
                                             />
+                                            <PostLabels post={linkedAncestor} />
                                         </>
                                     );
                                 }}
@@ -512,36 +512,36 @@ const PreprocessedStatusPostBlock: Component<
                                     linkedAncestors().slice(-1)[0].status
                                 }
                             />
-                            <PostLabels post={postData.status} />
                             <PreprocessedPostBody
                                 class="border-b"
                                 status={status}
                                 limitInitialHeight={postData.limitInitialHeight}
                             />
+                            <PostLabels post={postData.status} />
                         </Match>
                         <Match
                             when={postData.status.linkedAncestors.length === 0}
                         >
                             <PreprocessedPostUserBar status={status} />
-                            <PostLabels post={postData.status} />
                             <PreprocessedPostBody
                                 class="border-b"
                                 status={status}
                                 limitInitialHeight={postData.limitInitialHeight}
                             />
+                            <PostLabels post={postData.status} />
                         </Match>
                     </Switch>
                 </Match>
                 <Match when={status.reblog !== null}>
                     <PreprocessedPostUserBar status={status} />
                     <PreprocessedPostUserBar status={status.reblog!} />
-                    <PostLabels post={postData.status} />
 
                     <PreprocessedPostBody
                         class="border-b"
                         status={status.reblog!}
                         limitInitialHeight={postData.limitInitialHeight}
                     />
+                    <PostLabels post={postData.status} />
                 </Match>
             </Switch>
             <Show when={postData.showRaw}>
