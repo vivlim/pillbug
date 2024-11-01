@@ -14,6 +14,19 @@ export const defaultFeedRules: FeedRuleProperties[] = [
         },
         { type: "hidePost" }
     ),
+    new FeedRuleProperties(
+        "attach linked ancestor posts to all posts when available",
+        {
+            all: [
+                {
+                    fact: "id",
+                    operator: "notEqual",
+                    value: null,
+                }
+            ]
+        },
+        { type: "attachLinked" }
+    ),
 
     new FeedRuleProperties(
         "label posts written with pillbug",
