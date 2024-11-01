@@ -2,6 +2,7 @@ import { createContext, useContext } from "solid-js";
 import { SessionAuthManager } from "../auth/auth-manager";
 import { BlockingLoadProgressTracker } from "./blocking-load";
 import { SettingsManager } from "./settings-manager";
+import { FeedManager } from "./feed-manager";
 
 export const SessionContext = createContext<PillbugSessionContext>();
 
@@ -11,6 +12,7 @@ export interface PillbugSessionContext {
     /** Global progress tracker for all async operations that must complete before we should try to load the frame. */
     blockingLoadProgressTracker: BlockingLoadProgressTracker;
     settingsManager: SettingsManager;
+    feedManager: FeedManager;
 }
 
 /** Directly access the session context. It is usually more convenient to use more specific helpers like useAuth and useSettings. */

@@ -27,20 +27,5 @@ export const defaultFeedRules: FeedRuleProperties[] = [
             ]
         },
         { type: "applyLabel", params: { label: "pillbug enjoyer" } }
-    ),
-    new FeedRuleProperties(
-        "vivs only",
-        {
-            all: [
-                {
-                    fact: "account",
-                    operator: "notEqual",
-                    path: "$.acct",
-                    value: "viv",
-                }
-            ]
-        },
-        { type: "hidePost" },
-        false
     )
 ]

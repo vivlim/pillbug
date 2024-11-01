@@ -39,6 +39,8 @@ export interface DropdownOrOtherComponentProps<T extends string> {
     children: JSX.Element;
     allowOther: boolean;
     choices: Record<T, DropdownChoice>;
+    otherLabel?: string;
+    otherPlaceholder?: string;
 }
 
 export type DropdownChoice = {
@@ -122,7 +124,7 @@ export function DropdownOrOtherComponentBuilder<T extends string>(
                         value={choices.length}
                         selected={selectedIndex() === choices.length}
                     >
-                        other
+                        {props.otherLabel ?? "other"}
                     </option>
                 </Show>
             </select>
@@ -134,8 +136,13 @@ export function DropdownOrOtherComponentBuilder<T extends string>(
                     onChange={(e: { currentTarget: HTMLInputElement }) => {
                         setOtherValue(e.currentTarget.value);
                     }}
+                    placeholder={props.otherPlaceholder}
                 ></input>
             </Show>
         </>
     );
 }
+
+export const StringChoiceDropdown: Component<
+    DropdownOrOtherComponentProps<string>
+> = (p) => DropdownOrOtherComponentBuilder<string>(p);

@@ -26,6 +26,7 @@ import { useAuth } from "~/auth/auth-manager";
 import {
     DropdownOrOtherComponentBuilder,
     DropdownOrOtherComponentProps,
+    StringChoiceDropdown,
 } from "~/components/dropdown-or-other";
 import { FeedComponent } from "~/components/feed";
 import {
@@ -56,13 +57,19 @@ import {
     DropdownMenuRadioItem,
     DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
+import { useFeeds } from "~/lib/feed-manager";
 import { StoreBacked } from "~/lib/store-backed";
 
 type FeedSource = "homeTimeline";
 class FeedBuilderFacetStore {
     constructor(
         public source: FeedSource = "homeTimeline",
-        public rules: FeedRuleProperties[] = defaultFeedRules
+        public rules: FeedRuleProperties[] = defaultFeedRules,
+        public currentlyEditingFilterName: string | undefined = undefined,
+        public openSelectedFilterName: string | undefined = undefined,
+        public saveSelectedFilterName: string | undefined = undefined,
+        public ioState: undefined | "opening" | "saving" = undefined,
+        public feedbackMessage: undefined | string = undefined
     ) {}
 }
 
@@ -81,9 +88,18 @@ const initialRule: FeedRuleProperties = new FeedRuleProperties(
 );
 
 const FeedBuilderFacet: Component = (props) => {
+    const feedManager = useFeeds();
     const [facetStore, setFacetStore] = createStore<FeedBuilderFacetStore>(
         new FeedBuilderFacetStore()
     );
+
+    const availableFeeds = createMemo(() => {
+        const f = feedManager.persistentStore.filters;
+        if (f === undefined) {
+            return [];
+        }
+        return Object.keys(f);
+    });
 
     const editingRules: Accessor<StoreBacked<RuleProperties[]>> = createMemo(
         () => {
@@ -116,6 +132,155 @@ const FeedBuilderFacet: Component = (props) => {
                     <CardTitle>Feed builder</CardTitle>
                 </CardHeader>
                 <CardContent>
+                    <div>{facetStore.feedbackMessage}</div>
+                    <Switch>
+                        <Match when={facetStore.ioState === undefined}>
+                            <Button
+                                onClick={() => {
+                                    setFacetStore("feedbackMessage", undefined);
+                                    setFacetStore("ioState", "opening");
+                                }}
+                            >
+                                Open a filter
+                            </Button>
+                            <Button
+                                onClick={() => {
+                                    setFacetStore("feedbackMessage", undefined);
+                                    setFacetStore("ioState", "saving");
+                                }}
+                            >
+                                Save filter
+                            </Button>
+                        </Match>
+                        <Match when={facetStore.ioState === "opening"}>
+                            <StringChoiceDropdown
+                                choices={feedManager.persistentStore ?? {}}
+                                allowOther={false}
+                                value={facetStore.openSelectedFilterName ?? ""}
+                                setter={(f) =>
+                                    setFacetStore("openSelectedFilterName", f)
+                                }
+                            >
+                                Open filter
+                            </StringChoiceDropdown>
+                            <Button
+                                onClick={() => {
+                                    if (!facetStore.openSelectedFilterName) {
+                                        setFacetStore(
+                                            "feedbackMessage",
+                                            "can't open feed when there isn't one selected"
+                                        );
+                                        return;
+                                    }
+
+                                    var filter =
+                                        feedManager.persistentStore[
+                                            facetStore.openSelectedFilterName
+                                        ];
+                                    if (filter === undefined) {
+                                        setFacetStore(
+                                            "feedbackMessage",
+                                            `the feed ${facetStore.openSelectedFilterName} doesn't actually exist?`
+                                        );
+                                        return;
+                                    }
+                                    // todo, directly use filter here instead of breaking it apart?
+                                    setFacetStore(
+                                        "currentlyEditingFilterName",
+                                        filter.label
+                                    );
+                                    const rules = filter.rules.map(
+                                        (r) =>
+                                            new FeedRuleProperties(
+                                                r.description,
+                                                r.conditions,
+                                                r.ev,
+                                                r.enabled,
+                                                r.name,
+                                                r.priority
+                                            )
+                                    );
+                                    setFacetStore("rules", rules);
+                                    setFacetStore("rules", rules);
+                                    setFacetStore("rules", rules);
+                                    setFacetStore(
+                                        "feedbackMessage",
+                                        `opened ${filter.label}`
+                                    );
+                                    setFacetStore("ioState", undefined);
+                                }}
+                            >
+                                Open
+                            </Button>
+                            <Button
+                                onClick={() =>
+                                    setFacetStore("ioState", undefined)
+                                }
+                                class="redButton"
+                            >
+                                Cancel
+                            </Button>
+                        </Match>
+                        <Match when={facetStore.ioState === "saving"}>
+                            <StringChoiceDropdown
+                                choices={feedManager.persistentStore ?? {}}
+                                allowOther={true}
+                                otherLabel="(new filter)"
+                                otherPlaceholder="name the new filter"
+                                value={facetStore.saveSelectedFilterName ?? ""}
+                                setter={(f) =>
+                                    setFacetStore("saveSelectedFilterName", f)
+                                }
+                            >
+                                Save over filter
+                            </StringChoiceDropdown>
+                            <Button
+                                onClick={() => {
+                                    try {
+                                        const name =
+                                            facetStore.saveSelectedFilterName;
+                                        if (name === undefined || "") {
+                                            setFacetStore(
+                                                "feedbackMessage",
+                                                "you must specify a name for the filter"
+                                            );
+                                            return;
+                                        }
+                                        feedManager.setPersistentStore(name, {
+                                            label: name,
+                                            rules: facetStore.rules,
+                                        });
+                                        setFacetStore(
+                                            "feedbackMessage",
+                                            `saved as ${name}`
+                                        );
+                                        setFacetStore("ioState", undefined);
+                                    } catch (e) {
+                                        if (e instanceof Error) {
+                                            setFacetStore(
+                                                "feedbackMessage",
+                                                "save failed: " + e.message
+                                            );
+                                            console.error(
+                                                "error saving: " + e.stack ??
+                                                    e.message
+                                            );
+                                        }
+                                    }
+                                }}
+                            >
+                                Save
+                            </Button>
+                            <Button
+                                onClick={() =>
+                                    setFacetStore("ioState", undefined)
+                                }
+                                class="redButton"
+                            >
+                                Cancel
+                            </Button>
+                        </Match>
+                    </Switch>
                     <ul>
                         <li>
                             Source:

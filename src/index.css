@@ -368,3 +368,8 @@ html.setting-unlimitedColumnWidth #layoutColumnsRoot {
     margin-right: 0.5em;
     margin-top: 0.25em;
 }
+
+.redButton {
+    color: hsl(var(--destructive-foreground));
+    background-color: hsl(var(--destructive));
+}

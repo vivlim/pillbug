@@ -254,7 +254,17 @@ export const FeedRuleActions: Record<FeedRuleEventType, FeedRuleAction> = {
     }
 }
 
-export class FeedRuleProperties {
+
+export interface FeedRule {
+    description: string,
+    conditions: TopLevelCondition,
+    ev: FeedRuleEvent,
+    enabled: boolean,
+    name?: string,
+    priority?: number
+}
+
+export class FeedRuleProperties implements FeedRule {
     constructor(public description: string, public conditions: TopLevelCondition, public ev: FeedRuleEvent, public enabled: boolean = true, public name?: string, public priority?: number) {
 
     }
