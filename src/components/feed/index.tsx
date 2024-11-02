@@ -29,11 +29,12 @@ import { Button } from "../ui/button";
 import { cache, useSearchParams } from "@solidjs/router";
 import { createStore } from "solid-js/store";
 import { PageNav } from "../ui/page-footer";
+import { useSettings } from "~/lib/settings-manager";
 
 export type FeedComponentProps = {
-    onRequest: (options: GetTimelineOptions) => Promise<Response<Status[]>>;
     rules: FeedRuleProperties[];
     initialOptions: GetTimelineOptions;
+    manifest?: FeedManifest;
 };
 
 interface FeedComponentStore {
@@ -49,9 +50,9 @@ interface FeedComponentContext extends FeedComponentProps {
 const FeedComponentContextCtx = createContext<FeedComponentContext>();
 
 export const FeedComponent: Component<FeedComponentProps> = (props) => {
-    const engine: Accessor<FeedEngine> = createMemo(() => {
+    const [engine, engineActions] = createResource<FeedEngine>(async () => {
         console.log("new engine");
-        const manifest: FeedManifest = {
+        const manifest: FeedManifest = props.manifest ?? {
             source: new HomeFeedSource(useAuth()),
             fetchReferencedPosts: 5, // unused??
             postsPerPage: 10,
@@ -60,48 +61,34 @@ export const FeedComponent: Component<FeedComponentProps> = (props) => {
         return new FeedEngine(manifest, props.rules);
     });
 
-    const store = new StoreBacked<FeedComponentStore>({
-        options: props.initialOptions,
-    });
-
     return (
-        <FeedComponentContextCtx.Provider
-            value={{ ...props, engine: engine(), store }}
-        >
-            <FeedComponentPostList engine={engine} />
-        </FeedComponentContextCtx.Provider>
+        <Show when={engine()} fallback={"initializing"}>
+            <FeedComponentPostList engine={engine()!} />
+        </Show>
     );
 };
 
-function useFeed(): FeedComponentContext {
-    const value = useContext(FeedComponentContextCtx);
-    if (value === undefined) {
-        throw new Error(
-            "Feed context must be used within the feed that created it (a new version of pillbug may have been deployed; try refreshing)"
-        );
-    }
-    return value;
-}
-
 export const FeedComponentPostList: Component<{
-    engine: Accessor<FeedEngine>;
+    engine: FeedEngine;
 }> = (props) => {
+    if (props.engine === undefined) {
+        throw new Error("engine is not initialized");
+    }
+    const settings = useSettings();
     const [searchParams, setSearchParams] = useSearchParams();
     const [inProgressStatusMessage, setInProgressStatusMessage] = createSignal<
         string | undefined
     >();
-    const feed = useFeed();
     const auth = useAuth();
     const client = auth.assumeSignedIn.client;
     const getPosts = cache(async (num) => {
-        props.engine();
         console.log("fetching posts");
-        const posts = await props.engine().getPosts(num, (msg) => {
+        const posts = await props.engine.getPosts(num, (msg) => {
             setInProgressStatusMessage(msg);
         });
         console.log(`successfully fetched ${posts.length} posts`);
         return posts;
-    }, "posts");
+    }, `cached-feed-${props.engine.manifest.source.describe()}` /* use the source as part of the cache key, since it should be unique */);
 
     const currentPage = createMemo(() => {
         return Number.parseInt(searchParams.page ?? "1");
@@ -118,7 +105,7 @@ export const FeedComponentPostList: Component<{
     });
 
     createEffect(() => {
-        props.engine();
+        props.engine;
         postsResourceActions.refetch();
     });
 
@@ -128,7 +115,9 @@ export const FeedComponentPostList: Component<{
                 <ErrorBox error={e} description="Failed to load posts" />
             )}
         >
-            <div>{inProgressStatusMessage()}</div>
+            <Show when={settings.getPersistent().enableDevTools}>
+                <div>{inProgressStatusMessage()}</div>
+            </Show>
             <Switch>
                 <Match when={posts.state === "ready"}>
                     <For each={posts()}>

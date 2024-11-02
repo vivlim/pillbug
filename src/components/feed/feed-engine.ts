@@ -58,6 +58,7 @@ export class FeedEngine {
                 logCallback(msg);
             }
         }
+        log(`entering FeedEngine.GetPosts from source ${this.manifest.source.describe()}`)
         if (this.fetching) {
             log(`Tried to get posts but another call to get posts is ongoing (requested page ${pageNumber})`)
             return []
@@ -71,6 +72,7 @@ export class FeedEngine {
 
                 const numberOfPostsNeeded = pageNumber * this.manifest.postsPerPage
                 let remainingNumberOfRequests = 5;
+                log(`have ${this.processedStatuses.length} posts before fetching any`)
 
                 while (numberOfPostsNeeded > this.processedStatuses.length && remainingNumberOfRequests > 0) {
                     log(`need to fetch more posts; have ${this.processedStatuses.length} after filtering, trying to get ${numberOfPostsNeeded}. ${remainingNumberOfRequests} requests remain (request batch size: ${this.manifest.postsToFetchPerBatch}). last id: ${this.lastRetrievedStatusId}`)

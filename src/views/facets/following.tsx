@@ -5,6 +5,7 @@ import { Account } from "megalodon/lib/src/entities/account";
 import { Status } from "megalodon/lib/src/entities/status";
 import {
     Component,
+    createEffect,
     createMemo,
     createResource,
     createSignal,
@@ -39,6 +40,10 @@ import { LayoutLeftColumnPortal } from "~/components/layout/columns";
 import "./following.css";
 import { PostFeed } from "~/components/post/feed";
 import { fetchUserInfo, GetAccountFeedOptions } from "../userprofile";
+import { defaultFeedRules } from "~/components/feed/preset-rules";
+import { FeedComponent } from "~/components/feed";
+import { FeedManifest } from "~/components/feed/feed-engine";
+import { UserFeedSource } from "~/components/feed/sources/userfeed";
 
 interface AccountInfo {
     acct: string;
@@ -63,11 +68,9 @@ type FollowingFacetStore = {
 
 const FollowingFacet: Component = () => {
     const settings = useSettings();
-    if (!settings.getPersistent().enableDevTools) {
-        throw new Error("this view is only available if dev tools are enabled");
-    }
 
     const params = useParams();
+    const username = createMemo(() => params.username);
 
     // Hide the nav if a profile is visible - the profile replaces it
     const frameContext = useFrameContext();
@@ -427,8 +430,8 @@ const FollowingFacet: Component = () => {
                             </ul>
                         </details>
                     </Show>
-                    <Show when={params.username !== undefined}>
-                        <FollowingUserPosts acct={params.username} />
+                    <Show when={username() !== undefined}>
+                        <FollowingUserPosts acct={username()} />
                     </Show>
                 </div>
             </div>
@@ -487,41 +490,46 @@ const FollowingUser: Component<FollowingUserProps> = ({ acct }) => {
 
 const FollowingUserPosts: Component<{ acct: string }> = (props) => {
     const auth = useAuth();
-    const [userInfo] = createResource(
-        () => props.acct,
-        (acct) => fetchUserInfo(auth.assumeSignedIn.state, props.acct)
-    );
+    const [userFeedManifest, userFeedManifestActions] =
+        createResource<FeedManifest>(async () => {
+            const targetUser = await fetchUserInfo(
+                auth.assumeSignedIn.state,
+                props.acct
+            );
+            if (targetUser?.id === undefined) {
+                console.error(`user ${props.acct} doesn't exist?`);
+                throw new Error(`user ${props.acct} doesn't exist?`);
+            }
 
-    // hack: need to have a unique timestamp when the account is changed so the post feed is invalidated
-    const refreshTs = createMemo(() => {
-        console.log("going to fetch feed for " + props.acct);
-        return Date.now();
+            return {
+                source: new UserFeedSource(
+                    auth,
+                    targetUser.id,
+                    targetUser.acct
+                ),
+                fetchReferencedPosts: 5,
+                postsPerPage: 10,
+                postsToFetchPerBatch: 10,
+            };
+        });
+    createEffect(() => {
+        props.acct;
+        userFeedManifestActions.refetch();
     });
 
     return (
         <Switch>
-            <Match when={userInfo() !== undefined}>
-                <PostFeed
-                    onRequest={async (signedInState, timelineOptions) => {
-                        const acctFeedProps: GetAccountFeedOptions = {
-                            exclude_replies: true,
-                            ...timelineOptions,
-                        };
-                        if (!signedInState?.signedIn) {
-                            return undefined;
-                        }
-
-                        const client = signedInState.authenticatedClient;
-                        let posts = await client.getAccountStatuses(
-                            userInfo()!.id,
-                            acctFeedProps
-                        );
-
-                        return posts;
-                    }}
-                    lastRefresh={refreshTs()}
+            <Match when={userFeedManifest.state === "ready"}>
+                <FeedComponent
+                    manifest={userFeedManifest()}
+                    rules={defaultFeedRules}
+                    initialOptions={{ limit: 25 }}
                 />
             </Match>
+            <Match when={userFeedManifest.state === "errored"}>
+                failed to load user posts
+            </Match>
+            <Match when={true}>loading...</Match>
         </Switch>
     );
 };
