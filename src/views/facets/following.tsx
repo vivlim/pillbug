@@ -279,7 +279,6 @@ const FollowingFacet: Component = () => {
 
     return (
         <div id="following-root">
-            <div class="spacer" />
             <div class="following-user-list">
                 <ul>
                     <For each={filteredSortedAccounts()}>
@@ -433,8 +432,6 @@ const FollowingFacet: Component = () => {
                     </Show>
                 </div>
             </div>
-
-            <div class="spacer" />
         </div>
     );
 };

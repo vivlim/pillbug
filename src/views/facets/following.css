@@ -49,6 +49,7 @@
     overflow-y: auto;
     padding-left: .5em;
     padding-right: .5em;
+    border-bottom: .25em solid hsl(var(--border));
 }
 
 .following-user-info {
@@ -77,8 +78,10 @@
 }
 
 /* hack ... */
+@media (min-width: 768px) {
 .followingFacet #layoutLeftColumn {
     display: none;
+}
 }
 
 /* hack for these lingering around and blocking clicks */
@@ -92,7 +95,11 @@
     width: 100%;
 }
 
-@media (min-width: 680px) {
+.outsideAvatar {
+    display: none;
+}
+
+@media (min-width: 770px) {
     #following-root {
         flex-direction: row;
     }
@@ -103,6 +110,7 @@
         height: 100%;
         overflow-x: hidden;
         overflow-y: auto;
+        border-bottom: 0px;
     }
 
     .following-user-info {
@@ -113,18 +121,22 @@
         flex-direction: column;
     }
 
+    #layoutColumnsRoot {
+        max-width: unset;
+    }
+
 }
 
 @media (min-width: 1024px) {
-    #following-root {
-
-    }
     .following-user-list {
         max-width: 24rem;
     }
 }
 
 @media (min-width: 1280px) {
+    #following-root {
+        max-width: 1400px;
+    }
     .following-posts {
         min-width: 56rem;
     }
@@ -132,5 +144,9 @@
     .spacer {
         display: block;
         flex: 1 1 auto;
+    }
+
+    .outsideAvatar {
+        display: block;
     }
 }
