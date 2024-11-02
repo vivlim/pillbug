@@ -64,6 +64,8 @@ type FollowingFacetStore = {
     numberOfPostsScanned: number;
     remainingTimelinePulls: number;
     showAccountsWithUnknownLastPost?: boolean;
+    followingAccountCount: number;
+    hideGetMoreButtons: boolean;
 };
 
 const FollowingFacet: Component = () => {
@@ -93,6 +95,8 @@ const FollowingFacet: Component = () => {
         lastHomeTimelinePostId: undefined,
         remainingTimelinePulls: 4,
         numberOfPostsScanned: 0,
+        followingAccountCount: -1,
+        hideGetMoreButtons: false,
     });
 
     const [numAccountsRequested, setNumAccountsRequested] =
@@ -138,6 +142,19 @@ const FollowingFacet: Component = () => {
         setFacetStore("requestList", facetStore.requestList.length, lr);
     };
 
+    // if you've checked all the accounts, we should show the ones that haven't posted.
+    createEffect(() => {
+        if (
+            facetStore.followingAccountCount > 0 &&
+            sortedAccountsWithKnownLastPosts().length > 0 &&
+            missingAccounts().length === 0 &&
+            !facetStore.showAccountsWithUnknownLastPost
+        ) {
+            setFacetStore("showAccountsWithUnknownLastPost", true);
+            setFacetStore("hideGetMoreButtons", true);
+        }
+    });
+
     const discoverySink: DiscoverySink = async (
         acct: string,
         account: Account | undefined,
@@ -154,6 +171,16 @@ const FollowingFacet: Component = () => {
                 "numberOfPostsScanned",
                 facetStore.numberOfPostsScanned + 1
             );
+
+            // ignore boosts
+            if (lastKnownStatus.reblog !== null) {
+                return;
+            }
+
+            // and replies, for consistency with the feed we show currently.
+            if (lastKnownStatus.in_reply_to_id !== null) {
+                return;
+            }
         }
 
         const currentRecord = accountStore[acct];
@@ -190,13 +217,14 @@ const FollowingFacet: Component = () => {
         const accounts: Account[] = await unwrapLoggedResponseAsync(
             auth.assumeSignedIn.client.getAccountFollowing(
                 auth.assumeSignedIn.state.accountData.id,
-                { limit: 80 }
+                { get_all: true, sleep_ms: 10 }
             ),
             "getting list of accounts you follow",
             "need to have the full list available for cross referencing",
             (x) => `got ${x.length} accounts`,
             requestLogger
         );
+        setFacetStore("followingAccountCount", accounts.length);
 
         for (const account of accounts) {
             discoverySink(account.acct, account, undefined, true);
@@ -229,6 +257,9 @@ const FollowingFacet: Component = () => {
         }
         const accounts = missingAccounts();
         if (accounts.length === 0) {
+            if (!facetStore.hideGetMoreButtons) {
+                setFacetStore("hideGetMoreButtons", true);
+            }
             return;
         }
 
@@ -291,32 +322,48 @@ const FollowingFacet: Component = () => {
                     </For>
                 </ul>
 
-                <div>choose how to continue:</div>
-                <Button
-                    class="followingFetchButton"
-                    onClick={() => {
-                        expandWindowOnInteraction(8);
-                        setNumAccountsRequested(
-                            numAccountsInput!.valueAsNumber
-                        );
-                        dataFetcher();
-                    }}
-                >
-                    look back in timeline
-                </Button>
-                <Button
-                    class="followingFetchButton"
-                    onClick={() => {
-                        expandWindowOnInteraction(5);
-                        randomFollowerLookup(5);
-                    }}
-                >
-                    randomly sample your follower list
-                </Button>
+                <Switch>
+                    <Match when={!facetStore.hideGetMoreButtons}>
+                        <div>
+                            {sortedAccountsWithKnownLastPosts().length}/
+                            {facetStore.followingAccountCount} accounts you're
+                            following have known last posts. choose how to
+                            continue:
+                        </div>
+                        <Button
+                            class="followingFetchButton"
+                            onClick={() => {
+                                expandWindowOnInteraction(8);
+                                setNumAccountsRequested(
+                                    numAccountsInput!.valueAsNumber
+                                );
+                                dataFetcher();
+                            }}
+                        >
+                            look further back in timeline
+                        </Button>
+                        <Button
+                            class="followingFetchButton"
+                            onClick={() => {
+                                expandWindowOnInteraction(7);
+                                randomFollowerLookup(7);
+                            }}
+                        >
+                            randomly check some accounts you follow
+                        </Button>
+                    </Match>
+                    <Match when={facetStore.hideGetMoreButtons}>
+                        all of the {facetStore.followingAccountCount} accounts
+                        you're following are here.
+                    </Match>
+                </Switch>
             </div>
 
             <div class="following-posts">
                 <div class="pbCard p-4 m-2">
+                    <Show when={username() !== undefined}>
+                        <FollowingUserPosts acct={username()} />
+                    </Show>
                     <Show when={settings.persistentStore.enableDevTools}>
                         <details>
                             <summary>dev controls</summary>
@@ -429,9 +476,6 @@ const FollowingFacet: Component = () => {
                                 </For>
                             </ul>
                         </details>
-                    </Show>
-                    <Show when={username() !== undefined}>
-                        <FollowingUserPosts acct={username()} />
                     </Show>
                 </div>
             </div>

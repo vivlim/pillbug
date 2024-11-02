@@ -51,7 +51,7 @@ export class FeedEngine {
         })
     }
 
-    public async getPosts(pageNumber?: number, logCallback?: (msg: string) => void): Promise<ProcessedStatus[]> {
+    public async getPosts(pageNumber?: number, logCallback?: (msg: string) => void): Promise<{ posts: ProcessedStatus[], error?: Error }> {
         const log = (msg: string) => {
             console.log(msg);
             if (logCallback !== undefined) {
@@ -61,10 +61,11 @@ export class FeedEngine {
         log(`entering FeedEngine.GetPosts from source ${this.manifest.source.describe()}`)
         if (this.fetching) {
             log(`Tried to get posts but another call to get posts is ongoing (requested page ${pageNumber})`)
-            return []
+            return { posts: [] }
         }
         this.fetching = true;
         try {
+            let error: Error | undefined;
             if (pageNumber !== undefined && this.manifest.postsPerPage !== null) {
                 if (pageNumber < 1) {
                     throw new Error("page number can't be less than 1")
@@ -75,19 +76,20 @@ export class FeedEngine {
                 log(`have ${this.processedStatuses.length} posts before fetching any`)
 
                 while (numberOfPostsNeeded > this.processedStatuses.length && remainingNumberOfRequests > 0) {
-                    log(`need to fetch more posts; have ${this.processedStatuses.length} after filtering, trying to get ${numberOfPostsNeeded}. ${remainingNumberOfRequests} requests remain (request batch size: ${this.manifest.postsToFetchPerBatch}). last id: ${this.lastRetrievedStatusId}`)
+                    log(`fetching posts to populate feed; have ${this.processedStatuses.length} after filtering, trying to get ${numberOfPostsNeeded}. ${remainingNumberOfRequests} requests remain (request batch size: ${this.manifest.postsToFetchPerBatch}). last id: ${this.lastRetrievedStatusId}`)
                     remainingNumberOfRequests -= 1;
 
-                    const { moreAvailable } = await this.getAndProcessPosts(this.lastRetrievedStatusId)
-                    if (!moreAvailable) {
+                    const result = await this.getAndProcessPosts(this.lastRetrievedStatusId)
+                    error = result.error
+                    if (!result.moreAvailable || error !== undefined) {
                         break;
                     }
                 }
-                return this.processedStatuses.slice((pageNumber - 1) * this.manifest.postsPerPage, numberOfPostsNeeded)
+                return { posts: this.processedStatuses.slice((pageNumber - 1) * this.manifest.postsPerPage, numberOfPostsNeeded), error }
             }
             else {
-                await this.getAndProcessPosts();
-                return this.processedStatuses;
+                const { moreAvailable, error } = await this.getAndProcessPosts();
+                return { posts: this.processedStatuses };
             }
         }
         finally {
@@ -95,7 +97,7 @@ export class FeedEngine {
         }
     }
 
-    private async getAndProcessPosts(after?: string): Promise<{ moreAvailable: boolean }> {
+    private async getAndProcessPosts(after?: string): Promise<{ moreAvailable: boolean, error?: Error | undefined }> {
         try {
             const { statuses, moreAvailable } = await this.manifest.source.fetch(this.manifest, after)
             if (statuses.length === 0) {
@@ -119,8 +121,9 @@ export class FeedEngine {
         catch (e) {
             if (e instanceof Error) {
                 console.log(`Error getting and processing posts: ${e.message}`)
+                return { moreAvailable: false, error: e }
             }
-            return { moreAvailable: false }
+            return { moreAvailable: false, error: new Error("unknown error") }
         }
     }
 

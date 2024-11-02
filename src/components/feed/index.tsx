@@ -86,7 +86,11 @@ export const FeedComponentPostList: Component<{
         const posts = await props.engine.getPosts(num, (msg) => {
             setInProgressStatusMessage(msg);
         });
-        console.log(`successfully fetched ${posts.length} posts`);
+        if (posts.error !== undefined) {
+            console.error(`error while fetching posts: ${posts.error.message}`);
+        } else {
+            console.log(`successfully fetched ${posts.posts.length} posts`);
+        }
         return posts;
     }, `cached-feed-${props.engine.manifest.source.describe()}` /* use the source as part of the cache key, since it should be unique */);
 
@@ -116,11 +120,19 @@ export const FeedComponentPostList: Component<{
             )}
         >
             <Show when={settings.getPersistent().enableDevTools}>
-                <div>{inProgressStatusMessage()}</div>
+                <div class="debugStatusMessage">
+                    {inProgressStatusMessage()}
+                </div>
             </Show>
             <Switch>
                 <Match when={posts.state === "ready"}>
-                    <For each={posts()}>
+                    <Show when={posts()?.error !== undefined}>
+                        <div>
+                            Error while fetching post: {posts()?.error?.message}
+                            . Posts may be missing.
+                        </div>
+                    </Show>
+                    <For each={posts()?.posts}>
                         {(status, index) => (
                             <>
                                 <Show when={!status.hide}>

@@ -355,3 +355,8 @@ html.setting-unlimitedColumnWidth #layoutColumnsRoot {
     color: hsl(var(--destructive-foreground));
     background-color: hsl(var(--destructive));
 }
+
+.debugStatusMessage {
+    font-size: x-small;
+
+}
