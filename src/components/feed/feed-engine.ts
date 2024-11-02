@@ -39,7 +39,7 @@ export class FeedEngine {
     private processedStatuses: ProcessedStatus[] = []
     private fetching: boolean = false;
 
-    constructor(public readonly manifest: FeedManifest, rules: FeedRuleProperties[]) {
+    constructor(public readonly manifest: FeedManifest, private readonly rules: FeedRuleProperties[]) {
         const options: EngineOptions = {}
         const engineRules = rules.map(r => r.build())
 
@@ -195,6 +195,12 @@ export class FeedEngine {
             }
         }
 
+    }
+
+    //** defining this allows the feed sources to be serialized, which means they can be used as an argument to cache */
+    toJSON() {
+        const subset: { manifest: FeedManifest, rules: FeedRuleProperties[] } = { manifest: this.manifest, rules: this.rules }
+        return subset;
     }
 }
 
