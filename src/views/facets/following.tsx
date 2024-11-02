@@ -73,9 +73,13 @@ const FollowingFacet: Component = () => {
     const frameContext = useFrameContext();
     onMount(() => {
         frameContext.setNoColumns(true);
+        frameContext.setShowNav(false);
+        document.documentElement.classList.add("followingFacet");
     });
     onCleanup(() => {
         frameContext.setNoColumns(false);
+        frameContext.setShowNav(true);
+        document.documentElement.classList.remove("followingFacet");
     });
 
     const auth = useAuth();
@@ -215,7 +219,7 @@ const FollowingFacet: Component = () => {
         setFacetStore("lastHomeTimelinePostId", lastPostId);
     };
 
-    const randomFollowerLookup = async () => {
+    const randomFollowerLookup = async (count: number) => {
         if (accountGapCount() <= 0) {
             // no action needed - we have the needed number of accounts
             return;
@@ -227,7 +231,7 @@ const FollowingFacet: Component = () => {
 
         const selection = [];
 
-        for (let i = 0; i < 5; i++) {
+        for (let i = 0; i < count; i++) {
             selection.push(
                 accounts.splice(
                     Math.floor(Math.random() * accounts.length),
@@ -257,6 +261,13 @@ const FollowingFacet: Component = () => {
         }
     };
 
+    const expandWindowOnInteraction = (count: number) => {
+        // increase the window because the user is clicking
+        if (accountGapCount() <= count) {
+            setNumAccountsRequested(numAccountsRequested() + count);
+        }
+    };
+
     // stuff to do on first load
     const init = async () => {
         await followingList();
@@ -277,6 +288,29 @@ const FollowingFacet: Component = () => {
                         }}
                     </For>
                 </ul>
+
+                <div>choose how to continue:</div>
+                <Button
+                    class="followingFetchButton"
+                    onClick={() => {
+                        expandWindowOnInteraction(8);
+                        setNumAccountsRequested(
+                            numAccountsInput!.valueAsNumber
+                        );
+                        dataFetcher();
+                    }}
+                >
+                    look back in timeline
+                </Button>
+                <Button
+                    class="followingFetchButton"
+                    onClick={() => {
+                        expandWindowOnInteraction(5);
+                        randomFollowerLookup(5);
+                    }}
+                >
+                    randomly sample your follower list
+                </Button>
             </div>
 
             <div class="following-posts">
@@ -296,6 +330,7 @@ const FollowingFacet: Component = () => {
                                         type="number"
                                         ref={numAccountsInput!}
                                         value={numAccountsRequested()}
+                                        class="pbInput"
                                     />
                                 </li>
                                 <li>gap: {accountGapCount()} accounts</li>
@@ -320,7 +355,7 @@ const FollowingFacet: Component = () => {
                                 <li>
                                     <Button
                                         onClick={() => {
-                                            randomFollowerLookup();
+                                            randomFollowerLookup(5);
                                         }}
                                     >
                                         randomly sample followed accounts

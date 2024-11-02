@@ -76,8 +76,23 @@
     display: none;
 }
 
-@media (min-width: 680px) {
+/* hack ... */
+.followingFacet #layoutLeftColumn {
+    display: none;
+}
 
+/* hack for these lingering around and blocking clicks */
+.followingFacet #layoutColumnsRoot, .followingFacet #layoutMainColumn {
+    height: 0px;
+    padding: 0px;
+}
+
+.followingFetchButton {
+    margin-top: 0.5em;
+    width: 100%;
+}
+
+@media (min-width: 680px) {
     #following-root {
         flex-direction: row;
     }
