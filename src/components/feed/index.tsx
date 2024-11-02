@@ -113,38 +113,63 @@ export const FeedComponentPostList: Component<{
         postsResourceActions.refetch();
     });
 
-    return (
-        <ErrorBoundary
-            fallback={(e) => (
-                <ErrorBox error={e} description="Failed to load posts" />
-            )}
-        >
-            <Show when={settings.getPersistent().enableDevTools}>
-                <div class="debugStatusMessage">
-                    {inProgressStatusMessage()}
-                </div>
-            </Show>
-            <Switch>
-                <Match when={posts.state === "ready"}>
-                    <Show when={posts()?.error !== undefined}>
-                        <div>
-                            Error while fetching post: {posts()?.error?.message}
-                            . Posts may be missing.
-                        </div>
-                    </Show>
-                    <For each={posts()?.posts}>
-                        {(status, index) => (
-                            <>
-                                <Show when={!status.hide}>
-                                    <PreprocessedPost
-                                        status={status}
-                                        limitInitialHeight={true}
-                                    />
-                                </Show>
-                            </>
-                        )}
-                    </For>
+const [nextButtonElement, setNextButtonElement] = createSignal<Element>();
+const scrollObserver = createMemo(() => {
+    return new IntersectionObserver(
+        (entries, observer) => {
+            for (const entry of entries) {
+                if (entry.isIntersecting) {
+                    console.log("next button has scrolled into view");
+                    const nextPage = currentPage() + 1;
+                    requestIdleCallback(() => {
+                        getPosts(nextPage);
+                    });
+                }
+            }
+        },
+        {
+            threshold: 1.0,
+        }
+    );
+});
+createEffect(() => {
+    const e = nextButtonElement();
+    if (e !== undefined) {
+        scrollObserver().observe(e);
+    }
+});
 
+return (
+    <ErrorBoundary
+        fallback={(e) => (
+            <ErrorBox error={e} description="Failed to load posts" />
+        )}
+    >
+        <Show when={settings.getPersistent().enableDevTools}>
+            <div class="debugStatusMessage">{inProgressStatusMessage()}</div>
+        </Show>
+        <Switch>
+            <Match when={posts.state === "ready"}>
+                <Show when={posts()?.error !== undefined}>
+                    <div>
+                        Error while fetching post: {posts()?.error?.message}.
+                        Posts may be missing.
+                    </div>
+                </Show>
+                <For each={posts()?.posts}>
+                    {(status, index) => (
+                        <>
+                            <Show when={!status.hide}>
+                                <PreprocessedPost
+                                    status={status}
+                                    limitInitialHeight={true}
+                                />
+                            </Show>
+                        </>
+                    )}
+                </For>
+
+                <Show when={props.engine.manifest.postsPerPage !== null}>
                     <PageNav>
                         <Button
                             classList={{
@@ -166,12 +191,14 @@ export const FeedComponentPostList: Component<{
                                     { scroll: true }
                                 );
                             }}
+                            ref={setNextButtonElement}
                         >
                             Next ({currentPage() + 1})
                         </Button>
                     </PageNav>
-                </Match>
-            </Switch>
-        </ErrorBoundary>
-    );
+                </Show>
+            </Match>
+        </Switch>
+    </ErrorBoundary>
+);
 };
