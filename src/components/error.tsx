@@ -79,7 +79,7 @@ const InnerErrorBox: Component<{ error: Error; description: string }> = (
                     </Button>
                 </CardFooter>
             </Card>
-            <Show when={showLoginView}>
+            <Show when={showLoginView()}>
                 <LoginView />
             </Show>
         </>

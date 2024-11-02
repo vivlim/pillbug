@@ -1,5 +1,10 @@
 import { useLocation } from "@solidjs/router";
 import { createEffect, createSignal, type Component } from "solid-js";
+import { useAuth } from "~/auth/auth-manager";
+import { FeedComponent } from "~/components/feed";
+import { FeedManifest } from "~/components/feed/feed-engine";
+import { defaultHomeFeedRules } from "~/components/feed/preset-rules";
+import { HomeFeedSource } from "~/components/feed/sources/homefeed";
 import { PostFeed } from "~/components/post/feed";
 
 export interface SubmitFeedState {
@@ -16,18 +21,18 @@ const Feed: Component = () => {
             setLastRefresh(Date.now());
         }
     });
+    const feedManifest: FeedManifest = {
+        source: new HomeFeedSource(useAuth()),
+        fetchReferencedPosts: 5,
+        postsPerPage: 10,
+        postsToFetchPerBatch: 40,
+    };
 
     return (
-        <PostFeed
-            onRequest={async (signedInState, timelineOptions) => {
-                if (signedInState?.signedIn) {
-                    return await signedInState.authenticatedClient.getHomeTimeline(
-                        timelineOptions
-                    );
-                }
-                return undefined;
-            }}
-            lastRefresh={lastRefresh()}
+        <FeedComponent
+            manifest={feedManifest}
+            rules={defaultHomeFeedRules}
+            initialOptions={{ limit: 25 }}
         />
     );
 };

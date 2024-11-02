@@ -1,5 +1,7 @@
 import { A, useParams } from "@solidjs/router";
 import {
+    createEffect,
+    createMemo,
     createResource,
     createSignal,
     ErrorBoundary,
@@ -11,6 +13,12 @@ import { ProfileZone } from "~/components/user/profile-zone";
 import { GetTimelineOptions, PostFeed } from "~/components/post/feed";
 import { ErrorBox } from "~/components/error";
 import { MaybeSignedInState } from "~/auth/auth-types";
+import { FeedManifest } from "~/components/feed/feed-engine";
+import { Account } from "megalodon/lib/src/entities/account";
+import { UserFeedSource } from "~/components/feed/sources/userfeed";
+import { FeedComponent } from "~/components/feed";
+import { defaultHomeFeedRules } from "~/components/feed/preset-rules";
+import { unwrapResponse } from "~/lib/clientUtil";
 
 export interface GetAccountFeedOptions
     extends Omit<GetTimelineOptions, "local"> {
@@ -38,19 +46,57 @@ export const fetchUserInfo = async (
     return result.data;
 };
 
-const UserProfile: Component = () => {
-    const authManager = useAuth();
+const UserProfilePage: Component = () => {
     const params = useParams();
-    const [username, setUserName] = createSignal<string>(params.username);
-    const [userInfo] = createResource(
-        () => {
-            return {
-                username: username,
-                signedInState: authManager.state,
-            };
-        },
-        (args) => fetchUserInfo(args.signedInState, args.username())
+    const username = createMemo(() => params.username);
+    return (
+        <Show when={username() !== undefined}>
+            <UserProfile acct={username()} />
+        </Show>
     );
+};
+const UserProfile: Component<{ acct: string }> = (props) => {
+    const auth = useAuth();
+
+    const [account, accountActions] = createResource<
+        Account | undefined,
+        string,
+        unknown
+    >(
+        () => props.acct,
+        async (acct: string) => {
+            // console.log(
+            //     "entered user profile page resource fetcher for account " + acct
+            // );
+            const client = auth.client;
+            if (client === undefined) {
+                return undefined;
+            }
+            const account = unwrapResponse(await client.lookupAccount(acct));
+            if (account?.id === undefined) {
+                console.error(`user ${acct} doesn't exist?`);
+                throw new Error(`user ${acct} doesn't exist?`);
+            }
+
+            return account;
+        }
+    );
+    const manifest = createMemo(() => {
+        const a = account();
+        if (a !== undefined) {
+            return {
+                source: new UserFeedSource(auth, a.id, a.acct, true),
+                fetchReferencedPosts: 5,
+                postsPerPage: 10,
+                postsToFetchPerBatch: 10,
+            };
+        }
+    });
+
+    createEffect(() => {
+        props.acct;
+        accountActions.refetch();
+    });
 
     return (
         <ErrorBoundary
@@ -59,12 +105,23 @@ const UserProfile: Component = () => {
             )}
         >
             <Show
-                when={userInfo() != null}
+                when={
+                    !account.loading &&
+                    account() != undefined &&
+                    manifest() !== undefined
+                }
                 fallback={<div>Loading user profile</div>}
             >
                 <div class="flex flex-col md:flex-row mx-1 md:mx-4 gap-4 justify-center">
-                    <ProfileZone userInfo={userInfo()!} />
+                    <ProfileZone userInfo={account()!} />
                     <div class="flex-grow max-w-4xl flex flex-col justify-start">
+                        <FeedComponent
+                            manifest={manifest()!}
+                            rules={defaultHomeFeedRules}
+                            initialOptions={{}}
+                        />
+
+                        {/*
                         <PostFeed
                             onRequest={async (
                                 signedInState,
@@ -81,7 +138,7 @@ const UserProfile: Component = () => {
                                 const client =
                                     signedInState.authenticatedClient;
                                 let posts = await client.getAccountStatuses(
-                                    userInfo()!.id,
+                                    userInfo().account!.id,
                                     acctFeedProps
                                 );
 
@@ -93,7 +150,7 @@ const UserProfile: Component = () => {
                                     };
                                     let pinnedPosts =
                                         await client.getAccountStatuses(
-                                            userInfo()!.id,
+                                            userInfo().account!.id,
                                             pinnedPostProps
                                         );
                                     // HACK: this whole thing is kinda jank.
@@ -119,6 +176,7 @@ const UserProfile: Component = () => {
                                 return posts;
                             }}
                         />
+                        */}
                     </div>
                 </div>
             </Show>
@@ -126,4 +184,4 @@ const UserProfile: Component = () => {
     );
 };
 
-export default UserProfile;
+export default UserProfilePage;

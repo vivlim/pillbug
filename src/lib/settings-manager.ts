@@ -32,6 +32,7 @@ export interface PersistentSettings {
     unlimitedPostHeightInFeed?: Flag
     unlimitedColumnWidth?: Flag
     v2Feeds?: Flag
+    doNotPreloadNextPage?: Flag
 }
 
 /** Configurable on-off flags which may be undefined until a user configures them. */

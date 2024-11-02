@@ -2,7 +2,15 @@ import { Entity } from "megalodon";
 import rehypeParse from "rehype-parse";
 import rehypeSanitize, { defaultSchema } from "rehype-sanitize";
 import rehypeStringify from "rehype-stringify";
-import { createResource, JSX, Match, Switch, type Component } from "solid-js";
+import {
+    createEffect,
+    createMemo,
+    createResource,
+    JSX,
+    Match,
+    Switch,
+    type Component,
+} from "solid-js";
 import { unified } from "unified";
 import rehypeEmoji from "~/lib/rehype-emoji";
 
@@ -21,14 +29,16 @@ export interface HtmlPreviewSpanProps
  * Component for rendering arbitrary HTML (e.g. post content) more safely.
  */
 const HtmlSandbox: Component<HtmlSandboxProps> = (props) => {
-    const rehypeParser = unified()
-        .use(rehypeParse, { fragment: true })
-        .use(rehypeSanitize)
-        .use(rehypeEmoji, { emoji_defs: props.emoji })
-        .use(rehypeStringify);
+    const rehypeParser = createMemo(() =>
+        unified()
+            .use(rehypeParse, { fragment: true })
+            .use(rehypeSanitize)
+            .use(rehypeEmoji, { emoji_defs: props.emoji })
+            .use(rehypeStringify)
+    );
 
     const [sanitizedHtml] = createResource(props.html, async (fragment) => {
-        const vfile = await rehypeParser.process(props.html);
+        const vfile = await rehypeParser().process(fragment);
         return String(vfile);
     });
 
@@ -72,14 +82,17 @@ export interface StrictHtmlSandboxProps extends HtmlSandboxProps {
  * in a user's profile.
  */
 export const HtmlSandboxSpan: Component<StrictHtmlSandboxProps> = (props) => {
-    const rehypeParser = unified()
-        .use(rehypeParse, { fragment: true })
-        .use(rehypeSanitize, { ...defaultSchema, tagNames: [] })
-        .use(rehypeEmoji, { emoji_defs: props.emoji })
-        .use(rehypeStringify);
+    const rehypeParser = createMemo(() =>
+        unified()
+            .use(rehypeParse, { fragment: true })
+            .use(rehypeSanitize, { ...defaultSchema, tagNames: [] })
+            .use(rehypeEmoji, { emoji_defs: props.emoji })
+            .use(rehypeStringify)
+    );
 
     const [sanitizedHtml] = createResource(props.html, async (fragment) => {
-        const vfile = await rehypeParser.process(props.html);
+        console.log("enter rehype parser fror " + props.html);
+        const vfile = await rehypeParser().process(fragment);
         return String(vfile);
     });
 

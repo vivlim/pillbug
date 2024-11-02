@@ -102,13 +102,6 @@ export const FacetNavigation: Component = (props) => {
                 }}
             >
                 <ul id="facet-menu" class="flex flex-col list-none p-6 gap-1">
-                    <Show when={settings.getPersistent().v2Feeds}>
-                        <FacetNavigationItem href="/feed-builder">
-                            <FaSolidToolbox />
-                            rewritten feed engine
-                        </FacetNavigationItem>
-                    </Show>
-
                     <FacetNavigationItem href="/notifications">
                         <FaRegularBell />
                         notifications
@@ -139,6 +132,12 @@ export const FacetNavigation: Component = (props) => {
                         <FacetNavigationItem href="/dev/editDialog">
                             <FaSolidWrench />
                             Test Editor
+                        </FacetNavigationItem>
+                    </Show>
+                    <Show when={settings.getPersistent().v2Feeds}>
+                        <FacetNavigationItem href="/feed-builder">
+                            <FaSolidToolbox />
+                            feed rule editor (wip)
                         </FacetNavigationItem>
                     </Show>
                 </ul>

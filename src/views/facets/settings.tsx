@@ -77,20 +77,20 @@ const SettingsFacet: Component = () => {
                     <PersistentFlagCheckbox flag="enableDevTools">
                         Enable developer tools
                     </PersistentFlagCheckbox>
+                    <PersistentFlagCheckbox flag="doNotPreloadNextPage">
+                        Do not preload the next page when reaching the bottom of
+                        a page
+                    </PersistentFlagCheckbox>
                     <hr />
                     <PersistentFlagCheckbox flag="v2Feeds">
-                        Enable rewritten 'feed engine'.
+                        Enable feed filter editor
                         <ul>
                             <li>
-                                This shows up as a separate nav item, and
-                                functionality might be behave unexpectedly,
-                                especially the filters.
-                            </li>
-                            <li>
                                 the filter editor is unfinished and you probably
-                                shouldn't try to use it.
+                                shouldn't try to use it in its current state.
+                                the filters are only applied on the editor page
+                                currently.
                             </li>
-                            <li>pagination should be a lot better though.</li>
                         </ul>
                     </PersistentFlagCheckbox>
                 </CardContent>

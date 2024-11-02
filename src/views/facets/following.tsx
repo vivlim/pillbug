@@ -40,7 +40,10 @@ import { LayoutLeftColumnPortal } from "~/components/layout/columns";
 import "./following.css";
 import { PostFeed } from "~/components/post/feed";
 import { fetchUserInfo, GetAccountFeedOptions } from "../userprofile";
-import { defaultFeedRules } from "~/components/feed/preset-rules";
+import {
+    defaultFeedRules,
+    defaultHomeFeedRules,
+} from "~/components/feed/preset-rules";
 import { FeedComponent } from "~/components/feed";
 import { FeedManifest } from "~/components/feed/feed-engine";
 import { UserFeedSource } from "~/components/feed/sources/userfeed";
@@ -569,7 +572,7 @@ const FollowingUserPosts: Component<{ acct: string }> = (props) => {
             <Match when={userFeedManifest.state === "ready"}>
                 <FeedComponent
                     manifest={userFeedManifest()}
-                    rules={defaultFeedRules}
+                    rules={defaultHomeFeedRules}
                     initialOptions={{ limit: 25 }}
                 />
             </Match>

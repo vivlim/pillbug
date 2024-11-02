@@ -37,6 +37,7 @@ import {
     FeedRuleProperties,
 } from "~/components/feed/feed-engine";
 import { defaultFeedRules } from "~/components/feed/preset-rules";
+import { HomeFeedSource } from "~/components/feed/sources/homefeed";
 import {
     AnyPropertyTextboxes,
     MultiTextbox,
@@ -123,6 +124,13 @@ const FeedBuilderFacet: Component = (props) => {
                     r.priority
                 )
         );
+    };
+
+    const manifest = {
+        source: new HomeFeedSource(useAuth()),
+        fetchReferencedPosts: 5, // unused??
+        postsPerPage: 10,
+        postsToFetchPerBatch: 40,
     };
 
     return (
@@ -350,6 +358,7 @@ const FeedBuilderFacet: Component = (props) => {
 
             <div>
                 <FeedComponent
+                    manifest={manifest}
                     rules={facetStore.rules}
                     initialOptions={{ limit: 25 }}
                 />

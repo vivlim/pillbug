@@ -13,4 +13,9 @@ export abstract class FeedSource implements LinkedPostRetriever {
     abstract describe(): string
     /** retrieves specific posts by url */
     abstract getByUrl(postUrl: string): Promise<Status | null>;
+
+    //** defining this allows the feed sources to be serialized, which means they can be used as an argument to cache */
+    toJSON() {
+        return this.describe()
+    }
 }

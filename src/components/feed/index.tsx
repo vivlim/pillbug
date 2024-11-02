@@ -34,7 +34,7 @@ import { useSettings } from "~/lib/settings-manager";
 export type FeedComponentProps = {
     rules: FeedRuleProperties[];
     initialOptions: GetTimelineOptions;
-    manifest?: FeedManifest;
+    manifest: FeedManifest;
 };
 
 interface FeedComponentStore {
@@ -50,21 +50,39 @@ interface FeedComponentContext extends FeedComponentProps {
 const FeedComponentContextCtx = createContext<FeedComponentContext>();
 
 export const FeedComponent: Component<FeedComponentProps> = (props) => {
-    const [engine, engineActions] = createResource<FeedEngine>(async () => {
-        console.log("new engine");
-        const manifest: FeedManifest = props.manifest ?? {
-            source: new HomeFeedSource(useAuth()),
-            fetchReferencedPosts: 5, // unused??
-            postsPerPage: 10,
-            postsToFetchPerBatch: 40,
-        };
-        return new FeedEngine(manifest, props.rules);
+    const [engine, engineActions] = createResource<
+        FeedEngine | undefined,
+        { manifest: FeedManifest; rules: FeedRuleProperties[] },
+        unknown
+    >(
+        () => {
+            return { manifest: props.manifest, rules: props.rules };
+        },
+        async (args: {
+            manifest: FeedManifest;
+            rules: FeedRuleProperties[];
+        }) => {
+            console.log(
+                `entering engine resource fetcher for ${args.manifest?.source.describe()}`
+            );
+            return new FeedEngine(args.manifest, args.rules);
+        }
+    );
+    createEffect(() => {
+        props.manifest;
+        engineActions.refetch();
     });
 
     return (
-        <Show when={engine()} fallback={"initializing"}>
-            <FeedComponentPostList engine={engine()!} />
-        </Show>
+        <ErrorBoundary
+            fallback={(e) => (
+                <ErrorBox error={e} description="failed to load posts" />
+            )}
+        >
+            <Show when={engine()} fallback={"loading"}>
+                <FeedComponentPostList engine={engine()!} />
+            </Show>
+        </ErrorBoundary>
     );
 };
 
@@ -81,9 +99,9 @@ export const FeedComponentPostList: Component<{
     >();
     const auth = useAuth();
     const client = auth.assumeSignedIn.client;
-    const getPosts = cache(async (num) => {
+    const getPosts = cache(async (page: number, engine: FeedEngine) => {
         console.log("fetching posts");
-        const posts = await props.engine.getPosts(num, (msg) => {
+        const posts = await engine.getPosts(page, (msg) => {
             setInProgressStatusMessage(msg);
         });
         if (posts.error !== undefined) {
@@ -97,11 +115,20 @@ export const FeedComponentPostList: Component<{
     const currentPage = createMemo(() => {
         return Number.parseInt(searchParams.page ?? "1");
     });
-    const [posts, postsResourceActions] = createResource(async () => {
-        console.log("showing posts for page " + currentPage());
-        setInProgressStatusMessage("showing posts for page " + currentPage());
-        return await getPosts(currentPage());
-    });
+    const [posts, postsResourceActions] = createResource(
+        () => currentPage(),
+        async (page) => {
+            console.log(`showing posts for page ${page}`);
+            setInProgressStatusMessage("showing posts for page " + page);
+            const p = await getPosts(page, props.engine);
+            if (p.error !== undefined) {
+                console.error(`error getting posts: ${p.error.message}`);
+            } else {
+                console.log(`posts available: ${p.posts.length}`);
+            }
+            return p;
+        }
+    );
 
     createEffect(() => {
         currentPage();
@@ -113,92 +140,97 @@ export const FeedComponentPostList: Component<{
         postsResourceActions.refetch();
     });
 
-const [nextButtonElement, setNextButtonElement] = createSignal<Element>();
-const scrollObserver = createMemo(() => {
-    return new IntersectionObserver(
-        (entries, observer) => {
-            for (const entry of entries) {
-                if (entry.isIntersecting) {
-                    console.log("next button has scrolled into view");
-                    const nextPage = currentPage() + 1;
-                    requestIdleCallback(() => {
-                        getPosts(nextPage);
-                    });
+    const [nextButtonElement, setNextButtonElement] = createSignal<Element>();
+    const scrollObserver = createMemo(() => {
+        return new IntersectionObserver(
+            (entries, observer) => {
+                for (const entry of entries) {
+                    if (entry.isIntersecting) {
+                        console.log("next button has scrolled into view");
+                        const nextPage = currentPage() + 1;
+                        requestIdleCallback(() => {
+                            getPosts(nextPage, props.engine);
+                        });
+                    }
                 }
+            },
+            {
+                threshold: 1.0,
             }
-        },
-        {
-            threshold: 1.0,
+        );
+    });
+    createEffect(() => {
+        if (useSettings().getPersistent().doNotPreloadNextPage) {
+            return;
         }
+        const e = nextButtonElement();
+        if (e !== undefined) {
+            scrollObserver().observe(e);
+        }
+    });
+
+    return (
+        <ErrorBoundary
+            fallback={(e) => (
+                <ErrorBox error={e} description="Failed to load posts" />
+            )}
+        >
+            <Switch>
+                <Match when={!posts.loading}>
+                    <Show when={posts()?.error !== undefined}>
+                        <div>
+                            Error while fetching post: {posts()?.error?.message}
+                            . Posts may be missing.
+                        </div>
+                    </Show>
+                    <For each={posts()?.posts}>
+                        {(status, index) => (
+                            <>
+                                <Show when={!status.hide}>
+                                    <PreprocessedPost
+                                        status={status}
+                                        limitInitialHeight={true}
+                                    />
+                                </Show>
+                            </>
+                        )}
+                    </For>
+
+                    <Show when={props.engine.manifest.postsPerPage !== null}>
+                        <PageNav>
+                            <Button
+                                classList={{
+                                    invisible: currentPage() === 1,
+                                }}
+                                onClick={() => {
+                                    setSearchParams(
+                                        { page: currentPage() - 1 },
+                                        { scroll: true }
+                                    );
+                                }}
+                            >
+                                Back ({currentPage() - 1})
+                            </Button>
+                            <Button
+                                onClick={() => {
+                                    setSearchParams(
+                                        { page: currentPage() + 1 },
+                                        { scroll: true }
+                                    );
+                                }}
+                                ref={setNextButtonElement}
+                            >
+                                Next ({currentPage() + 1})
+                            </Button>
+                        </PageNav>
+                    </Show>
+                </Match>
+            </Switch>
+            <Show when={settings.getPersistent().enableDevTools}>
+                <div class="debugStatusMessage">
+                    {inProgressStatusMessage()}
+                </div>
+            </Show>
+        </ErrorBoundary>
     );
-});
-createEffect(() => {
-    const e = nextButtonElement();
-    if (e !== undefined) {
-        scrollObserver().observe(e);
-    }
-});
-
-return (
-    <ErrorBoundary
-        fallback={(e) => (
-            <ErrorBox error={e} description="Failed to load posts" />
-        )}
-    >
-        <Show when={settings.getPersistent().enableDevTools}>
-            <div class="debugStatusMessage">{inProgressStatusMessage()}</div>
-        </Show>
-        <Switch>
-            <Match when={posts.state === "ready"}>
-                <Show when={posts()?.error !== undefined}>
-                    <div>
-                        Error while fetching post: {posts()?.error?.message}.
-                        Posts may be missing.
-                    </div>
-                </Show>
-                <For each={posts()?.posts}>
-                    {(status, index) => (
-                        <>
-                            <Show when={!status.hide}>
-                                <PreprocessedPost
-                                    status={status}
-                                    limitInitialHeight={true}
-                                />
-                            </Show>
-                        </>
-                    )}
-                </For>
-
-                <Show when={props.engine.manifest.postsPerPage !== null}>
-                    <PageNav>
-                        <Button
-                            classList={{
-                                invisible: currentPage() === 1,
-                            }}
-                            onClick={() => {
-                                setSearchParams(
-                                    { page: currentPage() - 1 },
-                                    { scroll: true }
-                                );
-                            }}
-                        >
-                            Back ({currentPage() - 1})
-                        </Button>
-                        <Button
-                            onClick={() => {
-                                setSearchParams(
-                                    { page: currentPage() + 1 },
-                                    { scroll: true }
-                                );
-                            }}
-                            ref={setNextButtonElement}
-                        >
-                            Next ({currentPage() + 1})
-                        </Button>
-                    </PageNav>
-                </Show>
-            </Match>
-        </Switch>
-    </ErrorBoundary>
-);
 };
