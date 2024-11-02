@@ -125,7 +125,7 @@ export const FacetNavigation: Component = (props) => {
                     </Show>
                     <FacetNavigationItem href="/following">
                         <FaSolidPeopleGroup />
-                        following
+                        following (wip)
                     </FacetNavigationItem>
                     <FacetNavigationItem href="/settings">
                         <FaSolidGear />

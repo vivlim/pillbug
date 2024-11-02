@@ -352,11 +352,6 @@ const FeedBuilderFacet: Component = (props) => {
                 <FeedComponent
                     rules={facetStore.rules}
                     initialOptions={{ limit: 25 }}
-                    onRequest={async (o) => {
-                        return await useAuth().assumeSignedIn.client.getHomeTimeline(
-                            o
-                        );
-                    }}
                 />
             </div>
         </div>
