@@ -48,7 +48,7 @@
         "hastscript": "^9.0.0",
         "json-rules-engine": "^7.0.0",
         "luxon": "^3.5.0",
-        "megalodon": "^10.0.3",
+        "megalodon": "git://github.com/vivlim/megalodon.git#65f4c40a92ec4ec16d67ca1f1ec9de4e7a62f542",
         "rehype-parse": "^9.0.1",
         "rehype-sanitize": "^6.0.0",
         "rehype-stringify": "^10.0.1",
