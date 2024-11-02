@@ -121,7 +121,7 @@
         flex-direction: column;
     }
 
-    #layoutColumnsRoot {
+    .followingFacet #layoutColumnsRoot {
         max-width: unset;
     }
 

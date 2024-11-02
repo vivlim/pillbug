@@ -323,6 +323,9 @@ const FollowingFacet: Component = () => {
                 </ul>
 
                 <Switch>
+                    <Match when={facetStore.followingAccountCount < 0}>
+                        loading account list
+                    </Match>
                     <Match when={!facetStore.hideGetMoreButtons}>
                         <div>
                             {sortedAccountsWithKnownLastPosts().length}/
