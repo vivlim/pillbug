@@ -60,6 +60,7 @@ import {
 import { MenuButton } from "../ui/menubutton";
 import { unwrapResponse } from "~/lib/clientUtil";
 import { useSettings } from "~/lib/settings-manager";
+import { PostPreviewCard } from "./preprocessed";
 
 export type PostWithSharedProps = {
     status: Status;
@@ -247,6 +248,7 @@ const PostBody: Component<PostBodyProps> = (props) => {
                                     attachments={props.status.media_attachments}
                                     sensitive={props.status.sensitive}
                                 />
+                                <PostPreviewCard status={props.status} />
                             </ContentGuard>
                         </div>
                     </div>

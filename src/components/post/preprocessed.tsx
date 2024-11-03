@@ -19,7 +19,14 @@ import {
 } from "solid-js";
 import { SessionAuthManager, useAuth } from "~/auth/auth-manager";
 import { Button } from "~/components/ui/button";
-import { Card, CardContent } from "~/components/ui/card";
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardFooter,
+    CardHeader,
+    CardTitle,
+} from "~/components/ui/card";
 import HtmlSandbox from "../../views/htmlsandbox";
 import {
     ContextMenu,
@@ -127,6 +134,7 @@ const PreprocessedPostUserBar: Component<{
 
 interface PreprocessedPostBodyProps extends JSX.HTMLAttributes<HTMLDivElement> {
     status: Status;
+    processedStatus?: ProcessedStatus;
     limitInitialHeight: boolean;
 }
 
@@ -200,6 +208,12 @@ const PreprocessedPostBody: Component<PreprocessedPostBodyProps> = (props) => {
                                 <ImageBox
                                     attachments={props.status.media_attachments}
                                     sensitive={props.status.sensitive}
+                                />
+                                <PostPreviewCard
+                                    status={props.status}
+                                    linkedAncestors={
+                                        props.processedStatus?.linkedAncestors
+                                    }
                                 />
                             </ContentGuard>
                         </div>
@@ -496,6 +510,7 @@ const PreprocessedStatusPostBlock: Component<
                                             <PreprocessedPostBody
                                                 class="border-b"
                                                 status={linkedAncestor.status}
+                                                processedStatus={linkedAncestor}
                                                 limitInitialHeight={
                                                     postData.limitInitialHeight
                                                 }
@@ -515,6 +530,7 @@ const PreprocessedStatusPostBlock: Component<
                             <PreprocessedPostBody
                                 class="border-b"
                                 status={status}
+                                processedStatus={postData.status}
                                 limitInitialHeight={postData.limitInitialHeight}
                             />
                             <PostLabels post={postData.status} />
@@ -526,6 +542,7 @@ const PreprocessedStatusPostBlock: Component<
                             <PreprocessedPostBody
                                 class="border-b"
                                 status={status}
+                                processedStatus={postData.status}
                                 limitInitialHeight={postData.limitInitialHeight}
                             />
                             <PostLabels post={postData.status} />
@@ -564,5 +581,61 @@ const PostLabels: Component<{ post: ProcessedStatus }> = (props) => {
         <For each={props.post.labels}>
             {(label) => <span class="postLabel">{label}</span>}
         </For>
+    );
+};
+
+export const PostPreviewCard: Component<{
+    status: Status;
+    linkedAncestors?: ProcessedStatus[];
+}> = (props) => {
+    const ancestorUrls =
+        props.linkedAncestors === undefined
+            ? []
+            : props.linkedAncestors.map((a) => a.status.url);
+    const ancestorContainsUrl =
+        ancestorUrls.indexOf(props.status.card?.url) >= 0;
+    return (
+        <Show when={props.status.card !== null}>
+            <Switch>
+                <Match when={props.status.card!.type === "link"}>
+                    <Show when={!ancestorContainsUrl}>
+                        <LinkPreviewCard card={props.status.card!} />
+                    </Show>
+                </Match>
+                <Match when={props.status.card!.type === "video"}>
+                    <LinkPreviewCard card={props.status.card!} />
+                    (video preview card is not yet implemented)
+                </Match>
+                <Match when={props.status.card!.type === "photo"}>
+                    <Show when={useSettings().getPersistent().enableDevTools}>
+                        (dev msg: there would be a photo preview card here. is
+                        that expected?)
+                    </Show>
+                </Match>
+                <Match when={props.status.card!.type === "rich"}>
+                    <LinkPreviewCard card={props.status.card!} />
+                    (rich card is not yet implemented)
+                </Match>
+            </Switch>
+        </Show>
+    );
+};
+const LinkPreviewCard: Component<{ card: Entity.Card }> = (props) => {
+    return (
+        <a href={props.card.url} target="_blank">
+            <Card class="linkPreview m-2">
+                <CardHeader>
+                    <CardTitle>{props.card.title}</CardTitle>
+                </CardHeader>
+                <CardContent class="mx-4">
+                    <div>{props.card.url}</div>
+                    <CardDescription>{props.card.description}</CardDescription>
+                    <Show when={props.card.image !== null}>
+                        <img src={props.card.image!} class="size-16" />
+                    </Show>
+                </CardContent>
+                <CardFooter></CardFooter>
+            </Card>
+        </a>
     );
 };
