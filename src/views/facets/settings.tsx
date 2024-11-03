@@ -88,13 +88,25 @@ const SettingsFacet: Component = () => {
                         <summary class="pbInput">color options (wip)</summary>
                         <h1 style="font-weight: bold">
                             note that these settings are a work in progress and
-                            may be subject to change
+                            may be subject to change.
                         </h1>
                         <ColorSettingComponent key="primaryForegroundColor">
                             primary foreground
                         </ColorSettingComponent>
                         <ColorSettingComponent key="primaryBackgroundColor">
                             primary background
+                        </ColorSettingComponent>
+                        <ColorSettingComponent key="secondaryForegroundColor">
+                            secondary foreground
+                        </ColorSettingComponent>
+                        <ColorSettingComponent key="secondaryBackgroundColor">
+                            secondary background
+                        </ColorSettingComponent>
+                        <ColorSettingComponent key="pageForegroundColor">
+                            page foreground
+                        </ColorSettingComponent>
+                        <ColorSettingComponent key="pageBackgroundColor">
+                            page background
                         </ColorSettingComponent>
                         <ColorSettingComponent key="accentColor">
                             accent color

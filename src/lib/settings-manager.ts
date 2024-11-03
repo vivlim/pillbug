@@ -34,8 +34,12 @@ export interface PersistentSettings {
     unlimitedColumnWidth?: Flag
     v2Feeds?: Flag
     doNotPreloadNextPage?: Flag
+    pageForegroundColor?: ColorSetting
+    pageBackgroundColor?: ColorSetting
     primaryForegroundColor?: ColorSetting
     primaryBackgroundColor?: ColorSetting
+    secondaryForegroundColor?: ColorSetting
+    secondaryBackgroundColor?: ColorSetting
     cardForegroundColor?: ColorSetting
     cardBackgroundColor?: ColorSetting
     accentColor?: ColorSetting

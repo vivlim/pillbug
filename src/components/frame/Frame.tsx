@@ -232,16 +232,15 @@ const AppFrame: Component<{ children: JSX.Element }> = (props) => {
             }}
         >
             <>
-                <DynamicStyle>
-                    <FrameTopBar />
-                    <LayoutColumnsRoot>
-                        <LayoutLeftColumn />
-                        <LayoutMainColumn>{props.children}</LayoutMainColumn>
-                    </LayoutColumnsRoot>
-                    <LayoutLeftColumnPortal>
-                        <FacetNavigation />
-                    </LayoutLeftColumnPortal>
-                </DynamicStyle>
+                <DynamicStyle />
+                <FrameTopBar />
+                <LayoutColumnsRoot>
+                    <LayoutLeftColumn />
+                    <LayoutMainColumn>{props.children}</LayoutMainColumn>
+                </LayoutColumnsRoot>
+                <LayoutLeftColumnPortal>
+                    <FacetNavigation />
+                </LayoutLeftColumnPortal>
             </>
         </FrameContext.Provider>
     );

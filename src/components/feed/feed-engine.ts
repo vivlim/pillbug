@@ -190,6 +190,7 @@ export class FeedEngine {
             catch (e) {
                 if (e instanceof Error) {
                     console.log(`Error trying to fetch ${statuses.length}th linked ancestor post for ${s.status.id}. returning whatever's available. ${e.stack ?? e.message}`)
+                    return statuses;
                 }
 
             }

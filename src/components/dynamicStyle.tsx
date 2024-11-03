@@ -1,14 +1,14 @@
 import { HslColor } from "solid-color";
-import { Component, createMemo, JSX } from "solid-js";
+import { Component, createEffect, createMemo, JSX } from "solid-js";
 import {
     ColorSetting,
     FilterPropertiesByType,
     PersistentSettings,
     useSettings,
 } from "~/lib/settings-manager";
-export const DynamicStyle: Component<{ children: JSX.Element }> = (props) => {
+export const DynamicStyle: Component = (props) => {
     const settings = useSettings();
-    const cssVars = createMemo(() => {
+    createEffect(() => {
         const result: Record<string, string> = {};
         const s = settings.getPersistent();
         for (const key in mappingTable) {
@@ -16,22 +16,19 @@ export const DynamicStyle: Component<{ children: JSX.Element }> = (props) => {
                 PersistentSettings,
                 ColorSetting
             >;
-            if (s[k] === undefined) {
-                continue;
-            }
 
             for (const variable of mappingTable[k]) {
-                result[variable] = cssColor(s[k]);
+                if (s[k] === undefined) {
+                    document.body.style.removeProperty(variable);
+                } else {
+                    result[variable] = cssColor(s[k]);
+                    document.body.style.setProperty(variable, cssColor(s[k]));
+                }
             }
         }
         return result;
     });
-
-    return (
-        <>
-            <div style={cssVars()}>{props.children}</div>
-        </>
-    );
+    return <></>;
 };
 
 const mappingTable: Record<
@@ -40,13 +37,12 @@ const mappingTable: Record<
 > = {
     cardForegroundColor: ["--card-foreground"],
     cardBackgroundColor: ["--card"],
-
-    primaryForegroundColor: [
-        "--foreground",
-        "--accent-foreground",
-        "--primary-foreground",
-    ],
-    primaryBackgroundColor: ["--background", "--primary"],
+    primaryForegroundColor: ["--accent-foreground", "--primary-foreground"],
+    primaryBackgroundColor: ["--primary"],
+    secondaryForegroundColor: ["--secondary-foreground"],
+    secondaryBackgroundColor: ["--secondary"],
+    pageForegroundColor: ["--foreground"],
+    pageBackgroundColor: ["--background"],
     borderColor: ["--border"],
     accentColor: ["--accent"],
 };
