@@ -56,9 +56,12 @@ export class UserFeedSource extends FeedSource {
     }
 
     async getByUrl(postUrl: string): Promise<Status | null> {
-        const searchResult = unwrapResponse(await this.auth.assumeSignedIn.client.search(postUrl, { type: "statuses", limit: 1 }))
+        const searchResult = unwrapResponse(await this.auth.assumeSignedIn.client.search(postUrl, { type: "statuses", resolve: true, limit: 1 }))
         if (searchResult.statuses.length > 0) {
-            return searchResult.statuses[0]
+            if (searchResult.statuses[0].url === postUrl) {
+                return searchResult.statuses[0]
+            }
+            console.warn(`Retrieved by url ${searchResult.statuses[0].url} but this is different from the requested ${postUrl}`)
         }
         return null
     }

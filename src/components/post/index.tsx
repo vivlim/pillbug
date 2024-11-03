@@ -95,7 +95,11 @@ export async function fetchShareParentPost(
 
     console.log(`fetching parent post ${postUrl}`);
     const client = auth.assumeSignedIn.client;
-    const result = await client.search(postUrl, { type: "statuses", limit: 1 });
+    const result = await client.search(postUrl, {
+        type: "statuses",
+        resolve: true,
+        limit: 1,
+    });
     if (result.status !== 200) {
         throw new Error(`Failed to get shared post: ${result.statusText}`);
     }
