@@ -50,7 +50,7 @@ const FacetNavigationItem: Component<{
             ["p-3"]: true,
             ["border-2"]: true,
             ["border-transparent"]: true,
-            ["hover:border-fuchsia-900"]: true,
+            ["hoverAccentBorder"]: true,
             ["rounded-xl"]: true,
             ["active-facet"]: isActive,
             ["font-bold"]: isActive,

@@ -37,6 +37,7 @@ import {
     LayoutLeftColumnPortal,
     LayoutMainColumn,
 } from "../layout/columns";
+import { DynamicStyle } from "../dynamicStyle";
 
 const CurrentAccountWithAvatar: Component<{
     signInState: SignedInState;
@@ -231,14 +232,16 @@ const AppFrame: Component<{ children: JSX.Element }> = (props) => {
             }}
         >
             <>
-                <FrameTopBar />
-                <LayoutColumnsRoot>
-                    <LayoutLeftColumn />
-                    <LayoutMainColumn>{props.children}</LayoutMainColumn>
-                </LayoutColumnsRoot>
-                <LayoutLeftColumnPortal>
-                    <FacetNavigation />
-                </LayoutLeftColumnPortal>
+                <DynamicStyle>
+                    <FrameTopBar />
+                    <LayoutColumnsRoot>
+                        <LayoutLeftColumn />
+                        <LayoutMainColumn>{props.children}</LayoutMainColumn>
+                    </LayoutColumnsRoot>
+                    <LayoutLeftColumnPortal>
+                        <FacetNavigation />
+                    </LayoutLeftColumnPortal>
+                </DynamicStyle>
             </>
         </FrameContext.Provider>
     );

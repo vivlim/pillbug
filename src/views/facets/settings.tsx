@@ -1,8 +1,25 @@
 import { DateTime } from "luxon";
-import { Component, createSignal, For, JSX, Show } from "solid-js";
+import { ChromePicker, SketchPicker } from "solid-color";
+import {
+    Component,
+    createSignal,
+    createUniqueId,
+    For,
+    JSX,
+    Match,
+    Show,
+    Switch,
+} from "solid-js";
 import { Timestamp } from "~/components/post/timestamp";
+import { Button } from "~/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "~/components/ui/card";
-import { PersistentFlagNames, useSettings } from "~/lib/settings-manager";
+import {
+    ColorSetting,
+    FilterPropertiesByType,
+    PersistentFlagNames,
+    PersistentSettings,
+    useSettings,
+} from "~/lib/settings-manager";
 
 const SettingsFacet: Component = () => {
     const settings = useSettings();
@@ -67,6 +84,31 @@ const SettingsFacet: Component = () => {
                             UNLIMITED COLUMN WIDTH
                         </PersistentFlagCheckbox>
                     </ul>
+                    <details class="pbInput">
+                        <summary class="pbInput">color options (wip)</summary>
+                        <h1 style="font-weight: bold">
+                            note that these settings are a work in progress and
+                            may be subject to change
+                        </h1>
+                        <ColorSettingComponent key="primaryForegroundColor">
+                            primary foreground
+                        </ColorSettingComponent>
+                        <ColorSettingComponent key="primaryBackgroundColor">
+                            primary background
+                        </ColorSettingComponent>
+                        <ColorSettingComponent key="accentColor">
+                            accent color
+                        </ColorSettingComponent>
+                        <ColorSettingComponent key="borderColor">
+                            border color
+                        </ColorSettingComponent>
+                        <ColorSettingComponent key="cardForegroundColor">
+                            card fg color
+                        </ColorSettingComponent>
+                        <ColorSettingComponent key="cardBackgroundColor">
+                            card bg color
+                        </ColorSettingComponent>
+                    </details>
                 </CardContent>
             </Card>
             <Card>
@@ -122,6 +164,56 @@ const PersistentFlagCheckbox: Component<{
                 {props.children}
             </label>
         </li>
+    );
+};
+
+const ColorSettingComponent: Component<{
+    key: keyof FilterPropertiesByType<PersistentSettings, ColorSetting>;
+    children: JSX.Element;
+}> = (props) => {
+    const id = createUniqueId();
+    const settings = useSettings();
+
+    return (
+        <div style="display: inline-block; margin: 0.2em;" class="pbInput">
+            <Switch>
+                <Match when={settings.getPersistent()[props.key] !== undefined}>
+                    <h1>
+                        <span style="font-weight: bold;">{props.children}</span>
+                    </h1>
+                </Match>
+                <Match when={settings.getPersistent()[props.key] === undefined}>
+                    <h1>
+                        <span>{props.children}</span> (unset)
+                    </h1>
+                </Match>
+            </Switch>
+            <ChromePicker
+                color={settings.getPersistent()[props.key]}
+                onChangeComplete={(c) => {
+                    settings.setPersistentStore(props.key, c.hsl);
+                }}
+                onSwatchHover={(c, e) => {}}
+                onChange={(c, e) => {}}
+            />
+            <Switch>
+                <Match when={settings.getPersistent()[props.key] !== undefined}>
+                    <Button
+                        style="margin-top: 0.1em; width: 100%;"
+                        onClick={() => {
+                            settings.setPersistentStore(props.key, undefined);
+                        }}
+                    >
+                        reset
+                    </Button>
+                </Match>
+                <Match when={settings.getPersistent()[props.key] === undefined}>
+                    <Button style="margin-top: 0.1em; width: 100%;" disabled>
+                        reset
+                    </Button>
+                </Match>
+            </Switch>
+        </div>
     );
 };
 

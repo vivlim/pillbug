@@ -2,6 +2,7 @@ import { produce } from "solid-js/store";
 import { PersistentStoreBacked } from "./store-backed";
 import { useSessionContext } from "./session-context";
 import { createEffect } from "solid-js";
+import { Color, HslColor } from "solid-color";
 
 export function useSettings(): SettingsManager {
     const sessionContext = useSessionContext();
@@ -33,6 +34,12 @@ export interface PersistentSettings {
     unlimitedColumnWidth?: Flag
     v2Feeds?: Flag
     doNotPreloadNextPage?: Flag
+    primaryForegroundColor?: ColorSetting
+    primaryBackgroundColor?: ColorSetting
+    cardForegroundColor?: ColorSetting
+    cardBackgroundColor?: ColorSetting
+    accentColor?: ColorSetting
+    borderColor?: ColorSetting
 }
 
 /** Configurable on-off flags which may be undefined until a user configures them. */
@@ -48,6 +55,8 @@ export type PersistentFlags = FilterPropertiesByType<PersistentSettings, Flag>;
 
 /** A union type consisting of all of the boolean properties that belong to PersistentSettings. */
 export type PersistentFlagNames = keyof PersistentFlags;
+
+export type ColorSetting = HslColor | undefined;
 
 export class SettingsManager extends PersistentStoreBacked<EphemeralSettings, PersistentSettings> {
 

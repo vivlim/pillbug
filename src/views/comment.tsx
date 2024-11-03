@@ -116,7 +116,7 @@ export const CommentPostComponent: Component<CommentProps> = (postData) => {
             <div>
                 <Show when={auth.signedIn}>
                     <button
-                        class="border-2 border-transparent hover:border-fuchsia-900 rounded-md p-1 m-1"
+                        class="border-2 border-transparent hoverAccentBorder rounded-md p-1 m-1"
                         onClick={() => setShowingReplyBox(!showingReplyBox())}
                     >
                         <BsReply class="inline-block mr-1" />
@@ -124,7 +124,7 @@ export const CommentPostComponent: Component<CommentProps> = (postData) => {
                     </button>
 
                     <button
-                        class="border-2 border-transparent hover:border-fuchsia-900 rounded-md p-1 m-1"
+                        class="border-2 border-transparent hoverAccentBorder rounded-md p-1 m-1"
                         aria-label="Like Post"
                         onClick={async () => {
                             const updated = await toggleLike(
@@ -145,7 +145,7 @@ export const CommentPostComponent: Component<CommentProps> = (postData) => {
                     <DropdownMenuTrigger
                         as={"button"}
                         type="button"
-                        class="border-2 border-transparent hover:border-fuchsia-900 rounded-md p-1 m-1"
+                        class="border-2 border-transparent hoverAccentBorder rounded-md p-1 m-1"
                     >
                         <IoEllipsisHorizontal class="inline-block mx-1" />
                     </DropdownMenuTrigger>

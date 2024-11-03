@@ -232,7 +232,7 @@ const ManageAccountItem: Component<{
     const auth = useAuth();
 
     return (
-        <li class="flex grow flex-row items-center gap-2 border-2 rounded-lg p-2 hover:border-fuchsia-900">
+        <li class="flex grow flex-row items-center gap-2 border-2 rounded-lg p-2 hoverAccentBorder">
             <button
                 class="flex-1 flex flex-row items-center gap-2"
                 onClick={() => auth.switchActiveAccount(index)}

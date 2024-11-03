@@ -497,7 +497,7 @@ const FollowingUser: Component<FollowingUserProps> = ({ acct }) => {
     return (
         <li class="flex flex-initial pbCard my-2 following-user">
             <a
-                class="flex flex-row block w-full p-3 border-2 border-transparent hover:border-fuchsia-900 rounded-xl"
+                class="flex flex-row block w-full p-3 border-2 border-transparent hoverAccentBorder rounded-xl"
                 href={userHref}
             >
                 <AvatarLink

@@ -91,7 +91,7 @@ export const HtmlSandboxSpan: Component<StrictHtmlSandboxProps> = (props) => {
     );
 
     const [sanitizedHtml] = createResource(props.html, async (fragment) => {
-        console.log("enter rehype parser fror " + props.html);
+        // console.log("enter rehype parser fror " + props.html);
         const vfile = await rehypeParser().process(fragment);
         return String(vfile);
     });
