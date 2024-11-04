@@ -56,7 +56,7 @@ const EditorFacet: Component = () => {
         }
     });
     return (
-        <div id="editorRoot">
+        <div id="editorRoot" class="pbCard">
             <Show when={postId !== undefined}>
                 <div id="editorShareTarget" class="pbCard">
                     <b>

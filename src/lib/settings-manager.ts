@@ -35,6 +35,8 @@ export interface PersistentSettings {
     v2Feeds?: Flag
     doNotPreloadNextPage?: Flag
     flatAppearance?: Flag
+    beveledAppearance?: Flag
+    unroundedCornersAppearance?: Flag
     pageForegroundColor?: ColorSetting
     pageBackgroundColor?: ColorSetting
     primaryForegroundColor?: ColorSetting
@@ -97,6 +99,8 @@ export class SettingsManager extends PersistentStoreBacked<EphemeralSettings, Pe
         this.updateDocumentClass("enableDevTools")
         this.updateDocumentClass("unlimitedColumnWidth")
         this.updateDocumentClass("flatAppearance")
+        this.updateDocumentClass("beveledAppearance")
+        this.updateDocumentClass("unroundedCornersAppearance")
     }
 
 

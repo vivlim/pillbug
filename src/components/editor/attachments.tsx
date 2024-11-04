@@ -182,7 +182,7 @@ export const AttachmentComponent: Component<{
         };
     });
     return (
-        <div class="border-2 rounded-md p-4">
+        <div class="border-2 pbCard p-4">
             <div style="float: right;">
                 <Button onClick={onRemoveClicked}>remove</Button>
             </div>
@@ -192,7 +192,7 @@ export const AttachmentComponent: Component<{
             <img src={imgUrl} style="max-height: 25vh" />
             <input
                 type="text"
-                class="resize-none px-3 py-2 text-sm border-2 rounded-md focus-visible:ring-0
+                class="pbInput resize-none px-3 py-2 text-sm border-2 rounded-md focus-visible:ring-0
 flex h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50
                 "
                 placeholder="image description"

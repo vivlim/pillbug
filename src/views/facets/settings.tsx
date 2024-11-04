@@ -80,6 +80,12 @@ const SettingsFacet: Component = () => {
                         <PersistentFlagCheckbox flag="flatAppearance">
                             flat appearance
                         </PersistentFlagCheckbox>
+                        <PersistentFlagCheckbox flag="beveledAppearance">
+                            beveled appearance
+                        </PersistentFlagCheckbox>
+                        <PersistentFlagCheckbox flag="unroundedCornersAppearance">
+                            unrounded corners
+                        </PersistentFlagCheckbox>
                         <PersistentFlagCheckbox flag="alignColumnsLeft">
                             Align columns to the left instead of centering them
                         </PersistentFlagCheckbox>

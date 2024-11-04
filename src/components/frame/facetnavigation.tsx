@@ -51,7 +51,6 @@ const FacetNavigationItem: Component<{
             ["border-2"]: true,
             ["border-transparent"]: true,
             ["hoverAccentBorder"]: true,
-            ["rounded-xl"]: true,
             ["active-facet"]: isActive,
             ["font-bold"]: isActive,
         };
@@ -89,7 +88,6 @@ export const FacetNavigation: Component = (props) => {
                 classList={{
                     "m-2": true,
                     "w-full": true,
-                    "rounded-lg": true,
                     border: true,
                     "bg-card": true,
                     "text-card-foreground": true,

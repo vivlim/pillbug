@@ -162,7 +162,7 @@ export class EditorComponentBase<TOutput, TDoc extends EditorDocument> {
     public makeComponent(): JSX.Element {
         return (
             <form
-                class={`flex flex-col gap-3 overflow-auto ${this.class}`}
+                class={`flex flex-col gap-3 ${this.class}`}
                 onsubmit={async (ev) => {
                     ev.preventDefault();
                     try {

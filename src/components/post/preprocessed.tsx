@@ -92,7 +92,7 @@ const PreprocessedPostUserBar: Component<{
     const shared = props.sharedStatus ?? status.reblog ?? null;
 
     return (
-        <div class="border-b flex flex-row flex-wrap items-center gap-x-2 p-2 flex-auto">
+        <div class="pbPostUserBar border-b flex flex-row flex-wrap items-center gap-x-2 p-2 flex-auto">
             <Show when={status.pinned}>
                 <BsPinAngleFill aria-label="Pinned post" class="size-4" />
             </Show>
