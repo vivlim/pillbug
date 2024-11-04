@@ -13,7 +13,7 @@ export const MenuButton = <T extends ValidComponent = "button">(
     return (
         <Button
             class={cn(
-                "rounded-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                "pbButtonPrimary rounded-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
                 props.class
             )}
             variant="ghost"

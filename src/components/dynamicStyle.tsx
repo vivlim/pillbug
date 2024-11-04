@@ -9,7 +9,6 @@ import {
 export const DynamicStyle: Component = (props) => {
     const settings = useSettings();
     createEffect(() => {
-        const result: Record<string, string> = {};
         const s = settings.getPersistent();
         for (const key in mappingTable) {
             const k = key as keyof FilterPropertiesByType<
@@ -18,15 +17,16 @@ export const DynamicStyle: Component = (props) => {
             >;
 
             for (const variable of mappingTable[k]) {
+                cssColor(document.body.style, variable, s[k]);
+                /*
                 if (s[k] === undefined) {
                     document.body.style.removeProperty(variable);
                 } else {
-                    result[variable] = cssColor(s[k]);
                     document.body.style.setProperty(variable, cssColor(s[k]));
                 }
+                    */
             }
         }
-        return result;
     });
     return <></>;
 };
@@ -47,11 +47,26 @@ const mappingTable: Record<
     accentColor: ["--accent"],
 };
 
-function cssColor(c: HslColor | undefined): string {
+function cssColor(
+    target: CSSStyleDeclaration,
+    k: string,
+    c: HslColor | undefined
+) {
     if (c === undefined) {
-        c = { h: 0, s: 0, l: 0 };
+        target.removeProperty(k);
+        target.removeProperty(k + "-h");
+        target.removeProperty(k + "-s");
+        target.removeProperty(k + "-l");
+        return;
     }
-    const result = `${c?.h} ${c?.s * 100}% ${c?.l * 100}%`;
-    console.log("color: " + result);
-    return result;
+
+    target.setProperty(k + "-h", `${c.h}`);
+    target.setProperty(k + "-s", `${c.s * 100}`);
+    target.setProperty(k + "-l", `${c.l * 100}`);
+    target.setProperty(k, `var(${k}-h) var(${k}-s) var(${k}-l)`);
+
+    // const result = `${c?.h} ${c?.s * 100}% ${c?.l * 100}%`;
+    // console.log("color: " + result);
+
+    // return result;
 }

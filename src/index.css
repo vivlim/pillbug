@@ -20,7 +20,9 @@
     --card: 0 0% 100%;
     --card-foreground: 240 10% 3.9%;
 
-    --primary: 240 5.9% 10%;
+    --primary-h: 240;
+    --primary-s: 5.9%;
+    --primary-l: 25%;
     --primary-foreground: 0 0% 98%;
 
     --secondary: 240 4.8% 95.9%;
@@ -71,8 +73,10 @@
     --card: 240 10% 3.9%;
     --card-foreground: 0 0% 98%;
 
-    --primary: 0 0% 98%;
-    --primary-foreground: 240 5.9% 10%;
+    --primary-h: 332;
+    --primary-s: 64%;
+    --primary-l: 33%;
+    --primary-foreground: 240 5.9% 98%;
 
     --secondary: 240 3.7% 15.9%;
     --secondary-foreground: 0 0% 98%;
@@ -96,6 +100,10 @@
 
     --radius: 0.5rem;
   }
+}
+
+:root{
+    --primary: var(--primary-h) var(--primary-s) var(--primary-l);
 }
 
 @layer base {
@@ -368,4 +376,42 @@ html.setting-unlimitedColumnWidth #layoutColumnsRoot {
 .debugStatusMessage {
     font-size: x-small;
 
+}
+
+.pbButtonPrimary {
+    color: hsl(var(--primary-foreground));
+    background-color: hsl(var(--primary));
+}
+
+.not-setting-flatAppearance {
+
+    .pbButtonPrimary {
+  background: hsl(var(--primary-h) var(--primary-s) var(--primary-l));
+  border-radius: 10px 10px 10px 10px;
+  border: 1px solid hsl(var(--primary-h) var(--primary-s) calc(var(--primary-l) * .5));
+  box-shadow: 
+      0px 3px 20px hsl(var(--primary-h) calc(var(--primary-s) * 0.8) calc(var(--primary-l) * 0.8)),
+      inset 0px 5px 2px hsl(var(--primary-h) var(--primary-s) calc(var(--primary-l) * 1.5)),
+
+      inset 0px 2px 20px hsl(var(--primary-h) var(--primary-s) calc(var(--primary-l) * .5));
+    }
+    .pbButtonPrimary:hover:not(.disabled) {
+  background: hsl(var(--primary-h) var(--primary-s) calc(var(--primary-l) * 1.1));
+  box-shadow: 
+      0px 3px 20px hsl(var(--primary-h) var(--primary-s) calc(var(--primary-l) * 1.1)),
+      inset 0px 5px 2px hsl(var(--primary-h) var(--primary-s) calc(var(--primary-l) * 1.7)),
+
+      inset 0px 2px 20px hsl(var(--primary-h) var(--primary-s) calc(var(--primary-l) * 1));
+    }
+
+    .pbButtonPrimary:active:not(.disabled),
+    .pbButtonPrimary:focus:not(.disabled) 
+     {
+  background: hsl(var(--primary-h) var(--primary-s) calc(var(--primary-l) * 1));
+  box-shadow: 
+      0px 3px 20px hsl(var(--primary-h) var(--primary-s) calc(var(--primary-l) * 1.1)),
+      inset 0px 3px 2px hsl(var(--primary-h) var(--primary-s) calc(var(--primary-l) * 0.9)),
+
+      inset 0px 0px 20px hsl(var(--primary-h) var(--primary-s) calc(var(--primary-l) * 1));
+    }
 }

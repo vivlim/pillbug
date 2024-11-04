@@ -34,6 +34,7 @@ export interface PersistentSettings {
     unlimitedColumnWidth?: Flag
     v2Feeds?: Flag
     doNotPreloadNextPage?: Flag
+    flatAppearance?: Flag
     pageForegroundColor?: ColorSetting
     pageBackgroundColor?: ColorSetting
     primaryForegroundColor?: ColorSetting
@@ -95,6 +96,7 @@ export class SettingsManager extends PersistentStoreBacked<EphemeralSettings, Pe
         this.updateDocumentClass("alignColumnsLeft")
         this.updateDocumentClass("enableDevTools")
         this.updateDocumentClass("unlimitedColumnWidth")
+        this.updateDocumentClass("flatAppearance")
     }
 
 
@@ -107,9 +109,11 @@ export class SettingsManager extends PersistentStoreBacked<EphemeralSettings, Pe
         }
         if (settingValue) {
             document.documentElement.classList.add(className);
+            document.documentElement.classList.remove(`not-${className}`);
         }
         else {
             document.documentElement.classList.remove(className);
+            document.documentElement.classList.add(`not-${className}`);
         }
     }
 }

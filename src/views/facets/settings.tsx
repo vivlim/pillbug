@@ -77,6 +77,9 @@ const SettingsFacet: Component = () => {
                         <PersistentFlagCheckbox flag="unlimitedPostHeightInFeed">
                             Unlimited post height in feed (no 'show more')
                         </PersistentFlagCheckbox>
+                        <PersistentFlagCheckbox flag="flatAppearance">
+                            flat appearance
+                        </PersistentFlagCheckbox>
                         <PersistentFlagCheckbox flag="alignColumnsLeft">
                             Align columns to the left instead of centering them
                         </PersistentFlagCheckbox>
