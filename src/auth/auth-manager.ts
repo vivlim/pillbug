@@ -1,4 +1,4 @@
-import generator, { detector, MegalodonInterface } from "megalodon";
+import generator, { detector, Mastodon, MegalodonInterface } from "megalodon";
 import OAuth from "megalodon/lib/src/oauth";
 import { createResource, Resource } from "solid-js";
 import { produce, SetStoreFunction } from "solid-js/store";
@@ -6,6 +6,7 @@ import { MaybeSignedInState, OAuthRegistration, PillbugAccount, PillbugPersisten
 import { unwrapResponse } from "../lib/clientUtil";
 import { PersistentStoreBacked } from "../lib/store-backed";
 import { useSessionContext } from "~/lib/session-context";
+import MastodonAPI from "megalodon/lib/src/mastodon/api_client";
 
 const AppDisplayName: string = "pillbug";
 
@@ -17,6 +18,7 @@ export function useAuth(): SessionAuthManager {
 
 /** A subset of the auth manager api that assumes you are signed in, so you don't need to assert types when inside of a signedIn guard. Throws when used if you aren't */
 export class SessionAuthManagerAssumingSignedIn {
+    private checkedInnerClient: boolean = false;
     constructor(private readonly auth: SessionAuthManager) {
 
     }
@@ -25,6 +27,26 @@ export class SessionAuthManagerAssumingSignedIn {
         const client = this.auth.client
         if (!client) {
             throw new Error("Not signed in")
+        }
+        return client;
+    }
+
+    public get innerClient(): MastodonAPI.Client {
+        const client = (this.auth.client as any).client as MastodonAPI.Client
+        if (!client) {
+            throw new Error("Couldn't access inner client")
+        }
+        // spot check it once
+        if (!this.checkedInnerClient) {
+            const expectedProps: (keyof MastodonAPI.Client)[] = [
+                "get", "put", "putForm", "patch", "patchForm", "post", "postForm", "del", "cancel", "socket"
+            ]
+            for (const expectedProp of expectedProps) {
+                if (client[expectedProp] === undefined) {
+                    throw new Error(`Inner client was missing expected member ${expectedProp}`)
+                }
+            }
+
         }
         return client;
     }
