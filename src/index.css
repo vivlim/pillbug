@@ -17,15 +17,19 @@
     --border: 240 5.9% 50%;
         --input: 240 5.9% 50%;
 
-    --card: 0 0% 100%;
+    --card-h: 0;
+    --card-s: 0%;
+    --card-l: 100%;
     --card-foreground: 240 10% 3.9%;
 
-    --primary-h: 240;
-    --primary-s: 5.9%;
-    --primary-l: 25%;
+    --primary-h: 332;
+    --primary-s: 54%;
+    --primary-l: 33%;
     --primary-foreground: 0 0% 98%;
 
-    --secondary: 240 4.8% 95.9%;
+    --secondary-h: 213;
+    --secondary-s: 37%;
+    --secondary-l: 81%;
     --secondary-foreground: 240 5.9% 10%;
 
     --accent: 297 64% 28%;
@@ -70,15 +74,19 @@
     --border: 240 3.7% 33.9%;
     --input: 240 3.7% 15.9%;
 
-    --card: 240 10% 3.9%;
+    --card-h: 240;
+    --card-s: 10%;
+    --card-l: 13.9%;
     --card-foreground: 0 0% 98%;
 
     --primary-h: 332;
-    --primary-s: 64%;
+    --primary-s: 54%;
     --primary-l: 33%;
     --primary-foreground: 240 5.9% 98%;
 
-    --secondary: 240 3.7% 15.9%;
+    --secondary-h: 208;
+    --secondary-s: 23%;
+    --secondary-l: 32%;
     --secondary-foreground: 0 0% 98%;
 
     --destructive: 0 62.8% 30.6%;
@@ -104,6 +112,8 @@
 
 :root{
     --primary: var(--primary-h) var(--primary-s) var(--primary-l);
+    --card: var(--card-h) var(--card-s) var(--card-l);
+    --secondary: var(--secondary-h) var(--secondary-s) var(--secondary-l);
 }
 
 @layer base {
@@ -345,7 +355,7 @@ html.setting-unlimitedColumnWidth #layoutColumnsRoot {
 .pbInput {
     color: var(--foreground);
     background-color: hsl(var(--card));
-    border: 2px solid hsl(var(--border));
+    border: 2px solid hsl(var(--foreground));
     border-radius: 8px;
     padding: 0.45em;
     margin-left: 0.5em;
@@ -386,32 +396,109 @@ html.setting-unlimitedColumnWidth #layoutColumnsRoot {
 .not-setting-flatAppearance {
 
     .pbButtonPrimary {
-  background: hsl(var(--primary-h) var(--primary-s) var(--primary-l));
-  border-radius: 10px 10px 10px 10px;
-  border: 1px solid hsl(var(--primary-h) var(--primary-s) calc(var(--primary-l) * .5));
-  box-shadow: 
-      0px 3px 20px hsl(var(--primary-h) calc(var(--primary-s) * 0.8) calc(var(--primary-l) * 0.8)),
-      inset 0px 5px 2px hsl(var(--primary-h) var(--primary-s) calc(var(--primary-l) * 1.5)),
+        background: hsl(var(--primary-h) var(--primary-s) var(--primary-l));
+        border-radius: 10px 10px 10px 10px;
+        border: 1px solid hsl(var(--primary-h) var(--primary-s) calc(var(--primary-l) * .5));
+        box-shadow: 
+            0px 3px 20px hsl(var(--primary-h) calc(var(--primary-s) * 0.8) calc(var(--primary-l) * 0.8)),
+            inset 0px 5px 2px hsl(var(--primary-h) var(--primary-s) calc(var(--primary-l) * 1.5)),
 
-      inset 0px 2px 20px hsl(var(--primary-h) var(--primary-s) calc(var(--primary-l) * .5));
+            inset 0px 2px 20px hsl(var(--primary-h) var(--primary-s) calc(var(--primary-l) * .5));
     }
     .pbButtonPrimary:hover:not(.disabled) {
-  background: hsl(var(--primary-h) var(--primary-s) calc(var(--primary-l) * 1.1));
-  box-shadow: 
-      0px 3px 20px hsl(var(--primary-h) var(--primary-s) calc(var(--primary-l) * 1.1)),
-      inset 0px 5px 2px hsl(var(--primary-h) var(--primary-s) calc(var(--primary-l) * 1.7)),
+        background: hsl(var(--primary-h) var(--primary-s) calc(var(--primary-l) * 1.1));
+        box-shadow: 
+            0px 3px 20px hsl(var(--primary-h) var(--primary-s) calc(var(--primary-l) * 1.1)),
+            inset 0px 5px 2px hsl(var(--primary-h) var(--primary-s) calc(var(--primary-l) * 1.7)),
 
-      inset 0px 2px 20px hsl(var(--primary-h) var(--primary-s) calc(var(--primary-l) * 1));
+            inset 0px 2px 20px hsl(var(--primary-h) var(--primary-s) calc(var(--primary-l) * 1));
     }
 
     .pbButtonPrimary:active:not(.disabled),
     .pbButtonPrimary:focus:not(.disabled) 
      {
-  background: hsl(var(--primary-h) var(--primary-s) calc(var(--primary-l) * 1));
-  box-shadow: 
-      0px 3px 20px hsl(var(--primary-h) var(--primary-s) calc(var(--primary-l) * 1.1)),
-      inset 0px 3px 2px hsl(var(--primary-h) var(--primary-s) calc(var(--primary-l) * 0.9)),
+        background: hsl(var(--primary-h) var(--primary-s) calc(var(--primary-l) * 1));
+        box-shadow: 
+            0px 3px 20px hsl(var(--primary-h) var(--primary-s) calc(var(--primary-l) * 1.1)),
+            inset 0px 3px 2px hsl(var(--primary-h) var(--primary-s) calc(var(--primary-l) * 0.9)),
 
-      inset 0px 0px 20px hsl(var(--primary-h) var(--primary-s) calc(var(--primary-l) * 1));
+            inset 0px 0px 20px hsl(var(--primary-h) var(--primary-s) calc(var(--primary-l) * 1));
     }
+
+
+    .pbCard {
+        background: hsl(var(--card-h) var(--card-s) calc(var(--card-l) * 1.0));
+        margin: 2px 2px 8px 2px;
+        border: 1px solid hsl(var(--card-h) var(--card-s) calc(var(--card-l) * 0.9));
+
+        box-shadow: 
+            0px 3px 2px hsl(var(--card-h) var(--card-s) calc(var(--card-l) * 0.9)),
+            inset 0px -9px 20px hsl(var(--card-h) var(--card-s) calc(var(--card-l) * 0.85));
+    }
+
+    .pbCardSecondary {
+        color: hsl(var(--secondary-foreground));
+        background: hsl(var(--secondary-h) var(--secondary-s) calc(var(--secondary-l) * 1.0));
+        margin: 2px 2px 8px 2px;
+        border: 1px solid hsl(var(--secondary-h) var(--secondary-s) calc(var(--secondary-l) * 0.9));
+
+        box-shadow: 
+            0px 3px 2px hsl(var(--secondary-h) var(--secondary-s) calc(var(--secondary-l) * 0.9)),
+            inset 0px -9px 20px hsl(var(--secondary-h) var(--secondary-s) calc(var(--secondary-l) * 0.85));
+    }
+
+    .pbInput {
+        background: hsl(var(--card-h) var(--card-s) calc(var(--card-l) * 0.8));
+        margin: 2px 2px 8px 2px;
+        border: 1px solid hsl(var(--card-h) var(--card-s) calc(100% - var(--card-l)));
+
+        box-shadow: 
+            0px 3px 2px hsl(var(--card-h) var(--card-s) calc(var(--card-l) * 0.9)),
+            inset 0px 0px 20px hsl(var(--card-h) var(--card-s) calc(var(--card-l) * 1));
+
+    }
+
+    .facet-navigation-item {
+        color: hsl(var(--primary-foreground));
+        background: hsl(var(--primary-h) var(--primary-s) var(--primary-l));
+        border-radius: 10px 10px 10px 10px;
+        border: 1px solid hsl(var(--primary-h) var(--primary-s) calc(var(--primary-l) * .5));
+        box-shadow: 
+            0px 3px 20px hsl(var(--primary-h) calc(var(--primary-s) * 0.8) calc(var(--primary-l) * 0.8)),
+            inset 0px 5px 2px hsl(var(--primary-h) var(--primary-s) calc(var(--primary-l) * 1.5)),
+
+            inset 0px 2px 20px hsl(var(--primary-h) var(--primary-s) calc(var(--primary-l) * .5));
+    }
+    .facet-navigation-item:hover:not(.disabled) {
+        background: hsl(var(--primary-h) var(--primary-s) calc(var(--primary-l) * 1.1));
+        box-shadow: 
+            0px 3px 20px hsl(var(--primary-h) var(--primary-s) calc(var(--primary-l) * 1.1)),
+            inset 0px 5px 2px hsl(var(--primary-h) var(--primary-s) calc(var(--primary-l) * 1.7)),
+
+            inset 0px 2px 20px hsl(var(--primary-h) var(--primary-s) calc(var(--primary-l) * 1));
+    }
+
+    .facet-navigation-item:active:not(.disabled),
+    .facet-navigation-item:focus:not(.disabled),
+    .active-facet
+     {
+        background: hsl(var(--primary-h) var(--primary-s) calc(var(--primary-l) * 1));
+        box-shadow: 
+            0px 3px 20px hsl(var(--primary-h) var(--primary-s) calc(var(--primary-l) * 1.1)),
+            inset 0px 3px 2px hsl(var(--primary-h) var(--primary-s) calc(var(--primary-l) * 0.9)),
+
+            inset 0px 0px 20px hsl(var(--primary-h) var(--primary-s) calc(var(--primary-l) * 1));
+    }
+
+    .pbTopBar {
+        color: hsl(var(--secondary-foreground));
+        background: hsla(var(--secondary-h), var(--secondary-s), var(--secondary-l), 0.5);
+        border: 1px solid hsl(var(--secondary-h) var(--secondary-s) calc(var(--secondary-l) * 0.9));
+
+        box-shadow: 
+            0px 3px 2px hsl(var(--secondary-h) var(--secondary-s) calc(var(--secondary-l) * 0.9)),
+            inset 0px -9px 20px hsl(var(--secondary-h) var(--secondary-s) calc(var(--secondary-l) * 0.85));
+        backdrop-filter: blur(8px);
+    }
+
 }

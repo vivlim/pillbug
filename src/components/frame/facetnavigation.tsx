@@ -101,7 +101,10 @@ export const FacetNavigation: Component = (props) => {
                     "md:static": true,
                 }}
             >
-                <ul id="facet-menu" class="flex flex-col list-none p-6 gap-1">
+                <ul
+                    id="facet-menu"
+                    class="pbCard flex flex-col list-none p-6 gap-1"
+                >
                     <FacetNavigationItem href="/notifications">
                         <FaRegularBell />
                         notifications

@@ -127,7 +127,7 @@ export const ProfileZone: Component<ProfileZoneProps> = (props) => {
 
     return (
         <LayoutLeftColumnPortal>
-            <div class="md:w-72 p-8 md:flex-shrink-0 flex gap-4 min-h-max flex-col md:items-center justify-start bg-secondary text-secondary-foreground">
+            <div class="pbCardSecondary md:w-72 p-8 md:flex-shrink-0 flex gap-4 min-h-max flex-col md:items-center justify-start bg-secondary text-secondary-foreground">
                 <div class="flex flex-row md:flex-col md:items-center gap-4">
                     <AvatarLink
                         user={props.userInfo}

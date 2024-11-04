@@ -83,7 +83,7 @@ const FrameTopBar: Component = (props) => {
     const frameContext = useFrameContext();
 
     return (
-        <div class="sticky top-0 z-40 w-full backdrop-blur flex-none overflow-clip">
+        <div class="sticky top-0 z-40 w-full pbTopBar flex-none overflow-clip">
             <div class="mx-auto">
                 <div
                     id="layoutTopBar"

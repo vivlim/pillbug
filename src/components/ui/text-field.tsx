@@ -70,7 +70,7 @@ const TextFieldTextArea = <T extends ValidComponent = "textarea">(
     return (
         <TextFieldPrimitive.TextArea
             class={cn(
-                "w-full h-full bg-background text-sm placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50",
+                "pbInput w-full h-full bg-background text-sm placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50",
                 local.class
             )}
             style="overflow: auto;"

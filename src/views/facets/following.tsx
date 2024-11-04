@@ -366,7 +366,7 @@ const FollowingFacet: Component = () => {
             </div>
 
             <div class="following-posts">
-                <div class="pbCard p-4 m-2">
+                <div class="p-4 m-2">
                     <Show when={username() !== undefined}>
                         <FollowingUserPosts acct={username()} />
                     </Show>
