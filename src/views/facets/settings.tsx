@@ -20,6 +20,7 @@ import {
     PersistentSettings,
     useSettings,
 } from "~/lib/settings-manager";
+import { ProfileSettingsComponent } from "./settings-profile";
 
 const SettingsFacet: Component = () => {
     const settings = useSettings();
@@ -34,6 +35,7 @@ const SettingsFacet: Component = () => {
                     <CardTitle>settings</CardTitle>
                 </CardHeader>
             </Card>
+            <ProfileSettingsComponent />
             <Card>
                 <CardHeader>
                     <CardTitle>timestamps</CardTitle>

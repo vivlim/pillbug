@@ -64,6 +64,9 @@ export interface PropertyTextboxesProps<T> {
 export function PropertyTextboxesBuilder<T extends object>(
     props: PropertyTextboxesProps<T>
 ): JSX.Element {
+    if (props.value === undefined) {
+        return <div>(undefined object has no properties to edit)</div>;
+    }
     const keys = Object.keys(props.value) as (keyof T)[];
     return (
         <ul>
