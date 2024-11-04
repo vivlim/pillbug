@@ -400,7 +400,7 @@ html.setting-unlimitedColumnWidth #layoutColumnsRoot {
         border-radius: 10px 10px 10px 10px;
         border: 1px solid hsl(var(--primary-h) var(--primary-s) calc(var(--primary-l) * .5));
         box-shadow: 
-            0px 3px 20px hsl(var(--primary-h) calc(var(--primary-s) * 0.8) calc(var(--primary-l) * 0.8)),
+            0px 3px 20px hsla(var(--primary-h), var(--primary-s), var(--primary-l), 0.3),
             inset 0px 5px 2px hsl(var(--primary-h) var(--primary-s) calc(var(--primary-l) * 1.5)),
 
             inset 0px 2px 20px hsl(var(--primary-h) var(--primary-s) calc(var(--primary-l) * .5));
@@ -464,7 +464,7 @@ html.setting-unlimitedColumnWidth #layoutColumnsRoot {
         border-radius: 10px 10px 10px 10px;
         border: 1px solid hsl(var(--primary-h) var(--primary-s) calc(var(--primary-l) * .5));
         box-shadow: 
-            0px 3px 20px hsl(var(--primary-h) calc(var(--primary-s) * 0.8) calc(var(--primary-l) * 0.8)),
+            0px 3px 20px hsla(var(--primary-h), var(--primary-s), var(--primary-l), 0.3),
             inset 0px 5px 2px hsl(var(--primary-h) var(--primary-s) calc(var(--primary-l) * 1.5)),
 
             inset 0px 2px 20px hsl(var(--primary-h) var(--primary-s) calc(var(--primary-l) * .5));
