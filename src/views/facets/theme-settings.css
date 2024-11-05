@@ -1,0 +1,4 @@
+.themePreview {
+    padding:2em;
+    background-color: hsl(var(--background)) !important;
+}

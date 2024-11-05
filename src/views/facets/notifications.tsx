@@ -7,6 +7,7 @@ import {
 import { Status } from "megalodon/lib/src/entities/status";
 import {
     Component,
+    createEffect,
     createResource,
     createSignal,
     For,
@@ -256,6 +257,16 @@ export const NotificationsFacet: Component = () => {
     const location = useLocation();
     const navigate = useNavigate();
 
+    createEffect(() => {
+        if (auth.assumeSignedIn.account.unreadNotifications === true) {
+            console.log(
+                `setting current account's unread notifications flag from true to false`
+            );
+            auth.assumeSignedIn.mutateActiveAccount((_) => {
+                return { unreadNotifications: false };
+            });
+        }
+    });
     return (
         <ul id="notifications-facet">
             <For each={notifications()}>

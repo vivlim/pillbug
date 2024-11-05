@@ -3,6 +3,7 @@ import { PersistentStoreBacked } from "./store-backed";
 import { useSessionContext } from "./session-context";
 import { createEffect } from "solid-js";
 import { Color, HslColor } from "solid-color";
+import { useAuth } from "~/auth/auth-manager";
 
 export function useSettings(): SettingsManager {
     const sessionContext = useSessionContext();
@@ -34,6 +35,8 @@ export interface PersistentSettings {
     unlimitedColumnWidth?: Flag
     v2Feeds?: Flag
     doNotPreloadNextPage?: Flag
+    showUnreadNotificationsIcon?: Flag
+    globalState?: Flag
     flatAppearance?: Flag
     beveledAppearance?: Flag
     unroundedCornersAppearance?: Flag

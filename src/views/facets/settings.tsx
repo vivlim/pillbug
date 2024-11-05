@@ -1,3 +1,4 @@
+import { A } from "@solidjs/router";
 import { DateTime } from "luxon";
 import { ChromePicker, SketchPicker } from "solid-color";
 import {
@@ -33,6 +34,15 @@ const SettingsFacet: Component = () => {
                 <CardHeader>
                     <CardTitle>settings</CardTitle>
                 </CardHeader>
+                <CardContent>
+                    <A
+                        href="/settings/theme"
+                        class="facet-navigation-item"
+                        style="padding:0.5em; margin:0.5em; display: block;"
+                    >
+                        appearance settings
+                    </A>
+                </CardContent>
             </Card>
             <Card>
                 <CardHeader>
@@ -59,16 +69,13 @@ const SettingsFacet: Component = () => {
             </Card>
             <Card>
                 <CardHeader>
-                    <CardTitle>appearance</CardTitle>
+                    <CardTitle>tweaks</CardTitle>
                 </CardHeader>
                 <CardContent class="px-4 pb-2">
                     <ul class="flex flex-col gap-4">
                         <PersistentFlagCheckbox flag="useFullQualityImagesAsThumbnails">
                             Show full quality images without having to click
                             into them first
-                        </PersistentFlagCheckbox>
-                        <PersistentFlagCheckbox flag="imagesInPostsExpandToFullWidth">
-                            Images in posts expand to the full width of the post
                         </PersistentFlagCheckbox>
                         <PersistentFlagCheckbox flag="skipBlurHashClickThroughOnSensitiveMedia">
                             Skip needing to click through blurred previews of
@@ -77,59 +84,13 @@ const SettingsFacet: Component = () => {
                         <PersistentFlagCheckbox flag="unlimitedPostHeightInFeed">
                             Unlimited post height in feed (no 'show more')
                         </PersistentFlagCheckbox>
-                        <PersistentFlagCheckbox flag="flatAppearance">
-                            flat appearance
-                        </PersistentFlagCheckbox>
-                        <PersistentFlagCheckbox flag="beveledAppearance">
-                            beveled appearance
-                        </PersistentFlagCheckbox>
-                        <PersistentFlagCheckbox flag="unroundedCornersAppearance">
-                            unrounded corners
-                        </PersistentFlagCheckbox>
-                        <PersistentFlagCheckbox flag="alignColumnsLeft">
-                            Align columns to the left instead of centering them
-                        </PersistentFlagCheckbox>
-                        <PersistentFlagCheckbox flag="unlimitedColumnWidth">
-                            UNLIMITED COLUMN WIDTH
+
+                        <PersistentFlagCheckbox flag="showUnreadNotificationsIcon">
+                            Show icon when accounts have unread notifications
+                            (checks every 5 minutes, refresh the page after
+                            changing this setting)
                         </PersistentFlagCheckbox>
                     </ul>
-                    <details class="pbInput">
-                        <summary class="pbInput">color options (wip)</summary>
-                        <h1 style="font-weight: bold">
-                            note that these settings are a work in progress and
-                            may be subject to change.
-                        </h1>
-                        <ColorSettingComponent key="primaryForegroundColor">
-                            primary foreground
-                        </ColorSettingComponent>
-                        <ColorSettingComponent key="primaryBackgroundColor">
-                            primary background
-                        </ColorSettingComponent>
-                        <ColorSettingComponent key="secondaryForegroundColor">
-                            secondary foreground
-                        </ColorSettingComponent>
-                        <ColorSettingComponent key="secondaryBackgroundColor">
-                            secondary background
-                        </ColorSettingComponent>
-                        <ColorSettingComponent key="pageForegroundColor">
-                            page foreground
-                        </ColorSettingComponent>
-                        <ColorSettingComponent key="pageBackgroundColor">
-                            page background
-                        </ColorSettingComponent>
-                        <ColorSettingComponent key="accentColor">
-                            accent color
-                        </ColorSettingComponent>
-                        <ColorSettingComponent key="borderColor">
-                            border color
-                        </ColorSettingComponent>
-                        <ColorSettingComponent key="cardForegroundColor">
-                            card fg color
-                        </ColorSettingComponent>
-                        <ColorSettingComponent key="cardBackgroundColor">
-                            card bg color
-                        </ColorSettingComponent>
-                    </details>
                 </CardContent>
             </Card>
             <Card>
@@ -156,13 +117,20 @@ const SettingsFacet: Component = () => {
                             </li>
                         </ul>
                     </PersistentFlagCheckbox>
+                    <Show when={settings.getPersistent().enableDevTools}>
+                        <PersistentFlagCheckbox flag="globalState">
+                            Make some state accessible in the javascript console
+                            via <code>pillbug.*</code> (or{" "}
+                            <code>window.pillbug.*</code>)
+                        </PersistentFlagCheckbox>
+                    </Show>
                 </CardContent>
             </Card>
         </div>
     );
 };
 
-const PersistentFlagCheckbox: Component<{
+export const PersistentFlagCheckbox: Component<{
     flag: PersistentFlagNames;
     children: JSX.Element;
 }> = (props) => {
@@ -185,56 +153,6 @@ const PersistentFlagCheckbox: Component<{
                 {props.children}
             </label>
         </li>
-    );
-};
-
-const ColorSettingComponent: Component<{
-    key: keyof FilterPropertiesByType<PersistentSettings, ColorSetting>;
-    children: JSX.Element;
-}> = (props) => {
-    const id = createUniqueId();
-    const settings = useSettings();
-
-    return (
-        <div style="display: inline-block; margin: 0.2em;" class="pbInput">
-            <Switch>
-                <Match when={settings.getPersistent()[props.key] !== undefined}>
-                    <h1>
-                        <span style="font-weight: bold;">{props.children}</span>
-                    </h1>
-                </Match>
-                <Match when={settings.getPersistent()[props.key] === undefined}>
-                    <h1>
-                        <span>{props.children}</span> (unset)
-                    </h1>
-                </Match>
-            </Switch>
-            <ChromePicker
-                color={settings.getPersistent()[props.key]}
-                onChangeComplete={(c) => {
-                    settings.setPersistentStore(props.key, c.hsl);
-                }}
-                onSwatchHover={(c, e) => {}}
-                onChange={(c, e) => {}}
-            />
-            <Switch>
-                <Match when={settings.getPersistent()[props.key] !== undefined}>
-                    <Button
-                        style="margin-top: 0.1em; width: 100%;"
-                        onClick={() => {
-                            settings.setPersistentStore(props.key, undefined);
-                        }}
-                    >
-                        reset
-                    </Button>
-                </Match>
-                <Match when={settings.getPersistent()[props.key] === undefined}>
-                    <Button style="margin-top: 0.1em; width: 100%;" disabled>
-                        reset
-                    </Button>
-                </Match>
-            </Switch>
-        </div>
     );
 };
 

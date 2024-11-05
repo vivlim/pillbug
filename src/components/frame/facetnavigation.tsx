@@ -2,6 +2,7 @@ import { useLocation, useNavigate } from "@solidjs/router";
 import { hrtime } from "process";
 import {
     FaRegularBell,
+    FaSolidBell,
     FaSolidBug,
     FaSolidCircle,
     FaSolidGear,
@@ -19,7 +20,9 @@ import {
     createResource,
     For,
     JSX,
+    Match,
     Show,
+    Switch,
 } from "solid-js";
 import { useAuth } from "~/auth/auth-manager";
 import {
@@ -104,7 +107,12 @@ export const FacetNavigation: Component = (props) => {
                     class="pbCard flex flex-col list-none p-6 gap-1"
                 >
                     <FacetNavigationItem href="/notifications">
-                        <FaRegularBell />
+                        <Show
+                            when={auth.activeAccountHasUnreadNotifications()}
+                            fallback={<FaRegularBell />}
+                        >
+                            <FaSolidBell />
+                        </Show>
                         notifications
                     </FacetNavigationItem>
                     <FacetNavigationItem href="/search">

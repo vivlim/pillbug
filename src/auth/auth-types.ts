@@ -78,4 +78,6 @@ export interface SignedInAccount extends AccountBase {
     fullAcct: string;
     cachedAccount: Account | undefined;
     cachedInstance: Instance | undefined;
+    lastKnownNotificationId?: string;
+    unreadNotifications?: boolean;
 }

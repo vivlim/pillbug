@@ -1,8 +1,8 @@
 import generator, { detector, MegalodonInterface } from "megalodon";
 import OAuth from "megalodon/lib/src/oauth";
 import { createResource, Resource } from "solid-js";
-import { produce, SetStoreFunction } from "solid-js/store";
-import { MaybeSignedInState, OAuthRegistration, PillbugAccount, PillbugPersistentStore, PillbugSessionStore, SignedInAccount, SignedInState, SignedOutState, TokenState } from "./auth-types";
+import { produce, SetStoreFunction, StoreSetter, unwrap } from "solid-js/store";
+import { AccountBase, MaybeSignedInState, OAuthRegistration, PillbugAccount, PillbugPersistentStore, PillbugSessionStore, SignedInAccount, SignedInState, SignedOutState, TokenState } from "./auth-types";
 import { unwrapResponse } from "../lib/clientUtil";
 import { PersistentStoreBacked } from "../lib/store-backed";
 import { useSessionContext } from "~/lib/session-context";
@@ -35,6 +35,18 @@ export class SessionAuthManagerAssumingSignedIn {
             throw new Error("Called signedInState() without being signed in")
         }
         return state;
+    }
+
+    public get account(): SignedInAccount {
+        const a = this.auth.activeAccount;
+        if (a?.signedIn) {
+            return a;
+        }
+        throw new Error("Active account not found")
+    }
+
+    public mutateActiveAccount(f: StoreSetter<SignedInAccount, [number, "accounts"]>) {
+        this.auth.mutateActiveAccount(f as StoreSetter<PillbugAccount, [number, "accounts"]>);
     }
 }
 
@@ -132,9 +144,94 @@ export class SessionAuthManager extends PersistentStoreBacked<PillbugSessionStor
         return this.persistentStore.accounts.filter(a => a.signedIn);
     }
 
+    public async refreshAccountNotifications() {
+        if (this.persistentStore.accounts === undefined) { return; }
+        console.log("refreshing account notification state")
+        for (let i = 0; i < this.persistentStore.accounts?.length; i++) {
+            try {
+                let account = this.persistentStore.accounts[i];
+
+                if (account === null) {
+                    throw new Error(`the saved account slot at index ${i} is null.`)
+                }
+
+                if (!account.signedIn) {
+                    throw new Error(`the account at index ${i} is not signed in`)
+                }
+                account = await ensureAccountHasCurrentToken(account);
+                const client = generator(account.instanceSoftware, account.instanceUrl, account.token.tokenData.access_token)
+                const notifications = unwrapResponse(await client.getNotifications({ limit: 1 }))
+
+                if (notifications.length > 0) {
+                    const notificationId = notifications[0].id
+                    if (account.lastKnownNotificationId !== notificationId) {
+                        console.log(`account ${account.fullAcct}'s most recent notification id: ${notificationId}. last time the id was ${account.lastKnownNotificationId}, so there are new notifications.`)
+                        console.log(`account ${account.fullAcct} has unseen notifications`)
+                        this.setPersistentStore("accounts", i, (prev) => {
+                            if (prev.signedIn) {
+                                prev.lastKnownNotificationId = notificationId;
+                                prev.unreadNotifications = true;
+                            }
+                            return prev
+                        });
+                    }
+                    else {
+                        console.log(`account ${account.fullAcct}'s most recent notification id: ${notificationId}. this hasn't changed since last check`)
+                    }
+                }
+            }
+            catch (e) {
+                if (e instanceof Error) {
+                    console.warn(`error when refreshing notifications for account ${i}: ${e.message}`)
+                }
+            }
+
+
+        }
+
+    }
+
+    public activeAccountHasUnreadNotifications(): boolean {
+        if (!this.signedIn) {
+            return false;
+        }
+
+        return this.assumeSignedIn.account.unreadNotifications ?? false
+    }
+
     public switchActiveAccount(newIdx: number): void {
         this.setStore("currentAccountIndex", newIdx);
         this.setPersistentStore("lastUsedAccount", newIdx);
+    }
+
+    public get activeAccount(): PillbugAccount | undefined {
+        const index = this.store.currentAccountIndex;
+        if (index === undefined) { return undefined; }
+        if (this.persistentStore.accounts === undefined) { return undefined; }
+        if (index >= this.persistentStore.accounts?.length) {
+            return undefined;
+        }
+        var account = this.persistentStore.accounts[index]
+        return account;
+    }
+
+    public mutateActiveAccount(f: StoreSetter<PillbugAccount, [number, "accounts"]>) {
+        if (this.store.currentAccountIndex === undefined) {
+            throw new Error(`Can't mutate active account when there isn't one`)
+        }
+        console.log(`trying to update account at index ${this.store.currentAccountIndex}`)
+        this.setPersistentStore("accounts", unwrap(this.store.currentAccountIndex), f)
+    }
+
+    public unsetNotificationsFlag() {
+        if (this.store.currentAccountIndex === undefined) {
+            throw new Error(`Can't mutate active account when there isn't one`)
+        }
+        console.log(`trying to update account at index ${this.store.currentAccountIndex}`)
+        this.setPersistentStore("accounts", this.store.currentAccountIndex, (prev) => {
+            return { signedIn: false }
+        });
+
     }
 
     public removeAccount(idx: number): void {

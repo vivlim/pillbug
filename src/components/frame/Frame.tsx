@@ -1,6 +1,7 @@
 import {
     Accessor,
     createContext,
+    createEffect,
     createSignal,
     For,
     JSX,
@@ -23,9 +24,9 @@ import {
 } from "../ui/menubar";
 import { Button } from "../ui/button";
 import EditOverlay from "../../views/editoverlay";
-import { useAuth } from "../../auth/auth-manager";
+import { SessionAuthManager, useAuth } from "../../auth/auth-manager";
 import { useEditOverlayContext } from "../../lib/edit-overlay-context";
-import { FaSolidBars } from "solid-icons/fa";
+import { FaRegularBell, FaSolidBars, FaSolidBell } from "solid-icons/fa";
 import { AvatarImage } from "../user/avatar";
 import { UserInstanceBanner } from "../instance-banner";
 import { SignedInAccount, SignedInState } from "../../auth/auth-types";
@@ -38,6 +39,10 @@ import {
     LayoutMainColumn,
 } from "../layout/columns";
 import { DynamicStyle } from "../dynamicStyle";
+import { useSettings } from "~/lib/settings-manager";
+import { PillbugGlobal } from "~/pillbugglobal";
+import { MegalodonInterface } from "megalodon";
+import { Account } from "megalodon/lib/src/entities/account";
 
 const CurrentAccountWithAvatar: Component<{
     signInState: SignedInState;
@@ -73,6 +78,9 @@ const AvailableAccountWithAvatar: Component<{
             <span class="inline overflow-hidden text-ellipsis">
                 {props.account.fullAcct}
             </span>
+            <Show when={props.account.unreadNotifications === true}>
+                <FaSolidBell />
+            </Show>
         </>
     );
 };
@@ -215,10 +223,47 @@ const FrameTopBar: Component = (props) => {
     );
 };
 
+class PillbugGlobalImpl implements PillbugGlobal {
+    constructor(public auth: SessionAuthManager) {}
+
+    public get client(): MegalodonInterface {
+        return this.auth.assumeSignedIn.client;
+    }
+
+    public get signedInState(): SignedInState {
+        return this.auth.assumeSignedIn.state;
+    }
+}
+
+let hasSetInterval: boolean = false;
+
 const AppFrame: Component<{ children: JSX.Element }> = (props) => {
     const [showNav, setShowNav] = createSignal(true);
     const [navPopupMenuOpen, setNavPopupMenuOpen] = createSignal(false);
     const [noColumns, setNoColumns] = createSignal(false);
+
+    const auth = useAuth();
+    const settings = useSettings();
+
+    createEffect(() => {
+        if (useSettings().getPersistent().globalState) {
+            if (window.pillbug === undefined) {
+                window.pillbug = new PillbugGlobalImpl(auth);
+            }
+        }
+    });
+
+    if (settings.getPersistent().showUnreadNotificationsIcon === true) {
+        if (!hasSetInterval) {
+            hasSetInterval = true;
+            setTimeout(() => {
+                auth.refreshAccountNotifications();
+                setInterval(() => {
+                    auth.refreshAccountNotifications();
+                }, 1000 * 60 * 5 /* every 5 mins */);
+            }, 1000 * 5 /* 5 seconds after loading */);
+        }
+    }
 
     return (
         <FrameContext.Provider

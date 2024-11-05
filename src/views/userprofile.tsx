@@ -55,7 +55,7 @@ const UserProfilePage: Component = () => {
         </Show>
     );
 };
-const UserProfile: Component<{ acct: string }> = (props) => {
+export const UserProfile: Component<{ acct: string }> = (props) => {
     const auth = useAuth();
 
     const [account, accountActions] = createResource<
