@@ -3,6 +3,7 @@ import {
     createContext,
     createEffect,
     createSignal,
+    ErrorBoundary,
     For,
     JSX,
     Match,
@@ -44,6 +45,7 @@ import { PillbugGlobal } from "~/pillbugglobal";
 import { MegalodonInterface } from "megalodon";
 import { Account } from "megalodon/lib/src/entities/account";
 import { logger } from "~/logging";
+import ErrorBox from "../error";
 
 const CurrentAccountWithAvatar: Component<{
     signInState: SignedInState;
@@ -282,7 +284,18 @@ const AppFrame: Component<{ children: JSX.Element }> = (props) => {
                 <FrameTopBar />
                 <LayoutColumnsRoot>
                     <LayoutLeftColumn />
-                    <LayoutMainColumn>{props.children}</LayoutMainColumn>
+                    <LayoutMainColumn>
+                        <ErrorBoundary
+                            fallback={(e) => (
+                                <ErrorBox
+                                    error={e}
+                                    description={`failed to show page`}
+                                />
+                            )}
+                        >
+                            {props.children}
+                        </ErrorBoundary>
+                    </LayoutMainColumn>
                 </LayoutColumnsRoot>
                 <LayoutLeftColumnPortal>
                     <FacetNavigation />

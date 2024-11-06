@@ -91,10 +91,7 @@ export const FacetNavigation: Component = (props) => {
                 classList={{
                     "m-2": true,
                     "w-full": true,
-                    border: true,
-                    "bg-card": true,
                     "text-card-foreground": true,
-                    "shadow-sm": true,
                     fixed: true,
                     "col-span-full": true,
                     hidden: !frameContext.navPopupMenuOpen(),
@@ -104,7 +101,7 @@ export const FacetNavigation: Component = (props) => {
             >
                 <ul
                     id="facet-menu"
-                    class="pbCard flex flex-col list-none p-6 gap-1"
+                    class="pbCard pbGlideIn flex flex-col list-none p-6 gap-1"
                 >
                     <FacetNavigationItem href="/notifications">
                         <Show

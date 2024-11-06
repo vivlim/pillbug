@@ -146,6 +146,18 @@ const SettingsFacet: Component = () => {
                     >
                         log level for your browser's javascript console:
                     </IndexDropdown>
+
+                    <PersistentFlagCheckbox flag="saveLogs">
+                        Save logs to private filesystem (change takes effect
+                        after refresh)
+                    </PersistentFlagCheckbox>
+                    <A
+                        href="/files"
+                        class="facet-navigation-item"
+                        style="padding:0.5em; margin:0.5em; display: block;"
+                    >
+                        access private filesystem
+                    </A>
                 </CardContent>
             </Card>
         </div>
