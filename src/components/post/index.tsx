@@ -486,7 +486,7 @@ const Post: Component<PostProps> = (postData) => {
                         <Show when={auth.signedIn}>
                             <ShareButton status={status()} />
                             <Button
-                                class="hover:bg-transparent p-0 px-2 ml-2"
+                                class="hover:bg-transparent p-0 px-4"
                                 aria-label="Like Post"
                                 onClick={async () => {
                                     const updated = await toggleLike(

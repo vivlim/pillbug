@@ -602,6 +602,9 @@ html.setting-unlimitedColumnWidth #layoutColumnsRoot {
         border-left-color: hsl(var(--card-h) var(--card-s) calc(var(--card-l) * 1.5));
         border-right-color: hsl(var(--card-h) var(--card-s) calc(var(--card-l) * 0.5));
         border-bottom-color: hsl(var(--card-h) var(--card-s) calc(var(--card-l) * 0.5));
+
+        box-shadow: 
+            5px 5px 4px #00000044;
     }
 
     .pbInput {
