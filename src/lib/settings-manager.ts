@@ -4,7 +4,7 @@ import { useSessionContext } from "./session-context";
 import { createEffect } from "solid-js";
 import { Color, HslColor } from "solid-color";
 import { useAuth } from "~/auth/auth-manager";
-import { logger } from "~/logging";
+import { attachFileLoggerTransport, logger } from "~/logging";
 
 export function useSettings(): SettingsManager {
     const sessionContext = useSessionContext();
@@ -27,6 +27,7 @@ export interface PersistentSettings {
     version: 1
     kind: 'persistent'
     logLevel?: number
+    saveLogs?: Flag
     useInternetTime?: Flag
     alignColumnsLeft?: Flag
     useFullQualityImagesAsThumbnails?: Flag
@@ -74,6 +75,10 @@ export class SettingsManager extends PersistentStoreBacked<EphemeralSettings, Pe
 
     constructor() {
         super({ version: 1, kind: 'ephemeral' }, { version: 1, kind: 'persistent' }, { name: "pillbug-settings" });
+
+        if (this.persistentStore.saveLogs) {
+            attachFileLoggerTransport();
+        }
 
         createEffect(() => {
             // Update document classes based on settings

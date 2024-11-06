@@ -134,7 +134,7 @@
   }
 }
 
-* {
+*:not(.cm-editor *) {
     font-family: "Atkinson Hyperlegible", system-ui, sans-serif;
     text-wrap: auto;
 }
@@ -392,7 +392,6 @@ html.setting-unlimitedColumnWidth #layoutColumnsRoot {
 
 .debugStatusMessage {
     font-size: x-small;
-
 }
 
 .pbButtonPrimary,
@@ -625,5 +624,53 @@ html.setting-unlimitedColumnWidth #layoutColumnsRoot {
         padding-top:1px;
         padding-bottom:1px;
 
+    }
+}
+
+@media screen and (prefers-reduced-motion: no-preference) {
+    .pbGlideIn {
+        transform-style: preserve-3d;
+        perspective: 256px;
+        animation: glide-in 200ms cubic-bezier(0, 0, 0.7, 1.0);
+    }
+
+    .pbGlide-enter-active {
+        transform-style: preserve-3d;
+        perspective: 256px;
+        animation: glide-in 200ms cubic-bezier(0, 0, 0.7, 1.0);
+    }
+
+    .pbGlide-exit-active {
+        transform-style: preserve-3d;
+        perspective: 256px;
+        animation: glide-out 200ms cubic-bezier(0, 0, 0.7, 1.0);
+    }
+
+    @keyframes glide-in {
+    0% {
+        opacity: 0;
+        transform: translateY(50px) translateZ(-32px) scale3d(0.4, 0.4, 0.4) rotateX(-10deg) ;
+        filter: brightness(70%);
+        animation-timing-function: cubic-bezier(0, 0, 0.9, 1.0);
+    }
+    100% {
+        filter: brightness(100%);
+        opacity: 1;
+        transform: translateY(0px);
+    }
+    }
+
+    @keyframes glide-out {
+    0% {
+        filter: brightness(100%);
+        opacity: 1;
+        transform: translateY(0px);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(50px) translateZ(-32px) scale3d(0.4, 0.4, 0.4) rotateX(-10deg) ;
+        filter: brightness(70%);
+        animation-timing-function: cubic-bezier(0, 0, 0.9, 1.0);
+    }
     }
 }
