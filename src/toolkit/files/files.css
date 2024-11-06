@@ -1,0 +1,57 @@
+ul.fileTree li label {
+    display: block;
+    user-select: none;
+}
+
+ul.fileTree li {
+}
+
+
+ul.fileTree li input {
+    position: absolute;
+    opacity: 0;
+
+}
+
+label svg {
+    display: inline-block;
+
+}
+
+input:checked + label {
+    background-color: hsl(var(--secondary-h),var(--secondary-s),var(--secondary-l));
+    color: hsl(var(--secondary-foreground));
+    border: 1px solid transparent;
+}
+
+.fileTreeLeftColumn {
+    padding: 0.25em;
+}
+.fileTreeContainer {
+    margin: 0.25em;
+    padding-left: 0px;
+    padding-right: 0px;
+}
+
+li label {
+    padding-left: 0.5em;
+}
+.directoryItems li label {
+    padding-left: 1.25em;
+}
+.directoryItems .directoryItems li label {
+    padding-left: 2.0em;
+}
+.directoryItems .directoryItems .directoryItems li label {
+    padding-left: 2.75em;
+}
+
+input[type=radio]+label {
+	font-weight: normal;
+}
+input[type=radio]:checked+label {
+	font-weight: bold;
+}
+input[type=radio]:focus+label {
+	border: 1px dotted hsl(var(--secondary-foreground));
+}

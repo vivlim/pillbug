@@ -237,6 +237,7 @@ class PillbugGlobalImpl implements PillbugGlobal {
 
 let hasSetInterval: boolean = false;
 
+
 const AppFrame: Component<{ children: JSX.Element }> = (props) => {
     const [showNav, setShowNav] = createSignal(true);
     const [navPopupMenuOpen, setNavPopupMenuOpen] = createSignal(false);
