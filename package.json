@@ -31,6 +31,11 @@
         "vite-plugin-solid": "^2.8.2"
     },
     "dependencies": {
+        "@codemirror/commands": "^6.7.1",
+        "@codemirror/lang-javascript": "^6.2.2",
+        "@codemirror/lang-json": "^6.0.1",
+        "@codemirror/state": "^6.4.1",
+        "@codemirror/view": "^6.34.2",
         "@fontsource/atkinson-hyperlegible": "^5.1.0",
         "@kobalte/core": "^0.13.6",
         "@solid-primitives/storage": "^4.2.1",
@@ -38,6 +43,7 @@
         "blurhash": "^2.0.5",
         "class-variance-authority": "^0.7.0",
         "clsx": "^2.1.1",
+        "codemirror": "^6.0.1",
         "digraph-js": "^2.2.3",
         "exifreader": "^4.23.7",
         "filesize": "^10.1.6",
@@ -52,6 +58,7 @@
         "rehype-parse": "^9.0.1",
         "rehype-sanitize": "^6.0.0",
         "rehype-stringify": "^10.0.1",
+        "solid-codemirror": "^2.3.1",
         "solid-color": "^0.0.4",
         "solid-icons": "^1.1.0",
         "solid-js": "^1.8.11",

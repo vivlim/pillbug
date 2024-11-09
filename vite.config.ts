@@ -23,4 +23,8 @@ export default defineConfig({
             "~": path.resolve(__dirname, "./src"),
         },
     },
+    optimizeDeps: {
+        // Add both @codemirror/state and @codemirror/view to included deps to optimize
+        include: ['@codemirror/state', '@codemirror/view'],
+    }
 });

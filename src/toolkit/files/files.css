@@ -55,3 +55,15 @@ input[type=radio]:checked+label {
 input[type=radio]:focus+label {
 	border: 1px dotted hsl(var(--secondary-foreground));
 }
+
+/* editor */
+#codeMirror {
+    height: 100%;
+}
+#codeMirror > div {
+    height: 100%;
+}
+.window > .pbPostUserBar {
+    padding-left: 0.25em;
+    padding-right: 0.25em;
+}

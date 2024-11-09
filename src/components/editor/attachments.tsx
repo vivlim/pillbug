@@ -59,7 +59,9 @@ interface GetFilesFromInputOptions {
     capture?: string;
     multiple?: boolean;
 }
-function getFilesFromInput(options: GetFilesFromInputOptions): Promise<File[]> {
+export function getFilesFromInput(
+    options: GetFilesFromInputOptions
+): Promise<File[]> {
     return new Promise<File[]>((resolve, reject) => {
         console.log(
             `Creating input element with options: ${JSON.stringify(options)}`
@@ -91,7 +93,6 @@ function getFilesFromInput(options: GetFilesFromInputOptions): Promise<File[]> {
         input.click();
     });
 }
-
 export interface AddAttachmentMenuProps {
     onFileAdded: (file: File) => void;
     accept: string;
