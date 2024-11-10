@@ -11,7 +11,6 @@ export class UserFeedSource extends FeedSource {
 
     override async fetch(manifest: Omit<FeedManifest, "source">, after?: string | undefined): Promise<{ statuses: Status[]; moreAvailable: boolean; }> {
         const statuses = unwrapResponse(await this.auth.assumeSignedIn.client.getAccountStatuses(this.userId, {
-            exclude_replies: true,
             pinned: false,
             limit: manifest.postsToFetchPerBatch ?? undefined,
             max_id: after
