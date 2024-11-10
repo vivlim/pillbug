@@ -52,6 +52,8 @@ export interface PillbugSessionStore {
 export interface PillbugPersistentStore {
     accounts?: PillbugAccount[] | undefined;
     lastUsedAccount?: number | undefined;
+    /** Stores 'last checked' ISO-format timestamps for miscellaneous functionality. Should really be stored elsewhere, this is a stopgap solution */
+    lastChecked?: Record<string, string> | undefined;
 }
 
 export type PillbugAccount = OAuthRegistration | SignedInAccount;

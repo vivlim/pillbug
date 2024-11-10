@@ -6,6 +6,8 @@ import { FeedManifest } from "~/components/feed/feed-engine";
 import { defaultHomeFeedRules } from "~/components/feed/preset-rules";
 import { HomeFeedSource } from "~/components/feed/sources/homefeed";
 import { PostFeed } from "~/components/post/feed";
+import { ShowIfInstance } from "~/website-league/showIfInstance";
+import { WebsiteLeagueBroadcast } from "~/website-league/websiteLeagueBroadcast";
 
 export interface SubmitFeedState {
     new_id: string;
@@ -15,6 +17,7 @@ const Feed: Component = () => {
     const location = useLocation<SubmitFeedState>();
 
     const [lastRefresh, setLastRefresh] = createSignal(Date.now());
+    const [feedLoaded, setFeedLoaded] = createSignal(false);
 
     createEffect(() => {
         if (location.state?.new_id != null) {
@@ -29,11 +32,17 @@ const Feed: Component = () => {
     };
 
     return (
-        <FeedComponent
-            manifest={feedManifest}
-            rules={defaultHomeFeedRules}
-            initialOptions={{ limit: 25 }}
-        />
+        <>
+            <FeedComponent
+                manifest={feedManifest}
+                rules={defaultHomeFeedRules}
+                initialOptions={{ limit: 25 }}
+                onLoaded={() => setFeedLoaded(true)}
+            />
+            <ShowIfInstance in="Website League" when={feedLoaded()}>
+                <WebsiteLeagueBroadcast />
+            </ShowIfInstance>
+        </>
     );
 };
 

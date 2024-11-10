@@ -124,10 +124,6 @@ const AboutPillbugView: Component = () => {
                     <CardContent class="p-6 pt-0">
                         <p>you aren't logged in.</p>
                         <p>
-                            ℹ️ note: following the addition of multiple
-                            accounts, you will have to log in again. sorry!
-                        </p>
-                        <p>
                             <A href="/login" class="underline">
                                 Log in
                             </A>

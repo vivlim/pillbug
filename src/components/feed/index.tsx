@@ -35,6 +35,7 @@ export type FeedComponentProps = {
     rules: FeedRuleProperties[];
     initialOptions: GetTimelineOptions;
     manifest: FeedManifest;
+    onLoaded?: () => void;
 };
 
 interface FeedComponentStore {
@@ -80,7 +81,10 @@ export const FeedComponent: Component<FeedComponentProps> = (props) => {
             )}
         >
             <Show when={engine()} fallback={"loading"}>
-                <FeedComponentPostList engine={engine()!} />
+                <FeedComponentPostList
+                    engine={engine()!}
+                    onLoaded={props.onLoaded}
+                />
             </Show>
         </ErrorBoundary>
     );
@@ -88,6 +92,7 @@ export const FeedComponent: Component<FeedComponentProps> = (props) => {
 
 export const FeedComponentPostList: Component<{
     engine: FeedEngine;
+    onLoaded?: () => void;
 }> = (props) => {
     if (props.engine === undefined) {
         throw new Error("engine is not initialized");
@@ -125,6 +130,9 @@ export const FeedComponentPostList: Component<{
                 console.error(`error getting posts: ${p.error.message}`);
             } else {
                 console.log(`posts available: ${p.posts.length}`);
+            }
+            if (props.onLoaded) {
+                props.onLoaded();
             }
             return p;
         }

@@ -82,7 +82,7 @@ export type PreprocessedStatusPostBlockProps = {
     limitInitialHeight: boolean;
 };
 
-const PreprocessedPostUserBar: Component<{
+export const PreprocessedPostUserBar: Component<{
     status: Status;
     sharedStatus?: Status | undefined;
 }> = (props) => {
@@ -138,7 +138,9 @@ interface PreprocessedPostBodyProps extends JSX.HTMLAttributes<HTMLDivElement> {
     limitInitialHeight: boolean;
 }
 
-const PreprocessedPostBody: Component<PreprocessedPostBodyProps> = (props) => {
+export const PreprocessedPostBody: Component<PreprocessedPostBodyProps> = (
+    props
+) => {
     const [, rest] = splitProps(props, ["status", "class"]);
     const settings = useSettings();
     const [heightLimited, setHeightLimited] = createSignal(

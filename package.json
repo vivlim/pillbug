@@ -52,6 +52,7 @@
         "rehype-parse": "^9.0.1",
         "rehype-sanitize": "^6.0.0",
         "rehype-stringify": "^10.0.1",
+        "rss-parser": "^3.13.0",
         "solid-color": "^0.0.4",
         "solid-icons": "^1.1.0",
         "solid-js": "^1.8.11",
