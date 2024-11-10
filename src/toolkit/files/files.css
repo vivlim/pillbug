@@ -67,3 +67,17 @@ input[type=radio]:focus+label {
     padding-left: 0.25em;
     padding-right: 0.25em;
 }
+
+.window > .titleBar{
+    display: flex;
+    flex-direction: row;
+}
+
+.titleBar .title {
+    flex: 1;
+    align-content: center;
+}
+
+.titleBar button {
+    font-weight: bold;
+}

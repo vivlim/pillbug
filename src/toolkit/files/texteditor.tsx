@@ -15,9 +15,11 @@ import { json } from "@codemirror/lang-json";
 import { indentWithTab } from "@codemirror/commands";
 import { basicSetup } from "codemirror";
 import { getFileAtPath } from "./opfs";
+import { Button } from "~/components/ui/button";
+import { OpenedFile } from "./fileViewer";
 
 export type TextEditorProps = {
-    facetStore: StoreBacked<FilesFacetStore>;
+    file: OpenedFile;
 };
 export const TextEditor: Component<TextEditorProps> = (props) => {
     const [code, setCode] = createSignal("loading");
@@ -57,34 +59,61 @@ export const TextEditor: Component<TextEditorProps> = (props) => {
     createExtension(javascript());
     createExtension(EditorView.lineWrapping);
 
-    const [readOnly, setReadOnly] = createSignal(true);
+    const [readOnly, setReadOnly] = createSignal(false);
     createEditorReadonly(editorView, readOnly);
     createEditorControlledValue(editorView, code);
 
     const [fetchFileContents, fetchAction] = createResource(
-        () => props.facetStore.store.currentFile,
-        async (fn) => {
-            const fs = await navigator.storage.getDirectory();
-            const f = await getFileAtPath(fn, fs, { create: false });
-            const file = await f!.getFile();
-            const contents = await file.arrayBuffer();
-            const text = new TextDecoder().decode(contents);
+        () => props.file,
+        async (f) => {
+            if (f.handle instanceof FileSystemFileHandle) {
+                const file = await f.handle.getFile();
+                const contents = await file.arrayBuffer();
+                const text = new TextDecoder().decode(contents);
 
-            setCode(text);
-            setReadOnly(false);
-            //args.editorView.setState(EditorState.create({ doc: text }));
-            return text;
+                setCode(text);
+                setReadOnly(false);
+                //args.editorView.setState(EditorState.create({ doc: text }));
+                return text;
+            } else {
+                console.log(`handle is not a file handle for ${f.path}`);
+            }
         }
     );
 
     return (
-        <div class="pbCard window" style="height:100%">
-            <Show when={!fetchFileContents.loading} fallback="reading file">
-                <div class="pbPostUserBar">
-                    {props.facetStore.store.currentFile ?? "undefined"}
-                </div>
-                <div ref={editorRef} id="codeMirror" />
-            </Show>
-        </div>
+        <Show when={!fetchFileContents.loading} fallback="reading file">
+            <div>
+                <Button
+                    onClick={async () => {
+                        if (props.file.handle instanceof FileSystemFileHandle) {
+                            try {
+                                console.log(
+                                    `text editor: saving ${props.file.path}`
+                                );
+                                const bytes = new TextEncoder().encode(code());
+                                const writable =
+                                    await props.file.handle.createWritable();
+                                await writable.write(bytes);
+                                await writable.close();
+                                console.log(
+                                    `wrote to ${props.file.path} successfully`
+                                );
+                            } catch (e) {
+                                if (e instanceof Error) {
+                                    console.error(
+                                        `Failed to save ${props.file.path}: ${e.message}`
+                                    );
+                                    return;
+                                }
+                            }
+                        }
+                    }}
+                >
+                    Save
+                </Button>
+            </div>
+            <div ref={editorRef} id="codeMirror" />
+        </Show>
     );
 };

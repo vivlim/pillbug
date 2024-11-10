@@ -13,6 +13,7 @@ import {
     pathjoin,
 } from "./opfs";
 import { getFilesFromInput } from "~/components/editor/attachments";
+import { MultiFileViewer } from "./fileViewer";
 
 export interface FilesFacetStore {
     currentFile?: string;
@@ -105,7 +106,10 @@ const FilesFacet: Component = () => {
                         </Button>
                     </div>
                 </LayoutLeftColumnPortal>
-                <TextEditor facetStore={facetStore}></TextEditor>
+                <MultiFileViewer
+                    facetStore={facetStore}
+                    opfs={opfs()}
+                ></MultiFileViewer>
             </Show>
         </div>
     );
