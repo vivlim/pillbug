@@ -552,6 +552,32 @@ const PreprocessedStatusPostBlock: Component<
                 </Match>
                 <Match when={status.reblog !== null}>
                     <PreprocessedPostUserBar status={status} />
+                    <For each={linkedAncestors()}>
+                        {(linkedAncestor, idx) => {
+                            return (
+                                <>
+                                    <PreprocessedPostUserBar
+                                        status={linkedAncestor.status}
+                                        sharedStatus={
+                                            idx() > 0
+                                                ? linkedAncestors()[idx() - 1]
+                                                      .status
+                                                : undefined
+                                        }
+                                    />
+                                    <PreprocessedPostBody
+                                        class="border-b"
+                                        status={linkedAncestor.status}
+                                        processedStatus={linkedAncestor}
+                                        limitInitialHeight={
+                                            postData.limitInitialHeight
+                                        }
+                                    />
+                                    <PostLabels post={linkedAncestor} />
+                                </>
+                            );
+                        }}
+                    </For>
                     <PreprocessedPostUserBar status={status.reblog!} />
 
                     <PreprocessedPostBody

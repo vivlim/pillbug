@@ -70,7 +70,11 @@ export const WebsiteLeagueBroadcast: Component = (props) => {
     return (
         <ErrorBoundary fallback={<div>error retrieving announcement</div>}>
             <Show when={!announcement.loading}>
-                <div class="pbCard">
+                <div class="pbCard" style="margin-top: 2em;">
+                    <h1 style="font-style: italic; text-align:center;">
+                        latest announcement
+                    </h1>
+
                     <Switch>
                         <Match when={announcement()?.status !== undefined}>
                             <PreprocessedPostUserBar

@@ -210,8 +210,12 @@ const urlRegex = createUrlRegExp({
     localhost: false,
 });
 
-function getShareParentUrl(status: Status): string | undefined {
-    let urls = status.content.match(urlRegex);
+export function getShareParentUrl(status: Status): string | undefined {
+    let content = status.content;
+    if (status.reblog) {
+        content = status.reblog.content
+    }
+    let urls = content.match(urlRegex);
     if (urls === null) {
         return undefined;
     }
