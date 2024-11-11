@@ -3,6 +3,7 @@ import { Status, StatusTag } from "megalodon/lib/src/entities/status";
 import { MultiTextboxSpec } from "../textbox";
 import createUrlRegExp from "url-regex-safe";
 import { FeedSource } from "./sources/abstract";
+import { logger } from "~/logging";
 
 const Facts = {
 
@@ -53,7 +54,7 @@ export class FeedEngine {
 
     public async getPosts(pageNumber?: number, logCallback?: (msg: string) => void): Promise<{ posts: ProcessedStatus[], error?: Error }> {
         const log = (msg: string) => {
-            console.log(msg);
+            logger.info(msg);
             if (logCallback !== undefined) {
                 logCallback(msg);
             }
@@ -120,7 +121,7 @@ export class FeedEngine {
         }
         catch (e) {
             if (e instanceof Error) {
-                console.log(`Error getting and processing posts: ${e.message}`)
+                logger.info(`Error getting and processing posts: ${e.message}`)
                 return { moreAvailable: false, error: e }
             }
             return { moreAvailable: false, error: new Error("unknown error") }
@@ -168,19 +169,19 @@ export class FeedEngine {
 
                 const status = await this.manifest.source.getByUrl(url)
                 if (status === null) {
-                    console.log(`A linked post (${url}) couldn't be found while retrieving ancestor posts for ${s.status.id}. Returning with ${statuses.length} posts`)
+                    logger.info(`A linked post (${url}) couldn't be found while retrieving ancestor posts for ${s.status.id}. Returning with ${statuses.length} posts`)
                     return statuses;
                 }
 
                 // check if that status is already in our list, if so then there's a cycle and we'll bail out now.
                 if (statuses.findIndex(ps => ps.status.id === status.id) >= 0) {
-                    console.log(`Detected link cycle trying to retrieve ancestor posts for ${s.status.id}. Returning with ${statuses.length} posts`)
+                    logger.info(`Detected link cycle trying to retrieve ancestor posts for ${s.status.id}. Returning with ${statuses.length} posts`)
                     return statuses;
                 }
 
                 const processed = await this.process(status, true)
                 if (processed.hide) {
-                    console.log(`A linked post was hidden by a rule while retrieving ancestor posts for ${s.status.id}. Returning with ${statuses.length} posts`)
+                    logger.info(`A linked post was hidden by a rule while retrieving ancestor posts for ${s.status.id}. Returning with ${statuses.length} posts`)
                     return statuses;
                 }
 
@@ -189,7 +190,7 @@ export class FeedEngine {
             }
             catch (e) {
                 if (e instanceof Error) {
-                    console.log(`Error trying to fetch ${statuses.length}th linked ancestor post for ${s.status.id}. returning whatever's available. ${e.stack ?? e.message}`)
+                    logger.info(`Error trying to fetch ${statuses.length}th linked ancestor post for ${s.status.id}. returning whatever's available. ${e.stack ?? e.message}`)
                     return statuses;
                 }
 

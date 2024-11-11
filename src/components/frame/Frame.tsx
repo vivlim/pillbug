@@ -43,6 +43,7 @@ import { useSettings } from "~/lib/settings-manager";
 import { PillbugGlobal } from "~/pillbugglobal";
 import { MegalodonInterface } from "megalodon";
 import { Account } from "megalodon/lib/src/entities/account";
+import { logger } from "~/logging";
 
 const CurrentAccountWithAvatar: Component<{
     signInState: SignedInState;
@@ -167,7 +168,7 @@ const FrameTopBar: Component = (props) => {
                                                                 "(prefers-color-scheme: dark)"
                                                             ).matches)
                                                     ) {
-                                                        console.log(
+                                                        logger.info(
                                                             "switch to light theme"
                                                         );
                                                         window.localStorage.setItem(
@@ -178,7 +179,7 @@ const FrameTopBar: Component = (props) => {
                                                             "dark"
                                                         );
                                                     } else {
-                                                        console.log(
+                                                        logger.info(
                                                             "switch to dark theme"
                                                         );
                                                         window.localStorage.setItem(

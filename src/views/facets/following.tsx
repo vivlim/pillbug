@@ -47,6 +47,7 @@ import {
 import { FeedComponent } from "~/components/feed";
 import { FeedManifest } from "~/components/feed/feed-engine";
 import { UserFeedSource } from "~/components/feed/sources/userfeed";
+import { logger } from "~/logging";
 
 interface AccountInfo {
     acct: string;
@@ -645,7 +646,7 @@ function parseStatusDateTimeUnixTs(status: Status | undefined): {
     }
     const result = DateTime.fromISO(status.created_at);
     if (!result.isValid) {
-        console.log(
+        logger.info(
             `datetime '${status.created_at}' invalid for ${status.id}: ${result.invalidReason}`
         );
         return { dt: undefined, unix: 0 };

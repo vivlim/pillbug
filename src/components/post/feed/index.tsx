@@ -16,6 +16,7 @@ import { Button } from "~/components/ui/button";
 import { FeedContext } from "./feed-context";
 import { ErrorBox } from "~/components/error";
 import { MaybeSignedInState } from "~/auth/auth-types";
+import { logger } from "~/logging";
 
 interface GetTimelineOptionsApi {
     local?: boolean;
@@ -42,14 +43,14 @@ async function fetchPostList(
     signedInState: MaybeSignedInState,
     timelineOptions: GetTimelineOptions
 ) {
-    console.log(
+    logger.info(
         `fetching posts with options: ${JSON.stringify(timelineOptions)}`
     );
 
     const posts: Status[] = [];
     const result = await handler(signedInState, timelineOptions);
     if (result == undefined) {
-        console.log("Got no response from handler");
+        logger.info("Got no response from handler");
         return;
     }
 
@@ -96,7 +97,7 @@ export const PostFeed: Component<PostFeedProps> = (props) => {
 
     createEffect(() => {
         if (props.lastRefresh != null && props.lastRefresh != lastRefresh()) {
-            console.log("[PostFeed] refresh requested");
+            logger.info("[PostFeed] refresh requested");
             listActions.refetch();
         }
     });

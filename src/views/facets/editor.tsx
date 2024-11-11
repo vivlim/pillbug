@@ -36,6 +36,7 @@ import { useNavigate, useParams } from "@solidjs/router";
 import { PostWithShared } from "~/components/post";
 import { PostPageContext, PostPageForId } from "../postpage";
 import { unwrapResponse } from "~/lib/clientUtil";
+import { logger } from "~/logging";
 
 export type EditorFacetProps = {
     sharing_post_id?: string | undefined;
@@ -51,7 +52,7 @@ const EditorFacet: Component = () => {
 
     createEffect(() => {
         if (newPostId() !== undefined) {
-            console.log(`Navigating to new post ${newPostId()}`);
+            logger.info(`Navigating to new post ${newPostId()}`);
             navigate(`/post/${newPostId()}`);
         }
     });

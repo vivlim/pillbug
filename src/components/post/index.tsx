@@ -61,6 +61,8 @@ import { MenuButton } from "../ui/menubutton";
 import { unwrapResponse } from "~/lib/clientUtil";
 import { useSettings } from "~/lib/settings-manager";
 import { PostPreviewCard } from "./preprocessed";
+import { getShareParentUrl } from "../feed/feed-engine";
+import { logger } from "~/logging";
 
 export type PostWithSharedProps = {
     status: Status;
@@ -94,7 +96,7 @@ export async function fetchShareParentPost(
         return null;
     }
 
-    console.log(`fetching parent post ${postUrl}`);
+    logger.info(`fetching parent post ${postUrl}`);
     const client = auth.assumeSignedIn.client;
     const result = await client.search(postUrl, {
         type: "statuses",
@@ -108,18 +110,6 @@ export async function fetchShareParentPost(
         return null;
     }
     return result.data.statuses[0];
-}
-
-const urlRegex = createUrlRegExp({
-    strict: true,
-    localhost: false,
-});
-export function getShareParentUrl(status: Status): string | undefined {
-    let urls = status.content.match(urlRegex);
-    if (urls === null) {
-        return undefined;
-    }
-    return urls.find((u) => u.match(/statuses|objects|\d{18}/)) ?? undefined;
 }
 
 const PostUserBar: Component<{

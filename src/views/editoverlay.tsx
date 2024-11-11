@@ -3,6 +3,7 @@ import { useEditOverlayContext } from "~/lib/edit-overlay-context";
 import { useAuthContext } from "~/auth/auth-manager";
 import PostEditor from "./editdialog";
 import { useNavigate } from "@solidjs/router";
+import { logger } from "~/logging";
 
 const EditOverlay: Component = () => {
     const editingOverlayContext = useEditOverlayContext();
@@ -14,7 +15,7 @@ const EditOverlay: Component = () => {
     };
 
     const handlePostSubmit = (new_id: string) => {
-        console.log("Post sent! Trying to navigate...");
+        logger.info("Post sent! Trying to navigate...");
         navigate("/feed", { state: { new_id: new_id } });
     };
 

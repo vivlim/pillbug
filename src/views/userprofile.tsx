@@ -19,6 +19,7 @@ import { UserFeedSource } from "~/components/feed/sources/userfeed";
 import { FeedComponent } from "~/components/feed";
 import { defaultHomeFeedRules } from "~/components/feed/preset-rules";
 import { unwrapResponse } from "~/lib/clientUtil";
+import { logger } from "~/logging";
 
 export interface GetAccountFeedOptions
     extends Omit<GetTimelineOptions, "local"> {
@@ -37,7 +38,7 @@ export const fetchUserInfo = async (
     }
 
     const client = signedInState.authenticatedClient;
-    console.log(`getting account ${username}`);
+    logger.info(`getting account ${username}`);
 
     const result = await client.lookupAccount(username);
     if (result.status !== 200) {
@@ -65,7 +66,7 @@ export const UserProfile: Component<{ acct: string }> = (props) => {
     >(
         () => props.acct,
         async (acct: string) => {
-            // console.log(
+            // logger.info(
             //     "entered user profile page resource fetcher for account " + acct
             // );
             const client = auth.client;

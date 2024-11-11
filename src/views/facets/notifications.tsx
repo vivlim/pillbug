@@ -27,6 +27,7 @@ import { HtmlSandboxSpan } from "../htmlsandbox";
 import { Timestamp } from "~/components/post/timestamp";
 import { AvatarLink } from "~/components/user/avatar";
 import { SessionAuthManager, useAuth } from "~/auth/auth-manager";
+import { logger } from "~/logging";
 
 type NotificationDayGroups = {
     created_day: DateTime<true> | DateTime<false>;
@@ -259,7 +260,7 @@ export const NotificationsFacet: Component = () => {
 
     createEffect(() => {
         if (auth.assumeSignedIn.account.unreadNotifications === true) {
-            console.log(
+            logger.info(
                 `setting current account's unread notifications flag from true to false`
             );
             auth.assumeSignedIn.mutateActiveAccount((_) => {

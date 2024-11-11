@@ -13,6 +13,7 @@ import { cn } from "~/lib/utils";
 import { ImageLightbox } from "./image-lightbox";
 import { useSettings } from "~/lib/settings-manager";
 import { decode } from "blurhash";
+import { logger } from "~/logging";
 
 interface ImageAttachmentProps {
     attachment: Attachment;
@@ -82,7 +83,7 @@ const ImageAttachment: Component<ImageAttachmentProps> = (props) => {
                             : "m-auto"
                     }
                     onClick={() => {
-                        console.log(`Hello! onClick = ${props.onClick}`);
+                        logger.info(`Hello! onClick = ${props.onClick}`);
                         props.onClick?.(props.imageIndex);
                     }}
                 >
@@ -201,7 +202,7 @@ export const ImageBox: Component<ImageBoxProps> = (props) => {
     const images = props.attachments.filter((att) => att.type == "image");
 
     const onImageClick = (idx: number) => {
-        console.log(`Showing lightbox for image ${idx}`);
+        logger.info(`Showing lightbox for image ${idx}`);
         setLightboxIndex(idx);
         setLightboxOpen(true);
     };

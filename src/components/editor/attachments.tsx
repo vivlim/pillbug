@@ -53,6 +53,7 @@ import { KeyboardShortcutTextArea } from "../ui/keyboard-shortcut-text-field";
 import { KeyBindingMap } from "tinykeys";
 import { filesize } from "filesize";
 import * as ExifReader from "exifreader";
+import { logger } from "~/logging";
 
 interface GetFilesFromInputOptions {
     accept?: string;
@@ -61,7 +62,7 @@ interface GetFilesFromInputOptions {
 }
 function getFilesFromInput(options: GetFilesFromInputOptions): Promise<File[]> {
     return new Promise<File[]>((resolve, reject) => {
-        console.log(
+        logger.info(
             `Creating input element with options: ${JSON.stringify(options)}`
         );
         let input = document.createElement("input");
@@ -69,21 +70,21 @@ function getFilesFromInput(options: GetFilesFromInputOptions): Promise<File[]> {
         input.value = "";
         input = Object.assign(input, options);
         var handler = (_: any) => {
-            console.log("file input element changed");
+            logger.info("file input element changed");
             if (input === null || input === undefined) {
-                console.log("input element was null or undefined");
+                logger.info("input element was null or undefined");
                 reject(new Error("input element was null or undefined"));
                 return;
             }
 
             const fileList = input.files;
             if (fileList === null) {
-                console.log("no files were picked");
+                logger.info("no files were picked");
                 reject(new Error("no files were picked"));
                 return;
             }
             const filesArray = Array.from(fileList);
-            console.log(`${fileList.length} files`);
+            logger.info(`${fileList.length} files`);
             resolve(filesArray);
         };
         input.addEventListener("change", handler);

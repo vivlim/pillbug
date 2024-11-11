@@ -6,6 +6,7 @@ import { AccountBase, MaybeSignedInState, OAuthRegistration, PillbugAccount, Pil
 import { unwrapResponse } from "../lib/clientUtil";
 import { PersistentStoreBacked } from "../lib/store-backed";
 import { useSessionContext } from "~/lib/session-context";
+import { logger } from "~/logging";
 
 const AppDisplayName: string = "pillbug";
 
@@ -146,7 +147,7 @@ export class SessionAuthManager extends PersistentStoreBacked<PillbugSessionStor
 
     public async refreshAccountNotifications() {
         if (this.persistentStore.accounts === undefined) { return; }
-        console.log("refreshing account notification state")
+        logger.info("refreshing account notification state")
         for (let i = 0; i < this.persistentStore.accounts?.length; i++) {
             try {
                 let account = this.persistentStore.accounts[i];
@@ -165,8 +166,8 @@ export class SessionAuthManager extends PersistentStoreBacked<PillbugSessionStor
                 if (notifications.length > 0) {
                     const notificationId = notifications[0].id
                     if (account.lastKnownNotificationId !== notificationId) {
-                        console.log(`account ${account.fullAcct}'s most recent notification id: ${notificationId}. last time the id was ${account.lastKnownNotificationId}, so there are new notifications.`)
-                        console.log(`account ${account.fullAcct} has unseen notifications`)
+                        logger.info(`account ${account.fullAcct}'s most recent notification id: ${notificationId}. last time the id was ${account.lastKnownNotificationId}, so there are new notifications.`)
+                        logger.info(`account ${account.fullAcct} has unseen notifications`)
                         this.setPersistentStore("accounts", i, (prev) => {
                             if (prev.signedIn) {
                                 prev.lastKnownNotificationId = notificationId;
@@ -176,7 +177,7 @@ export class SessionAuthManager extends PersistentStoreBacked<PillbugSessionStor
                         });
                     }
                     else {
-                        console.log(`account ${account.fullAcct}'s most recent notification id: ${notificationId}. this hasn't changed since last check`)
+                        logger.info(`account ${account.fullAcct}'s most recent notification id: ${notificationId}. this hasn't changed since last check`)
                     }
                 }
             }
@@ -219,7 +220,7 @@ export class SessionAuthManager extends PersistentStoreBacked<PillbugSessionStor
         if (this.store.currentAccountIndex === undefined) {
             throw new Error(`Can't mutate active account when there isn't one`)
         }
-        console.log(`trying to update account at index ${this.store.currentAccountIndex}`)
+        logger.info(`trying to update account at index ${this.store.currentAccountIndex}`)
         this.setPersistentStore("accounts", unwrap(this.store.currentAccountIndex), f)
     }
 
@@ -227,7 +228,7 @@ export class SessionAuthManager extends PersistentStoreBacked<PillbugSessionStor
         if (this.store.currentAccountIndex === undefined) {
             throw new Error(`Can't mutate active account when there isn't one`)
         }
-        console.log(`trying to update account at index ${this.store.currentAccountIndex}`)
+        logger.info(`trying to update account at index ${this.store.currentAccountIndex}`)
         this.setPersistentStore("accounts", this.store.currentAccountIndex, (prev) => {
             return { signedIn: false }
         });
@@ -235,7 +236,7 @@ export class SessionAuthManager extends PersistentStoreBacked<PillbugSessionStor
     }
 
     public removeAccount(idx: number): void {
-        console.log(`Removing account at index ${idx}`)
+        logger.info(`Removing account at index ${idx}`)
 
         // Setting to undefined removes that account
         this.setPersistentStore("accounts", produce((accts) => {
@@ -275,7 +276,7 @@ export class SessionAuthManager extends PersistentStoreBacked<PillbugSessionStor
         instance = instance.replace(/\/+$/, "");
         // TODO: Additional normalization? I'm not sure what other ways a URL can be malformed.
         let software = await detector(instance);
-        console.log(`detected software '${software}' on ${instance}`);
+        logger.info(`detected software '${software}' on ${instance}`);
 
         // Create the unauthenticated client.
         let client = generator(software, instance);
@@ -287,7 +288,7 @@ export class SessionAuthManager extends PersistentStoreBacked<PillbugSessionStor
                 redirect_uri.length - window.location.search.length
             );
         }
-        console.log(`redirect uri: ${redirect_uri}`);
+        logger.info(`redirect uri: ${redirect_uri}`);
 
         let appData = await client.registerApp(AppDisplayName, {
             redirect_uris: redirect_uri, // code will be passed as get parameter 'code'
@@ -309,7 +310,7 @@ export class SessionAuthManager extends PersistentStoreBacked<PillbugSessionStor
     }
 
     public async completeLogin(code: string) {
-        console.log("Attempting to complete login");
+        logger.info("Attempting to complete login");
 
         try {
             const [partialLogin, partialLoginIndex] = this.getUnfinishedLogin();
@@ -339,7 +340,7 @@ export class SessionAuthManager extends PersistentStoreBacked<PillbugSessionStor
                 cachedInstance: undefined,
                 cachedAccount: undefined,
             };
-            console.log(`Attempting to write back to persistent store a complete login for ${completeLogin.instanceUrl}`)
+            logger.info(`Attempting to write back to persistent store a complete login for ${completeLogin.instanceUrl}`)
 
             this.setPersistentStore("accounts", partialLoginIndex, (prev) => {
                 if (prev.appData.client_id !== completeLogin.appData.client_id) {
@@ -348,7 +349,7 @@ export class SessionAuthManager extends PersistentStoreBacked<PillbugSessionStor
                 return completeLogin;
             });
 
-            console.log(`Completed login to ${completeLogin.instanceUrl}`)
+            logger.info(`Completed login to ${completeLogin.instanceUrl}`)
 
             // Nudge the current account id to switch to it
             // First set it to undefined, in case this is the first account. (Otherwise 0 would be no change)
@@ -400,7 +401,7 @@ export class SessionAuthManager extends PersistentStoreBacked<PillbugSessionStor
 
         if (unfinishedLogins.length > 0) {
             unfinishedLogins.reverse();
-            console.log(`Cleaning up ${unfinishedLogins.length} old unfinished logins and using the most recent one.`)
+            logger.info(`Cleaning up ${unfinishedLogins.length} old unfinished logins and using the most recent one.`)
 
             for (const i of unfinishedLogins) {
                 accounts.splice(i, 1);
@@ -411,7 +412,7 @@ export class SessionAuthManager extends PersistentStoreBacked<PillbugSessionStor
         }
 
         // Need to set these both at the same time. If they get out of sync, weird stuff
-        console.log(`Account index: ${unfinishedLoginIndexToUse}. Accounts: ${JSON.stringify(accounts)}`)
+        logger.info(`Account index: ${unfinishedLoginIndexToUse}. Accounts: ${JSON.stringify(accounts)}`)
         this.setPersistentStore(produce((store) => {
             store.lastUsedAccount = unfinishedLoginIndexToUse;
             store.accounts = accounts;
@@ -455,7 +456,7 @@ export async function updateAuthStateForActiveAccount(accountIndex: number, pers
 
     if (accountIndex >= persistentStore.accounts.length) {
         const clamped = persistentStore.accounts.length - 1;
-        console.log(`Out of bounds account index: ${accountIndex} >= ${persistentStore.accounts.length}. clamping to ${clamped}`);
+        logger.info(`Out of bounds account index: ${accountIndex} >= ${persistentStore.accounts.length}. clamping to ${clamped}`);
         accountIndex = clamped;
     }
 

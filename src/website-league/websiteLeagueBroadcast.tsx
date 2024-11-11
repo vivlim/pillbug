@@ -19,6 +19,7 @@ import {
     PreprocessedPostUserBar,
 } from "~/components/post/preprocessed";
 import { unwrapResponse } from "~/lib/clientUtil";
+import { logger } from "~/logging";
 
 type WebsiteLeagueAnnouncement = {
     status?: Status;
@@ -113,29 +114,29 @@ async function getLatestAnnouncementFromFeed(
         );
 
         if (feed === undefined) {
-            console.log("didn't use or couldn't get rss feed");
+            logger.info("didn't use or couldn't get rss feed");
             return knownLatest;
         }
 
         if (feed.items.length === 0) {
-            console.log("rss feed contained no items");
+            logger.info("rss feed contained no items");
             return knownLatest;
         }
 
         const topItem = feed.items[0];
         if (topItem.link === undefined) {
-            console.log("rss feed top item had no link");
+            logger.info("rss feed top item had no link");
             return knownLatest;
         }
 
         if (knownLatest !== undefined && knownLatest.url === topItem.link) {
-            console.log("rss feed top item matches the last known post");
+            logger.info("rss feed top item matches the last known post");
             return knownLatest;
         }
 
         const result = unwrapResponse(await client.search(topItem.link));
         if (result.statuses.length === 0) {
-            console.log(`no search results for rss item ${topItem.link}`);
+            logger.info(`no search results for rss item ${topItem.link}`);
             return knownLatest;
         }
         return result.statuses[0];
@@ -162,7 +163,7 @@ async function getRssFeed(
         const now = DateTime.now();
         const ago = now.diff(DateTime.fromISO(lastChecked));
         if (ago.as("seconds") < Duration.fromISO("PT6H").as("seconds")) {
-            console.log(
+            logger.info(
                 `last checked rss feed ${ago} ago, too recent to check again.`
             );
             return undefined;
@@ -178,7 +179,7 @@ async function getRssFeed(
     });
 
     if (feedRequest.status !== 200) {
-        console.log(`failed to retrieve rss feed: ${feedRequest.statusText}`);
+        logger.info(`failed to retrieve rss feed: ${feedRequest.statusText}`);
         return undefined;
     }
     const feedText = await feedRequest.text();

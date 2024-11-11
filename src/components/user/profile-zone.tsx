@@ -106,7 +106,7 @@ export interface ProfileZoneProps {
 
 /// The profile sidebar/header that appears on user profile and post pages
 export const ProfileZone: Component<ProfileZoneProps> = (props) => {
-    // console.log(`profilezone for ${props.userInfo.acct}`);
+    // logger.info(`profilezone for ${props.userInfo.acct}`);
     const auth = useAuth();
     const currentUser = createMemo(() => {
         if (auth.signedIn) {

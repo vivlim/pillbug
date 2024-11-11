@@ -30,6 +30,7 @@ import { cache, useSearchParams } from "@solidjs/router";
 import { createStore } from "solid-js/store";
 import { PageNav } from "../ui/page-footer";
 import { useSettings } from "~/lib/settings-manager";
+import { logger } from "~/logging";
 
 export type FeedComponentProps = {
     rules: FeedRuleProperties[];
@@ -63,7 +64,7 @@ export const FeedComponent: Component<FeedComponentProps> = (props) => {
             manifest: FeedManifest;
             rules: FeedRuleProperties[];
         }) => {
-            console.log(
+            logger.info(
                 `entering engine resource fetcher for ${args.manifest?.source.describe()}`
             );
             return new FeedEngine(args.manifest, args.rules);
@@ -105,14 +106,14 @@ export const FeedComponentPostList: Component<{
     const auth = useAuth();
     const client = auth.assumeSignedIn.client;
     const getPosts = cache(async (page: number, engine: FeedEngine) => {
-        console.log("fetching posts");
+        logger.info("fetching posts");
         const posts = await engine.getPosts(page, (msg) => {
             setInProgressStatusMessage(msg);
         });
         if (posts.error !== undefined) {
             console.error(`error while fetching posts: ${posts.error.message}`);
         } else {
-            console.log(`successfully fetched ${posts.posts.length} posts`);
+            logger.info(`successfully fetched ${posts.posts.length} posts`);
         }
         return posts;
     }, `cached-feed-${props.engine.manifest.source.describe()}` /* use the source as part of the cache key, since it should be unique */);
@@ -123,13 +124,13 @@ export const FeedComponentPostList: Component<{
     const [posts, postsResourceActions] = createResource(
         () => currentPage(),
         async (page) => {
-            console.log(`showing posts for page ${page}`);
+            logger.info(`showing posts for page ${page}`);
             setInProgressStatusMessage("showing posts for page " + page);
             const p = await getPosts(page, props.engine);
             if (p.error !== undefined) {
                 console.error(`error getting posts: ${p.error.message}`);
             } else {
-                console.log(`posts available: ${p.posts.length}`);
+                logger.info(`posts available: ${p.posts.length}`);
             }
             if (props.onLoaded) {
                 props.onLoaded();
@@ -154,7 +155,7 @@ export const FeedComponentPostList: Component<{
             (entries, observer) => {
                 for (const entry of entries) {
                     if (entry.isIntersecting) {
-                        console.log("next button has scrolled into view");
+                        logger.info("next button has scrolled into view");
                         const nextPage = currentPage() + 1;
                         requestIdleCallback(() => {
                             getPosts(nextPage, props.engine);

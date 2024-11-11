@@ -40,6 +40,7 @@ import { useEditOverlayContext } from "~/lib/edit-overlay-context";
 import { VisibilityIcon } from "~/components/visibility-icon";
 import { IoWarningOutline } from "solid-icons/io";
 import { MenuButton } from "~/components/ui/menubutton";
+import { logger } from "~/logging";
 
 export interface EditDialogProps extends DialogRootProps {
     returnRoute?: string;
@@ -80,9 +81,9 @@ const PostEditor: Component<EditDialogProps> = (props) => {
     const [postId, setPostId] = createSignal<string | null>(null);
     // bubble up submit
     createEffect(() => {
-        console.log("posted() changed?");
+        logger.info("posted() changed?");
         if (posted()) {
-            console.log("bubbling up...");
+            logger.info("bubbling up...");
             const new_id = postId();
             if (new_id) {
                 props.onSubmit?.(new_id);
