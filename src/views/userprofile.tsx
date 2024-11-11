@@ -75,7 +75,7 @@ export const UserProfile: Component<{ acct: string }> = (props) => {
             }
             const account = unwrapResponse(await client.lookupAccount(acct));
             if (account?.id === undefined) {
-                console.error(`user ${acct} doesn't exist?`);
+                logger.error(`user ${acct} doesn't exist?`);
                 throw new Error(`user ${acct} doesn't exist?`);
             }
 

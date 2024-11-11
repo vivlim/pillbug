@@ -56,7 +56,7 @@ export const ImageLightbox: Component<ImageLightboxProps> = (props) => {
                 props.imageIndex >= props.images.length ||
                 props.imageIndex < 0
             ) {
-                console.error(
+                logger.error(
                     `provided index ${props.imageIndex} out of bounds, setting to 0`
                 );
                 setIndex(0);

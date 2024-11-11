@@ -111,7 +111,7 @@ export const FeedComponentPostList: Component<{
             setInProgressStatusMessage(msg);
         });
         if (posts.error !== undefined) {
-            console.error(`error while fetching posts: ${posts.error.message}`);
+            logger.error(`error while fetching posts: ${posts.error.message}`);
         } else {
             logger.info(`successfully fetched ${posts.posts.length} posts`);
         }
@@ -128,7 +128,7 @@ export const FeedComponentPostList: Component<{
             setInProgressStatusMessage("showing posts for page " + page);
             const p = await getPosts(page, props.engine);
             if (p.error !== undefined) {
-                console.error(`error getting posts: ${p.error.message}`);
+                logger.error(`error getting posts: ${p.error.message}`);
             } else {
                 logger.info(`posts available: ${p.posts.length}`);
             }

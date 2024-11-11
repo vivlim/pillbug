@@ -3,6 +3,7 @@ import { FeedSource } from "./abstract";
 import { Status } from "megalodon/lib/src/entities/status";
 import { FeedManifest } from "../feed-engine";
 import { unwrapResponse } from "~/lib/clientUtil";
+import { logger } from "~/logging";
 
 export class HomeFeedSource extends FeedSource {
     constructor(private auth: SessionAuthManager) {
@@ -32,7 +33,7 @@ export class HomeFeedSource extends FeedSource {
             if (requestedLastPart === foundLastPart) {
                 return searchResult.statuses[0]
             }
-            console.warn(`Retrieved by url ${searchResult.statuses[0].url} but this is different from the requested ${postUrl}`)
+            logger.warn(`Retrieved by url ${searchResult.statuses[0].url} but this is different from the requested ${postUrl}`)
         }
         return null
     }

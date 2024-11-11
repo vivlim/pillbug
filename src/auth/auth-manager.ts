@@ -183,7 +183,7 @@ export class SessionAuthManager extends PersistentStoreBacked<PillbugSessionStor
             }
             catch (e) {
                 if (e instanceof Error) {
-                    console.warn(`error when refreshing notifications for account ${i}: ${e.message}`)
+                    logger.warn(`error when refreshing notifications for account ${i}: ${e.message}`)
                 }
             }
 
@@ -360,7 +360,7 @@ export class SessionAuthManager extends PersistentStoreBacked<PillbugSessionStor
         }
         catch (e) {
             if (e instanceof Error) {
-                console.error(`Failed to complete login: ${e}`)
+                logger.error(`Failed to complete login: ${e}`)
                 throw e;
             }
         }
