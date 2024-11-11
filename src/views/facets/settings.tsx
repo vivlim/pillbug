@@ -11,6 +11,10 @@ import {
     Show,
     Switch,
 } from "solid-js";
+import {
+    DropdownOrOtherComponentProps,
+    IndexDropdown,
+} from "~/components/dropdown-or-other";
 import { Timestamp } from "~/components/post/timestamp";
 import { Button } from "~/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "~/components/ui/card";
@@ -124,6 +128,24 @@ const SettingsFacet: Component = () => {
                             <code>window.pillbug.*</code>)
                         </PersistentFlagCheckbox>
                     </Show>
+
+                    <IndexDropdown
+                        value={settings.getPersistent().logLevel ?? 3}
+                        setter={(l) =>
+                            settings.setPersistentStore("logLevel", l)
+                        }
+                        labels={[
+                            "silly",
+                            "trace",
+                            "debug",
+                            "info",
+                            "warn",
+                            "error",
+                            "fatal",
+                        ]}
+                    >
+                        log level for your browser's javascript console:
+                    </IndexDropdown>
                 </CardContent>
             </Card>
         </div>

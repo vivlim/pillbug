@@ -146,3 +146,50 @@ export function DropdownOrOtherComponentBuilder<T extends string>(
 export const StringChoiceDropdown: Component<
     DropdownOrOtherComponentProps<string>
 > = (p) => DropdownOrOtherComponentBuilder<string>(p);
+
+
+export interface IndexDropdownProps {
+    value: number;
+    setter: (arg0: number) => void;
+    children: JSX.Element;
+    labels: string[];
+}
+export const IndexDropdown: Component<IndexDropdownProps> = (props) => {
+    const uniqueId = createUniqueId();
+    const elementId = `dropdown-${uniqueId}`;
+
+    const [selectedIndex, setSelectedIndex] = createSignal<number>(props.value);
+
+    return (
+        <>
+            <label for={elementId} class="pl-2 select-none">
+                {props.children}
+            </label>
+            <select
+                id={elementId}
+                onChange={(e: {
+                    currentTarget: HTMLSelectElement;
+                    target: Element;
+                }) => {
+                    const selectedIndex = parseInt(e.currentTarget.value);
+                    setSelectedIndex(selectedIndex);
+                    props.setter(selectedIndex);
+                }}
+                class="pbInput"
+            >
+                <For each={props.labels}>
+                    {(label, idx) => {
+                        return (
+                            <option
+                                value={idx()}
+                                selected={selectedIndex() === idx()}
+                            >
+                                {label}
+                            </option>
+                        );
+                    }}
+                </For>
+            </select>
+        </>
+    );
+};
