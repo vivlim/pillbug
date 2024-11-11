@@ -548,7 +548,7 @@ const FollowingUserPosts: Component<{ acct: string }> = (props) => {
                 props.acct
             );
             if (targetUser?.id === undefined) {
-                console.error(`user ${props.acct} doesn't exist?`);
+                logger.error(`user ${props.acct} doesn't exist?`);
                 throw new Error(`user ${props.acct} doesn't exist?`);
             }
 

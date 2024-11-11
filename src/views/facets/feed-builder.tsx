@@ -61,6 +61,7 @@ import {
 } from "~/components/ui/dropdown-menu";
 import { useFeeds } from "~/lib/feed-manager";
 import { StoreBacked } from "~/lib/store-backed";
+import { logger } from "~/logging";
 
 type FeedSource = "homeTimeline";
 class FeedBuilderFacetStore {
@@ -280,7 +281,7 @@ const FeedBuilderFacet: Component = (props) => {
                                             "feedbackMessage",
                                             "save failed: " + e.message
                                         );
-                                        console.error(
+                                        logger.error(
                                             "error saving: " + e.stack ??
                                                 e.message
                                         );

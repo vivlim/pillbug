@@ -142,7 +142,7 @@ async function getLatestAnnouncementFromFeed(
         return result.statuses[0];
     } catch (e) {
         if (e instanceof Error) {
-            console.error(
+            logger.error(
                 `failed to get announcement from rss feed: ${e.message}`
             );
             return undefined;

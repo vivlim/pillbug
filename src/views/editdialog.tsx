@@ -170,7 +170,7 @@ const PostEditor: Component<EditDialogProps> = (props) => {
                     setBusy(false);
                 } else {
                     // TODO: show errors
-                    console.error(postErrors().join("\n"));
+                    logger.error(postErrors().join("\n"));
                 }
                 return false;
             }}
