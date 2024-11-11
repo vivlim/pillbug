@@ -4,6 +4,7 @@ import { useSessionContext } from "./session-context";
 import { createEffect } from "solid-js";
 import { Color, HslColor } from "solid-color";
 import { useAuth } from "~/auth/auth-manager";
+import { logger } from "~/logging";
 
 export function useSettings(): SettingsManager {
     const sessionContext = useSessionContext();
@@ -25,6 +26,7 @@ export interface EphemeralSettings {
 export interface PersistentSettings {
     version: 1
     kind: 'persistent'
+    logLevel?: number
     useInternetTime?: Flag
     alignColumnsLeft?: Flag
     useFullQualityImagesAsThumbnails?: Flag
@@ -76,6 +78,10 @@ export class SettingsManager extends PersistentStoreBacked<EphemeralSettings, Pe
         createEffect(() => {
             // Update document classes based on settings
             this.updateDocumentClassesFromSettings();
+
+            if (this.persistentStore.logLevel !== undefined) {
+                logger.settings.minLevel = this.persistentStore.logLevel;
+            }
         })
     }
 

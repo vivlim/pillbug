@@ -25,7 +25,7 @@ export const UserInstanceBanner: Component = () => {
 };
 
 export const InstanceBanner: Component<InstanceBannerProps> = (props) => {
-    logger.info(JSON.stringify(props));
+    logger.debug(props);
     return (
         <>
             <Show when={props.instance?.thumbnail !== undefined}>

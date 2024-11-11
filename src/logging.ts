@@ -7,4 +7,14 @@ class PillbugLogger<T> extends Logger<T> {
         this.stackDepthLevel = 6
     }
 }
-export const logger = new PillbugLogger<unknown>({ name: "app" })
+
+function isChromium() {
+    return window.chrome !== undefined;
+}
+
+export const logger = new PillbugLogger<unknown>({
+    name: "app",
+    minLevel: 3,
+    prettyLogTemplate: "[{{dateIsoStr}} {{logLevelName}} {{name}} {{fileNameWithLine}}] ",
+    stylePrettyLogs: isChromium()
+})
