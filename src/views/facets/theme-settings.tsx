@@ -40,7 +40,8 @@ const ThemeSettingsFacet: Component = () => {
         {
             status: {
                 account: auth.assumeSignedIn.state.accountData,
-                content: "this is an example post",
+                content:
+                    "<p>this is an example post</p><blockquote>it contains a block quote</blockquote>as well as <code>some inline code</code><pre>and a code block</pre>",
                 id: "null",
                 uri: "#",
                 in_reply_to_id: null,

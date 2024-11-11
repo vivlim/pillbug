@@ -190,6 +190,13 @@ body {
     font-size: large;
 }
 
+.post-content blockquote {
+    border-left: 2px solid hsl(var(--accent));
+    padding-left: 0.5em;
+    padding-top: 0.25em;
+    padding-bottom: 0.25em;
+}
+
 #layoutColumnsRoot {
     display: grid;
     width: 100vw;
