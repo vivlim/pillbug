@@ -66,7 +66,7 @@ function cssColor(
     target.setProperty(k, `var(${k}-h) var(${k}-s) var(${k}-l)`);
 
     // const result = `${c?.h} ${c?.s * 100}% ${c?.l * 100}%`;
-    // console.log("color: " + result);
+    // logger.info("color: " + result);
 
     // return result;
 }

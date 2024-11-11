@@ -19,6 +19,7 @@ import {
 import { AvatarImage } from "~/components/user/avatar";
 import { SessionAuthManager, useAuth } from "~/auth/auth-manager";
 import { SignedInAccount } from "~/auth/auth-types";
+import { logger } from "~/logging";
 
 export const LoginView: Component = () => {
     const auth = useAuth();
@@ -27,7 +28,7 @@ export const LoginView: Component = () => {
 
     const doOAuth = async (authManager: SessionAuthManager) => {
         if (busy()) {
-            console.log(
+            logger.info(
                 "tried to enter oauth when already busy. taking no action"
             );
             return;
@@ -44,7 +45,7 @@ export const LoginView: Component = () => {
             window.location.assign(registration.appData.url);
         } catch (error) {
             if (error instanceof Error) {
-                console.log(
+                logger.info(
                     `error during login ${error.message}\n${error.stack}`
                 );
                 setError(error);
@@ -63,14 +64,14 @@ export const LoginView: Component = () => {
     if (searchParams.code !== undefined) {
         const getToken = async () => {
             if (busy()) {
-                console.log(
+                logger.info(
                     "tried to enter getting token when already busy. taking no action"
                 );
                 return;
             }
             setBusy(true);
             try {
-                console.log(
+                logger.info(
                     "trying to acquire a token using the provided code"
                 );
 
@@ -79,7 +80,7 @@ export const LoginView: Component = () => {
                 navigate("/");
             } catch (error) {
                 if (error instanceof Error) {
-                    console.log(`error getting token ${error.message}`);
+                    logger.info(`error getting token ${error.message}`);
                     setError(error);
                     setBusy(false);
                 }

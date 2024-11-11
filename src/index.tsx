@@ -1,4 +1,5 @@
 /* @refresh reload */
+import "./logging";
 import { ErrorBoundary, render } from "solid-js/web";
 
 import "./index.css";

@@ -1,6 +1,7 @@
 import { Component, Match, Show, Switch } from "solid-js";
 import { Instance } from "megalodon/lib/src/entities/instance";
 import { useAuth } from "~/auth/auth-manager";
+import { logger } from "~/logging";
 
 export interface InstanceBannerProps {
     instance: Instance;
@@ -24,7 +25,7 @@ export const UserInstanceBanner: Component = () => {
 };
 
 export const InstanceBanner: Component<InstanceBannerProps> = (props) => {
-    console.log(JSON.stringify(props));
+    logger.info(JSON.stringify(props));
     return (
         <>
             <Show when={props.instance?.thumbnail !== undefined}>

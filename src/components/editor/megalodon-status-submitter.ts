@@ -5,6 +5,7 @@ import { MegalodonInterface } from "megalodon";
 import { unwrapResponse } from "~/lib/clientUtil";
 import { Attachment } from "megalodon/lib/src/entities/attachment";
 import { AsyncAttachment } from "megalodon/lib/src/entities/async_attachment";
+import { logger } from "~/logging";
 
 export class MegalodonPostSubmitter implements IEditorSubmitter<MegalodonPostStatus, string> {
 
@@ -18,9 +19,9 @@ export class MegalodonPostSubmitter implements IEditorSubmitter<MegalodonPostSta
         const client = this.client;
         for (let attachment of attachments) {
             // not bothering with focus for now
-            console.log(`Uploading ${attachment.name}.`)
+            logger.info(`Uploading ${attachment.name}.`)
             const upload = unwrapResponse(await client.uploadMedia(attachment.file, { description: attachment.description }))
-            console.log(`Uploaded ${attachment.name}.`)
+            logger.info(`Uploaded ${attachment.name}.`)
             media.push(upload)
         }
         doc.options.media_ids = media.map(m => m.id)

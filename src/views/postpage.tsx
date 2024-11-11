@@ -30,6 +30,7 @@ import {
 import { useFrameContext } from "~/components/frame/context";
 import { NewCommentEditor } from "~/components/editor/comments";
 import { unwrapResponse } from "~/lib/clientUtil";
+import { logger } from "~/logging";
 
 /** Fetch the info for a post and arrange its context in a nested tree structure before returning. */
 export async function fetchPostInfoTree(
@@ -42,7 +43,7 @@ export async function fetchPostInfoTree(
     const loadPostsProps = props.loadProps;
     const signedInState = props.signedInState;
 
-    console.log(
+    logger.info(
         `fetching post info tree with props: ${JSON.stringify(loadPostsProps)}`
     );
     if (!signedInState?.signedIn) {
@@ -54,7 +55,7 @@ export async function fetchPostInfoTree(
         previousTree !== undefined &&
         loadPostsProps.newCommentId !== undefined
     ) {
-        console.log(
+        logger.info(
             `attempting to patch previous post tree with new comment ${loadPostsProps.newCommentId}`
         );
         const newCommentRequest = await client.getStatus(
@@ -97,7 +98,7 @@ export async function fetchPostInfoTree(
         };
 
         if (targetId === null) {
-            console.log(
+            logger.info(
                 `the new comment ${newComment.id} did not set an id it's a reply to, this is a bug.`
             );
         }
@@ -105,7 +106,7 @@ export async function fetchPostInfoTree(
         tryAttachTo(previousTree);
 
         if (!success) {
-            console.log(
+            logger.info(
                 `couldn't find ${targetId} to attach the new comment ${newComment.id} to. attaching it to the root...`
             );
             previousTree.children.push(
@@ -117,7 +118,7 @@ export async function fetchPostInfoTree(
     } else {
         const postId = loadPostsProps.postId;
 
-        console.log(`getting post ${postId}`);
+        logger.info(`getting post ${postId}`);
 
         const requestedStatus = unwrapResponse(await client.getStatus(postId));
 
@@ -150,7 +151,7 @@ export async function fetchPostInfoTree(
         } catch (e) {
             let errorNode;
             if (e instanceof Error) {
-                console.log(
+                logger.info(
                     `Failed to get context for post ${postId}: ${e.stack}`
                 );
                 errorNode = new PostTreePlaceholderNode(

@@ -11,6 +11,7 @@ import { Dialog, DialogOverlay } from "../ui/dialog";
 import * as DialogPrimitive from "@kobalte/core/dialog";
 import { Dynamic } from "solid-js/web";
 import { Button } from "../ui/button";
+import { logger } from "~/logging";
 
 const InnerImage: Component<{ image: Attachment }> = (props) => {
     // set the max height to the screen height, -5rem for the margine, and -3rem
@@ -50,7 +51,7 @@ export const ImageLightbox: Component<ImageLightboxProps> = (props) => {
     // outer index takes precedence
     createEffect(() => {
         if (props.imageIndex != null) {
-            console.log("Updating index");
+            logger.info("Updating index");
             if (
                 props.imageIndex >= props.images.length ||
                 props.imageIndex < 0

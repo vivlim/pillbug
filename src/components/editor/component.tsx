@@ -55,6 +55,7 @@ import { KeyBindingMap } from "tinykeys";
 import { filesize } from "filesize";
 import { AddAttachmentMenu, AttachmentComponent } from "./attachments";
 import { BeforeLeaveEventArgs, useBeforeLeave } from "@solidjs/router";
+import { logger } from "~/logging";
 
 export const MegalodonStatusEditorComponent: Component<
     EditorProps<MegalodonPostStatus, string, EditorDocument>
@@ -103,7 +104,7 @@ export class EditorComponentBase<TOutput, TDoc extends EditorDocument> {
 
     /** perform an 'action' */
     protected async performAction(action: EditorActions) {
-        console.log(`editor ${action}: starting attempt`);
+        logger.info(`editor ${action}: starting attempt`);
         this.model.setValidationErrors([]);
         this.model.setStage("validating");
         // Unwrap the document, it doesn't need to be reactive now
@@ -113,14 +114,14 @@ export class EditorComponentBase<TOutput, TDoc extends EditorDocument> {
             doc
         );
         if (transformResult.errors.length > 0) {
-            console.log(
+            logger.info(
                 `editor ${action}: validation failed with ${transformResult.errors.length} errors`
             );
             this.model.setValidationErrors(transformResult.errors);
             this.model.setStage("idle");
             return;
         }
-        console.log(`editor ${action}: validation succeeded`);
+        logger.info(`editor ${action}: validation succeeded`);
 
         if (transformResult.output === undefined) {
             this.model.setValidationErrors([
@@ -128,21 +129,21 @@ export class EditorComponentBase<TOutput, TDoc extends EditorDocument> {
                     "Failed to transform message, and no explicit errors were returned. This is a bug."
                 ),
             ]);
-            console.log(`editor ${action}: transforming the document failed`);
+            logger.info(`editor ${action}: transforming the document failed`);
             this.model.setStage("idle");
             return;
         }
 
         this.model.setStage("submitting");
         try {
-            console.log(`editor ${action}: submitting the post`);
+            logger.info(`editor ${action}: submitting the post`);
             const newPostId = await this.submitter.submit(
                 transformResult.output,
                 this.model.document.attachments,
                 action
             );
 
-            console.log(`editor ${action}: submitted successfully`);
+            logger.info(`editor ${action}: submitted successfully`);
             this.model.setStage("submitted");
 
             // Setting the new post id may trigger navigation or other behavior in the calling page
@@ -153,7 +154,7 @@ export class EditorComponentBase<TOutput, TDoc extends EditorDocument> {
                     new ValidationError(e.stack ?? e.message),
                 ]);
             }
-            console.log(`editor ${action}: submitting failed`);
+            logger.info(`editor ${action}: submitting failed`);
             this.model.setStage("idle");
             return;
         }
@@ -191,22 +192,22 @@ export class EditorComponentBase<TOutput, TDoc extends EditorDocument> {
         const keyboardShortcuts: Accessor<KeyBindingMap> = createMemo(() => {
             return {
                 "Control+Enter": () => {
-                    console.log("pushed ctrl+enter");
+                    logger.info("pushed ctrl+enter");
                     this.performAction("submit");
                 },
             };
         });
 
         const onPaste = (e: ClipboardEvent) => {
-            console.log("entering clipboard handler");
+            logger.info("entering clipboard handler");
             if (e.clipboardData === null) {
-                console.log("no clipboard data.");
+                logger.info("no clipboard data.");
                 return;
             }
 
             // Does the clipboard being pasted contain files?
             if (e.clipboardData.types.includes("Files")) {
-                console.log("clipboard has files");
+                logger.info("clipboard has files");
                 for (let i = 0; i < e.clipboardData.items.length; i++) {
                     let transferItem = e.clipboardData.items[i];
                     let file = e.clipboardData.files[i];
@@ -225,7 +226,7 @@ export class EditorComponentBase<TOutput, TDoc extends EditorDocument> {
                     });
                 }
             } else {
-                console.log("clipboard has no files");
+                logger.info("clipboard has no files");
             }
         };
 
