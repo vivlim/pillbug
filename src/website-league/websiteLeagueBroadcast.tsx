@@ -50,7 +50,9 @@ export const WebsiteLeagueBroadcast: Component = (props) => {
             );
 
             if (lastStatus.length === 0) {
-                return { text: "failed to get broadcast announcement status" };
+                logger.warn(
+                    `Failed to get broadcast announcement status from instance.`
+                );
             }
 
             // make sure it is really the latest
