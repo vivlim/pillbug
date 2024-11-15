@@ -8,6 +8,7 @@ import { Status } from "megalodon/lib/src/entities/status";
 import {
     Component,
     createEffect,
+    createMemo,
     createResource,
     createSignal,
     For,
@@ -28,6 +29,8 @@ import { Timestamp } from "~/components/post/timestamp";
 import { AvatarLink } from "~/components/user/avatar";
 import { SessionAuthManager, useAuth } from "~/auth/auth-manager";
 import { logger } from "~/logging";
+import { unwrapResponse } from "~/lib/clientUtil";
+import { PreprocessedPostBody } from "~/components/post/preprocessed";
 
 type NotificationDayGroups = {
     created_day: DateTime<true> | DateTime<false>;
@@ -99,7 +102,7 @@ export const SingleLinePostPreviewLink: Component<{
                 <Match when={props.status !== undefined}>
                     <a
                         href={`/post/${props.status?.id}`}
-                        class="pbSingleLineBlock"
+                        class="pbSingleLineBlock notificationYourStatus noUnderline"
                     >
                         <HtmlSandboxSpan
                             html={props.status!.content}
@@ -143,10 +146,24 @@ export const GroupedNotificationComponent: Component<{
 
     const firstNotification = notifications[0];
 
+    const isReplyToYou = createMemo(() => {
+        if (
+            group.type === "mention" &&
+            firstNotification.status?.in_reply_to_account_id ===
+                useAuth().assumeSignedIn.state.accountData.id
+        ) {
+            return true;
+        }
+        return false;
+    });
+
     return (
         <>
             <li class="pbNotification pbCard">
                 <Switch>
+                    <Match when={isReplyToYou()}>
+                        <ReplyNotification notification={firstNotification} />
+                    </Match>
                     <Match when={notifications.length === 1}>
                         <Show when={firstNotification.account != null}>
                             <AvatarLink
@@ -229,24 +246,77 @@ export const GroupedNotificationComponent: Component<{
                         </details>
                     </Match>
                 </Switch>
+
+                <RawDataViewer data={props.kindGroup} show={false} />
             </li>
         </>
     );
 };
-/*
 
-            <ContextMenu>
-                <ContextMenuTrigger class="flex-auto" disabled>
-                </ContextMenuTrigger>
-                <ContextMenuContent>
-                    <ContextMenuItem onClick={() => setShowRaw(!showRaw())}>
-                        Show JSON
-                    </ContextMenuItem>
-                </ContextMenuContent>
-            </ContextMenu>
-            <RawDataViewer data={props.kindGroup} show={showRaw()} />
+const ReplyNotification: Component<{ notification: Notification }> = (
+    props
+) => {
+    const status = createMemo(() => props.notification.status);
+    const auth = useAuth();
+    const [yourStatus] = createResource(
+        () => status()?.in_reply_to_id,
+        async (reply_to_id) => {
+            if (reply_to_id === null || reply_to_id === undefined) {
+                return undefined;
+            }
+            const s = unwrapResponse(
+                await auth.assumeSignedIn.client.getStatus(reply_to_id)
+            );
+            return s;
+        }
+    );
 
-*/
+    return (
+        <>
+            <Show when={props.notification.account != null}>
+                <AvatarLink
+                    user={props.notification.account!}
+                    imgClass="size-6"
+                    class="inline-block underline"
+                />
+            </Show>
+
+            <a
+                href={`/user/${props.notification.account?.acct}`}
+                class="underline"
+            >
+                {props.notification.account?.acct}
+            </a>
+            <Show when={!yourStatus.loading} fallback="(retrieving your post)">
+                <Switch>
+                    <Match when={yourStatus()?.in_reply_to_id === null}>
+                        <a href={`/post/${status()?.id}`}>
+                            replied to your post:
+                        </a>
+                    </Match>
+                    <Match when={yourStatus()?.in_reply_to_id !== null}>
+                        <a href={`/post/${status()?.id}`}>
+                            replied to your comment:
+                        </a>
+                    </Match>
+                </Switch>
+                <span class="pbSingleLineBlock notificationYourStatus">
+                    <HtmlSandboxSpan
+                        html={yourStatus()?.content!}
+                        emoji={yourStatus()?.emojis!}
+                    />
+                </span>
+            </Show>
+            <a href={`/post/${status()?.id}`} class="noUnderline">
+                <PreprocessedPostBody
+                    class="notificationReplyTheirStatus"
+                    status={props.notification.status!}
+                    limitInitialHeight={true}
+                ></PreprocessedPostBody>
+            </a>
+        </>
+    );
+};
 
 export const NotificationsFacet: Component = () => {
     const auth = useAuth();
@@ -271,20 +341,23 @@ export const NotificationsFacet: Component = () => {
     return (
         <ul id="notifications-facet">
             <For each={notifications()}>
-                {(dayGroup, index) => (
-                    <>
-                        <li class="pbCard">
-                            <Timestamp ts={dayGroup.created_day} />
-                        </li>
-                        <For each={dayGroup.kindGroups}>
-                            {(kindGroup, index) => (
-                                <GroupedNotificationComponent
-                                    kindGroup={kindGroup}
-                                />
-                            )}
-                        </For>
-                    </>
-                )}
+                {(dayGroup, index) => {
+                    const day = createMemo(() => {
+                        return dayGroup.created_day.toLocaleString();
+                    });
+                    return (
+                        <>
+                            <li class="pbCardSecondary">{day()}</li>
+                            <For each={dayGroup.kindGroups}>
+                                {(kindGroup, index) => (
+                                    <GroupedNotificationComponent
+                                        kindGroup={kindGroup}
+                                    />
+                                )}
+                            </For>
+                        </>
+                    );
+                }}
             </For>
         </ul>
     );

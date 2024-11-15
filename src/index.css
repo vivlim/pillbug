@@ -301,9 +301,20 @@ button {
     padding-bottom: 0.8rem;
 }
 
-#notifications-facet .pbCard>a {
+#notifications-facet .pbCard>a:not(a.noUnderline) {
     text-decoration: underline;
     margin-inline: 0.2em;
+}
+
+.notificationYourStatus {
+    opacity: 0.7;
+    font-style: italic;
+}
+
+.notificationReplyTheirStatus {
+    border-left: 2px solid hsl(var(--accent));
+    margin-bottom: 0.2em;
+    margin-top: 0.2em;
 }
 
 /* Generic card element for pillbug. This is some kind of rectangle that holds stuff. Doesn't define padding. */
@@ -316,6 +327,14 @@ button {
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
+.pbCardSecondary {
+    color: hsl(var(--secondary-foreground));
+    background: hsl(var(--secondary-h) var(--secondary-s) calc(var(--secondary-l) * 1.0));
+    margin: 2px 2px 8px 2px;
+    border-radius: var(--radius);
+}
+
 
 /* When used inside of a pbCard, ends after one line */
 .pbSingleLineBlock {
@@ -611,6 +630,14 @@ html.setting-unlimitedColumnWidth #layoutColumnsRoot {
 
         box-shadow: 
             5px 5px 4px #00000044;
+    }
+
+    .pbCardSecondary {
+        background: hsla(var(--secondary-h), var(--secondary-s), var(--secondary-l), 1);
+        background-image: linear-gradient(to right,
+            hsl(var(--secondary-h) var(--secondary-s) calc(var(--secondary-l) * 1.0)),
+            hsl(var(--secondary-h) calc(var(--secondary-s) * 0.60) calc(var(--secondary-l) * 2.5))
+            );
     }
 
     .pbInput {
