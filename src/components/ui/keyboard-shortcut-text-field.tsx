@@ -15,6 +15,7 @@ import {
     TextFieldTextAreaProps,
 } from "./text-field";
 import { createKeybindingsHandler, KeyBindingMap } from "tinykeys";
+import { Textbox } from "../textbox";
 
 export interface KeyboardShortcutTextAreaProps {
     shortcuts: KeyBindingMap;
@@ -26,9 +27,9 @@ export interface KeyboardShortcutTextAreaProps {
     value: string;
     onPaste?: (e: ClipboardEvent) => void;
 }
-export const KeyboardShortcutTextArea: Component<
-    KeyboardShortcutTextAreaProps
-> = (props) => {
+export const KeyboardShortcutTextArea: Component<KeyboardShortcutTextAreaProps> = (
+    props
+) => {
     const [, rest] = splitProps(props, ["shortcuts", "setValue"]);
 
     const handler = createMemo(() => {

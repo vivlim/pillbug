@@ -420,6 +420,17 @@ html.setting-unlimitedColumnWidth #layoutColumnsRoot {
     font-size: x-small;
 }
 
+.textboxRow, .flexRow {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.25em;
+}
+
+.textboxRow input[type="text"] {
+    flex: 1;
+}
+
 .pbButtonPrimary,
 .facet-navigation-item
 {

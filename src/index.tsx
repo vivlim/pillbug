@@ -20,6 +20,7 @@ const SettingsFacet = lazy(() => import("./views/facets/settings"));
 const ThemeSettingsFacet = lazy(() => import("./views/facets/theme-settings"));
 const EditorFacet = lazy(() => import("./views/facets/editor"));
 const NotificationsFacet = lazy(() => import("./views/facets/notifications"));
+const SearchFacet = lazy(() => import("./views/facets/search"));
 const AboutPillbugView = lazy(() => import("./views/aboutpillbug"));
 const Feed = lazy(() => import("./views/feed"));
 const UserProfile = lazy(() => import("./views/userprofile"));
@@ -66,7 +67,7 @@ render(
                 <Route
                     path="/search"
                     component={() => {
-                        return <div>placeholder for search</div>;
+                        return <SearchFacet />;
                     }}
                 />
                 <Route

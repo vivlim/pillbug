@@ -1,11 +1,18 @@
 import { DateTime, Duration } from "luxon";
 import { Response } from "megalodon";
+import { logger } from "~/logging";
 
 export function unwrapResponse<T>(response: Response<T>, label?: string | undefined) {
     if (label === undefined) {
         label = "Request";
     }
     if (response.status !== 200 && response.status !== 202) {
+        if (label !== undefined) {
+            logger.error(`${label} request failed with code ${response.status}`, response.statusText, response.data)
+        } else {
+            logger.error(`api request failed with code ${response.status}`, response.statusText, response.data)
+
+        }
         throw new Error(`${label} failed with code ${response.status}: ${response.statusText}`)
     }
 

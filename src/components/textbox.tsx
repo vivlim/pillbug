@@ -1,29 +1,82 @@
-import { Component, For, JSX, Match, Switch, createUniqueId } from "solid-js";
+import {
+    Component,
+    For,
+    JSX,
+    Match,
+    Switch,
+    createEffect,
+    createMemo,
+    createSignal,
+    createUniqueId,
+    splitProps,
+} from "solid-js";
 import { Checkbox } from "./checkbox";
+import { KeyBindingMap, createKeybindingsHandler } from "tinykeys";
 
 export type SimpleInputProps<T> = {
     value: T;
     setter: (s: T) => void;
     children: JSX.Element;
+    shortcuts?: KeyBindingMap;
+    onPaste?: (e: ClipboardEvent) => void;
+    tabindex?: number;
+    ref?: HTMLInputElement | ((e: HTMLInputElement) => void) | undefined;
+    immediateFocus?: boolean;
 };
 
 export const Textbox: Component<SimpleInputProps<string>> = (props) => {
     const id = createUniqueId();
+    const [, rest] = splitProps(props, ["shortcuts", "setter", "children"]);
+
+    const [ref, setRef] = createSignal<HTMLInputElement>();
+
+    createEffect(() => {
+        const r = ref();
+        if (r === undefined) {
+            return;
+        }
+        if (r && props.immediateFocus) {
+            r.focus();
+        }
+        if (typeof props.ref === "function") {
+            props.ref(r);
+        }
+    });
+
+    const handler = createMemo(() => {
+        if (props.shortcuts === undefined) {
+            return undefined;
+        }
+        return createKeybindingsHandler(props.shortcuts);
+    });
+
     return (
         <>
             <label for={id}>{props.children}</label>
             <input
+                {...rest}
                 id={id}
+                ref={setRef}
                 type="text"
                 class="pbInput"
                 value={props.value}
                 onChange={(e: { currentTarget: HTMLInputElement }) => {
                     props.setter(e.currentTarget.value);
                 }}
+                onKeyDown={handler()}
+                onPaste={props.onPaste}
             ></input>
         </>
     );
 };
+
+export function EnterToSubmitShortcut(action: () => void): KeyBindingMap {
+    return {
+        Enter: () => {
+            action();
+        },
+    };
+}
 
 export const OrNullTextbox: Component<SimpleInputProps<string | null>> = (
     props
