@@ -1,5 +1,6 @@
 import { Entity } from "megalodon";
 import rehypeParse from "rehype-parse";
+import rehypeReact, { Options as RehypeReactOptions } from "rehype-react";
 import rehypeSanitize, { defaultSchema } from "rehype-sanitize";
 import rehypeStringify from "rehype-stringify";
 import {
@@ -8,11 +9,19 @@ import {
     createResource,
     JSX,
     Match,
+    ParentProps,
     Switch,
     type Component,
 } from "solid-js";
 import { unified } from "unified";
 import rehypeEmoji from "~/lib/rehype-emoji";
+import { Fragment, jsx, jsxs } from "solid-jsx";
+import rehypeLinks from "~/lib/rehype-links";
+import { Button } from "~/components/ui/button";
+import {
+    PostEmbeddedUserLink,
+    PostEmbeddedUserLinkProps,
+} from "~/components/post-embedded/user-link";
 
 export type HtmlSandboxProps = {
     html: string;
@@ -25,6 +34,30 @@ export interface HtmlPreviewSpanProps
     numChars: number;
 }
 
+export const ParsedComponents = {
+    Link: (props: JSX.HTMLAttributes<HTMLAnchorElement>) => (
+        <a {...props}>{props.children}</a>
+    ),
+    UserLink: (props: PostEmbeddedUserLinkProps) => (
+        <PostEmbeddedUserLink {...props} />
+    ),
+};
+
+function jsxFactory(
+    type: string | ((properties_: ParentProps) => JSX.Element),
+    properties: ParentProps
+): JSX.Element {
+    if (
+        typeof type === "string" &&
+        ParsedComponents[type as keyof typeof ParsedComponents] !== undefined
+    ) {
+        return ParsedComponents[type as keyof typeof ParsedComponents](
+            properties
+        );
+    }
+    return jsx(type, properties);
+}
+
 /**
  * Component for rendering arbitrary HTML (e.g. post content) more safely.
  */
@@ -34,21 +67,19 @@ const HtmlSandbox: Component<HtmlSandboxProps> = (props) => {
             .use(rehypeParse, { fragment: true })
             .use(rehypeSanitize)
             .use(rehypeEmoji, { emoji_defs: props.emoji })
-            .use(rehypeStringify)
+            .use(rehypeLinks, {})
+            .use(rehypeReact, rehypeReactOptions)
     );
 
     const [sanitizedHtml] = createResource(props.html, async (fragment) => {
         const vfile = await rehypeParser().process(fragment);
-        return String(vfile);
+        return vfile.result;
     });
 
     return (
         <Switch>
             <Match when={sanitizedHtml.state === "ready"}>
-                <div
-                    class="post-content overflow-auto"
-                    innerHTML={sanitizedHtml()}
-                />
+                <div class="post-content overflow-auto">{sanitizedHtml()}</div>
             </Match>
             <Match when={sanitizedHtml.loading}>
                 <div>sanitizing html...</div>
@@ -74,6 +105,15 @@ export interface StrictHtmlSandboxProps extends HtmlSandboxProps {
     class?: string;
 }
 
+const rehypeReactOptions: RehypeReactOptions = {
+    Fragment,
+    jsx: jsxFactory,
+    jsxs: jsxFactory,
+    elementAttributeNameCase: "html",
+    stylePropertyNameCase: "css",
+    passNode: true,
+};
+
 /**
  * Component similar to {@link HtmlSandbox}, but provides a span.
  *
@@ -87,19 +127,19 @@ export const HtmlSandboxSpan: Component<StrictHtmlSandboxProps> = (props) => {
             .use(rehypeParse, { fragment: true })
             .use(rehypeSanitize, { ...defaultSchema, tagNames: [] })
             .use(rehypeEmoji, { emoji_defs: props.emoji })
-            .use(rehypeStringify)
+            .use(rehypeReact, rehypeReactOptions)
     );
 
     const [sanitizedHtml] = createResource(props.html, async (fragment) => {
         // logger.info("enter rehype parser fror " + props.html);
         const vfile = await rehypeParser().process(fragment);
-        return String(vfile);
+        return vfile.result;
     });
 
     return (
         <Switch>
             <Match when={sanitizedHtml.state === "ready"}>
-                <span innerHTML={sanitizedHtml()} class={props.class} />
+                <span class={props.class}>{sanitizedHtml()}</span>
             </Match>
             <Match when={sanitizedHtml.loading}>
                 <span>sanitizing html...</span>

@@ -50,12 +50,14 @@
         "get-urls": "^12.1.0",
         "hash-wasm": "^4.11.0",
         "hast-util-find-and-replace": "^5.0.1",
+        "hast-util-to-string": "^3.0.1",
         "hastscript": "^9.0.0",
         "json-rules-engine": "^7.0.0",
         "lodash-es": "^4.17.21",
         "luxon": "^3.5.0",
         "megalodon": "git://github.com/vivlim/megalodon.git#65f4c40a92ec4ec16d67ca1f1ec9de4e7a62f542",
         "rehype-parse": "^9.0.1",
+        "rehype-react": "^8.0.0",
         "rehype-sanitize": "^6.0.0",
         "rehype-stringify": "^10.0.1",
         "rss-parser": "^3.13.0",
@@ -63,6 +65,7 @@
         "solid-color": "^0.0.4",
         "solid-icons": "^1.1.0",
         "solid-js": "^1.8.11",
+        "solid-jsx": "^1.1.4",
         "solid-transition-group": "^0.2.3",
         "tailwind-merge": "^2.5.2",
         "tailwindcss-animate": "^1.0.7",
@@ -70,6 +73,8 @@
         "tinykeys": "^3.0.0",
         "tslog": "^4.9.3",
         "unified": "^11.0.5",
+        "unist-util-is": "^6.0.0",
+        "unist-util-visit": "^5.0.0",
         "url-regex-safe": "^4.0.0"
     }
 }
