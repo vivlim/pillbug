@@ -69,6 +69,7 @@ import { MenuButton } from "../ui/menubutton";
 import { unwrapResponse } from "~/lib/clientUtil";
 import { useSettings } from "~/lib/settings-manager";
 import { ProcessedStatus } from "../feed/feed-engine";
+import { MediaAttachments } from "./attachments";
 
 export type PreprocessedPostProps = {
     class?: string;
@@ -216,6 +217,10 @@ export const PreprocessedPostBody: Component<PreprocessedPostBodyProps> = (
                                     linkedAncestors={
                                         props.processedStatus?.linkedAncestors
                                     }
+                                />
+                                <MediaAttachments
+                                    attachments={props.status.media_attachments}
+                                    sensitive={props.status.sensitive}
                                 />
                             </ContentGuard>
                         </div>

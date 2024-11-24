@@ -1,5 +1,6 @@
 import { Attachment } from "megalodon/lib/src/entities/attachment";
 import {
+    children,
     Component,
     createResource,
     createSignal,
@@ -72,7 +73,6 @@ const ImageAttachment: Component<ImageAttachmentProps> = (props) => {
         ctx.putImageData(imageData, 0, 0);
         return canvas.toDataURL();
     });
-
     return (
         <Switch>
             <Match when={!hidingSensitiveContent()}>
@@ -108,12 +108,11 @@ const ImageAttachment: Component<ImageAttachmentProps> = (props) => {
                         setHidingSensitiveContent(false);
                     }}
                 >
-                    <div style="position: relative">
-                        <div style="position:absolute; top: 30%; width: 100%; text-align: center; padding: 1em; background: #00000066; color: #ffffff">
-                            click to show
-                        </div>
-                        <img
-                            src={blurHashImage()}
+                    <ElementOverlay overlayText="click to show">
+                        <BlurHashImage
+                            blurhash={props.attachment.blurhash}
+                            width={w}
+                            height={h}
                             sizes={sizes}
                             alt={props.attachment.description!}
                             class="object-cover w-full"
@@ -121,7 +120,85 @@ const ImageAttachment: Component<ImageAttachmentProps> = (props) => {
                                 "aspect-ratio": props.aspectRatio,
                             }}
                         />
-                    </div>
+                    </ElementOverlay>
+                </button>
+            </Match>
+        </Switch>
+    );
+};
+
+export interface BlurHashImageProps
+    extends JSX.ImgHTMLAttributes<HTMLImageElement> {
+    blurhash?: string | null;
+    width: number;
+    height: number;
+}
+export const BlurHashImage: Component<BlurHashImageProps> = (props) => {
+    const [, rest] = splitProps(props, ["blurhash", "width", "height"]);
+    const [blurHashImage] = createResource(
+        () => {
+            return { ...props };
+        },
+        async (props) => {
+            let blurhash = props.blurhash ?? "L~D1N_WUofj[tWa$odazM{jcjsWC"; // default derived from winxp bliss wallpaper
+            const pixels = decode(blurhash, props.width, props.height);
+            const canvas = document.createElement("canvas");
+            const ctx = canvas.getContext("2d");
+            if (ctx === null) {
+                return undefined;
+            }
+            const imageData = ctx.createImageData(props.width, props.height);
+            imageData.data.set(pixels);
+            ctx.putImageData(imageData, 0, 0);
+            return canvas.toDataURL();
+        }
+    );
+
+    return <img {...rest} src={blurHashImage()} />;
+};
+
+export interface ElementOverlayProps
+    extends JSX.HTMLAttributes<HTMLDivElement> {
+    overlayText: string;
+    children: JSX.Element;
+}
+
+export const ElementOverlay: Component<ElementOverlayProps> = (props) => {
+    const [, rest] = splitProps(props, ["overlayText", "children"]);
+
+    return (
+        <div style="position: relative">
+            <div
+                style="position:absolute; top: 30%; width: 100%; text-align: center; padding: 1em; background: #00000066; color: #ffffff"
+                {...rest}
+            >
+                {props.overlayText}
+            </div>
+            {props.children}
+        </div>
+    );
+};
+
+export interface ClickThroughProps
+    extends JSX.ButtonHTMLAttributes<HTMLButtonElement> {
+    children: JSX.Element;
+    initial: JSX.Element;
+}
+export const ClickThrough: Component<ClickThroughProps> = (props) => {
+    const [clickedInto, setClickedInto] = createSignal<boolean>(false);
+    const [, rest] = splitProps(props, ["children", "initial"]);
+
+    return (
+        <Switch>
+            <Match when={clickedInto()}>{props.children}</Match>
+            <Match when={!clickedInto()}>
+                <button
+                    {...rest}
+                    onClick={() => {
+                        setClickedInto(true);
+                    }}
+                >
+                    {props.initial}
                 </button>
             </Match>
         </Switch>
