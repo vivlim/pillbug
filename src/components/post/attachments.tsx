@@ -140,6 +140,17 @@ const VideoAttachmentPlayer: Component<{
                         <Match
                             when={
                                 props.attachment.preview_url !== null &&
+                                /* some servers will return the video url, so we need to make sure this is an image */
+                                (props.attachment.preview_url.endsWith("png") ||
+                                    props.attachment.preview_url.endsWith(
+                                        "jpeg"
+                                    ) ||
+                                    props.attachment.preview_url.endsWith(
+                                        "jpg"
+                                    ) ||
+                                    props.attachment.preview_url.endsWith(
+                                        "webp"
+                                    )) &&
                                 !props.sensitive
                             }
                         >
@@ -167,7 +178,6 @@ const VideoAttachmentPlayer: Component<{
                         </Match>
                         <Match
                             when={
-                                props.sensitive &&
                                 props.attachment.blurhash &&
                                 props.attachment.meta?.original?.width &&
                                 props.attachment.meta?.original?.height &&
@@ -196,7 +206,6 @@ const VideoAttachmentPlayer: Component<{
 
                         <Match
                             when={
-                                props.sensitive &&
                                 props.attachment.blurhash &&
                                 props.attachment.meta?.small?.width &&
                                 props.attachment.meta?.small?.height
@@ -209,6 +218,15 @@ const VideoAttachmentPlayer: Component<{
                                     height={
                                         props.attachment.meta!.small!.height!
                                     }
+                                />
+                            </ElementOverlay>
+                        </Match>
+                        <Match when={props.attachment.blurhash}>
+                            <ElementOverlay overlayText="click to play video">
+                                <BlurHashImage
+                                    blurhash={props.attachment.blurhash}
+                                    width={640}
+                                    height={480}
                                 />
                             </ElementOverlay>
                         </Match>
@@ -233,6 +251,13 @@ const VideoAttachmentPlayer: Component<{
 };
 
 const ObjectPropertyList: Component<{ object: any }> = (props) => {
+    if (props.object === undefined) {
+        return <li>(undefined)</li>;
+    }
+
+    if (props.object === null) {
+        return <li>(null)</li>;
+    }
     const oprops = Object.keys(props.object);
     return (
         <For each={oprops}>
