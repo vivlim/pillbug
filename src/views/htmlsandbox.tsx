@@ -22,6 +22,7 @@ import {
     PostEmbeddedUserLink,
     PostEmbeddedUserLinkProps,
 } from "~/components/post-embedded/user-link";
+import rehypeWrapTextRoot from "~/lib/rehype-wrap-text-root";
 
 export type HtmlSandboxProps = {
     html: string;
@@ -52,7 +53,7 @@ function jsxFactory(
         ParsedComponents[type as keyof typeof ParsedComponents] !== undefined
     ) {
         return ParsedComponents[type as keyof typeof ParsedComponents](
-            properties
+            properties as any // unchecked properties. todo: add some checks
         );
     }
     return jsx(type, properties);
@@ -68,6 +69,7 @@ const HtmlSandbox: Component<HtmlSandboxProps> = (props) => {
             .use(rehypeSanitize)
             .use(rehypeEmoji, { emoji_defs: props.emoji })
             .use(rehypeLinks, {})
+            .use(rehypeWrapTextRoot, { tagName: "div" })
             .use(rehypeReact, rehypeReactOptions)
     );
 
@@ -127,6 +129,8 @@ export const HtmlSandboxSpan: Component<StrictHtmlSandboxProps> = (props) => {
             .use(rehypeParse, { fragment: true })
             .use(rehypeSanitize, { ...defaultSchema, tagNames: [] })
             .use(rehypeEmoji, { emoji_defs: props.emoji })
+            .use(rehypeLinks, {})
+            .use(rehypeWrapTextRoot, { tagName: "span" })
             .use(rehypeReact, rehypeReactOptions)
     );
 

@@ -20,12 +20,13 @@ export default function rehypeLinks(options: RehypeLinksOptions) {
     return function (tree: Root) {
         visit(tree, { type: 'element', tagName: 'a' }, (node, index, parent) => {
             try {
-                if (node.children.length === 2) {
-                    if (node.children[0].type === 'text' && node.children[0].value === '@' && node.properties['href']) {
-                        node.tagName = "UserLink"
-                        node.properties['text'] = toString(node);
-                        return CONTINUE;
-                    }
+                // Get the hyperlink label and assign it to 'text'
+                const label = toString(node);
+                node.properties['text'] = label;
+
+                if (label.length > 0 && label[0] === "@") {
+                    node.tagName = "UserLink"
+                    return CONTINUE;
                 }
                 //node = h('Link', h('properties', h('children', node.children)))
                 node.tagName = "Link"
