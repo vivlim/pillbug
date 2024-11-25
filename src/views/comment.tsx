@@ -45,6 +45,7 @@ import {
 import { FaSolidScrewdriverWrench } from "solid-icons/fa";
 import { MenuButton } from "~/components/ui/menubutton";
 import { unwrapResponse } from "~/lib/clientUtil";
+import { UserContextMenu } from "~/components/post-embedded/user-link";
 export type CommentProps = {
     status: Status;
 };
@@ -73,33 +74,34 @@ export const CommentPostComponent: Component<CommentProps> = (postData) => {
     return (
         <>
             <div class="flex flex-row items-center flex-wrap border-b">
-                <AvatarLink user={status().account} imgClass="size-6" />
-                <A href={userHref()} class="font-bold m-2">
-                    <HtmlSandboxSpan
-                        html={status().account.display_name}
-                        emoji={status().account.emojis}
-                    />
-                </A>
-                <A href={userHref()} class="m-1 text-neutral-500 text-sm">
-                    {status().account.acct}
-                </A>
-                <A href={postHref()} class="m-1 text-neutral-500 text-xs">
-                    <Timestamp ts={DateTime.fromISO(status().created_at)} />
-                </A>
-                <ContextMenu>
-                    <ContextMenuTrigger class="flex-auto">
-                        {/* it doesn't *really* make sense for this visibility icon to be the right click target... but for now i just need *something* */}
-                        <VisibilityIcon
-                            class="ml-1 size-3"
-                            value={status().visibility}
-                        />
+                <UserContextMenu
+                    account={status().account}
+                    href={status().account.url}
+                >
+                    <ContextMenuTrigger class="flex flex-row items-center gap-x-2 select-none">
+                        <AvatarLink user={status().account} imgClass="size-6" />
+                        <A href={userHref()} class="font-bold m-2">
+                            <HtmlSandboxSpan
+                                html={status().account.display_name}
+                                emoji={status().account.emojis}
+                            />
+                        </A>
+                        <A
+                            href={userHref()}
+                            class="m-1 text-neutral-500 text-sm"
+                        >
+                            {status().account.acct}
+                        </A>
+                        <A
+                            href={postHref()}
+                            class="m-1 text-neutral-500 text-xs"
+                        >
+                            <Timestamp
+                                ts={DateTime.fromISO(status().created_at)}
+                            />
+                        </A>
                     </ContextMenuTrigger>
-                    <ContextMenuContent>
-                        <ContextMenuItem onClick={() => setShowRaw(!showRaw())}>
-                            Show raw status
-                        </ContextMenuItem>
-                    </ContextMenuContent>
-                </ContextMenu>
+                </UserContextMenu>
             </div>
             <div class="md:px-3 pt-2">
                 <ContentGuard warnings={status().spoiler_text}>

@@ -13,7 +13,10 @@ import {
     createSignal,
 } from "solid-js";
 import { useAuth } from "~/auth/auth-manager";
-import { PreprocessedPost } from "~/components/post/preprocessed";
+import {
+    PreprocessedPost,
+    wrapUnprocessedStatus,
+} from "~/components/post/preprocessed";
 import { EnterToSubmitShortcut, Textbox } from "~/components/textbox";
 import { Button } from "~/components/ui/button";
 import { AvatarImage, AvatarLink } from "~/components/user/avatar";
@@ -139,17 +142,9 @@ export const SearchResults: Component<SearchResultsProps> = (props) => {
                                 return (
                                     <li>
                                         <PreprocessedPost
-                                            status={{
-                                                status: status,
-                                                labels: [],
-                                                hide: false,
-                                                collapseReasons: [],
-                                                linkedAncestors: [],
-                                                rawRuleResults: {
-                                                    positive: [],
-                                                    negative: [],
-                                                },
-                                            }}
+                                            status={wrapUnprocessedStatus(
+                                                status
+                                            )}
                                             limitInitialHeight={true}
                                         />
                                     </li>

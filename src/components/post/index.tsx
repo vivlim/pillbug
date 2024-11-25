@@ -60,7 +60,11 @@ import {
 import { MenuButton } from "../ui/menubutton";
 import { unwrapResponse } from "~/lib/clientUtil";
 import { useSettings } from "~/lib/settings-manager";
-import { PostPreviewCard } from "./preprocessed";
+import {
+    PostPreviewCard,
+    PreprocessedPost,
+    wrapUnprocessedStatus,
+} from "./preprocessed";
 import { getShareParentUrl } from "../feed/feed-engine";
 import { logger } from "~/logging";
 
@@ -351,6 +355,16 @@ const ShareButton: Component<ShareButtonProps> = (props) => {
 };
 
 const Post: Component<PostProps> = (postData) => {
+    const [, rest] = splitProps(postData, ["status"]);
+    return (
+        <PreprocessedPost
+            status={wrapUnprocessedStatus(postData.status)}
+            {...rest}
+        />
+    );
+};
+
+const OldPost: Component<PostProps> = (postData) => {
     const auth = useAuth();
     const settings = useSettings();
     const [status, updateStatus] = createSignal(postData.status);

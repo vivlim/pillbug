@@ -370,6 +370,21 @@ const ShareButton: Component<ShareButtonProps> = (props) => {
     );
 };
 
+/** stub to wrap a regular status for use with the processed components. */
+export function wrapUnprocessedStatus(status: Status): ProcessedStatus {
+    return {
+        status: status,
+        labels: [],
+        hide: false,
+        collapseReasons: [],
+        linkedAncestors: [],
+        rawRuleResults: {
+            positive: [],
+            negative: [],
+        },
+    };
+}
+
 export const PreprocessedPost: Component<PreprocessedPostProps> = (
     postData
 ) => {
