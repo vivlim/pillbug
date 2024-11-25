@@ -67,18 +67,11 @@ export const PostEmbeddedUserLink: Component<PostEmbeddedUserLinkProps> = (
             fallback={
                 <>
                     <a
-                        href={`/user/${props.href}`}
+                        href={props.href}
                         class="inline-block mx-1"
                         title={`${props.href}`}
                     >
                         {props.text}
-                    </a>
-                    <a
-                        href={props.href}
-                        class="inline-block mx-1"
-                        title={`${props.href} on remote instance`}
-                    >
-                        <FaSolidShareFromSquare class="size-4" />
                     </a>
                 </>
             }

@@ -79,7 +79,7 @@ export async function exportFileAtPath(path: string, fs: FileSystemDirectoryHand
     }
     catch (e) {
         if (e instanceof Error) {
-            logger.error(`path ${path} doesn't exist or isn't exportable: ${e.message}`)
+            logger.error(`path ${path} doesn't exist or isn't exportable`, e)
         }
 
     }

@@ -281,10 +281,7 @@ const FeedBuilderFacet: Component = (props) => {
                                             "feedbackMessage",
                                             "save failed: " + e.message
                                         );
-                                        logger.error(
-                                            "error saving: " + e.stack ??
-                                                e.message
-                                        );
+                                        logger.error("error saving", e);
                                     }
                                 }
                             }}

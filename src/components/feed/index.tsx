@@ -103,6 +103,9 @@ export const FeedComponentPostList: Component<{
     const [inProgressStatusMessage, setInProgressStatusMessage] = createSignal<
         string | undefined
     >();
+    const [nextPageEnabled, setNextPageEnabled] = createSignal<boolean>(true);
+    const [loadingNextPage, setLoadingNextPage] = createSignal<boolean>(false);
+
     const auth = useAuth();
     const client = auth.assumeSignedIn.client;
     const getPosts = cache(async (page: number, engine: FeedEngine) => {
@@ -111,7 +114,7 @@ export const FeedComponentPostList: Component<{
             setInProgressStatusMessage(msg);
         });
         if (posts.error !== undefined) {
-            logger.error(`error while fetching posts: ${posts.error.message}`);
+            logger.error(`error while fetching posts`, posts.error);
         } else {
             logger.info(`successfully fetched ${posts.posts.length} posts`);
         }
@@ -119,7 +122,7 @@ export const FeedComponentPostList: Component<{
     }, `cached-feed-${props.engine.manifest.source.describe()}` /* use the source as part of the cache key, since it should be unique */);
 
     const currentPage = createMemo(() => {
-        return Number.parseInt(searchParams.page ?? "1");
+        return Number.parseInt((searchParams.page as string) ?? "1");
     });
     const [posts, postsResourceActions] = createResource(
         () => currentPage(),
@@ -157,8 +160,20 @@ export const FeedComponentPostList: Component<{
                     if (entry.isIntersecting) {
                         logger.info("next button has scrolled into view");
                         const nextPage = currentPage() + 1;
-                        requestIdleCallback(() => {
-                            getPosts(nextPage, props.engine);
+                        setNextPageEnabled(false);
+                        setLoadingNextPage(true);
+                        requestIdleCallback(async () => {
+                            try {
+                                const posts = await getPosts(
+                                    nextPage,
+                                    props.engine
+                                );
+                                if (posts.posts.length > 0) {
+                                    setNextPageEnabled(true);
+                                }
+                            } finally {
+                                setLoadingNextPage(false);
+                            }
                         });
                     }
                 }
@@ -218,7 +233,7 @@ export const FeedComponentPostList: Component<{
                                     );
                                 }}
                             >
-                                Back ({currentPage() - 1})
+                                back ({currentPage() - 1})
                             </Button>
                             <Button
                                 onClick={() => {
@@ -228,8 +243,11 @@ export const FeedComponentPostList: Component<{
                                     );
                                 }}
                                 ref={setNextButtonElement}
+                                disabled={!nextPageEnabled()}
                             >
-                                Next ({currentPage() + 1})
+                                {loadingNextPage()
+                                    ? "preloading..."
+                                    : `next (${currentPage() + 1})`}
                             </Button>
                         </PageNav>
                     </Show>
