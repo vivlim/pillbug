@@ -56,7 +56,7 @@ import {
 } from "solid-icons/io";
 import { BsPinAngleFill } from "solid-icons/bs";
 import { IconProps } from "solid-icons";
-import { cn } from "~/lib/utils";
+import { cn, prefersReducedMotion } from "~/lib/utils";
 import { Dynamic } from "solid-js/web";
 import { ContentGuard } from "~/components/content-guard";
 import { ImageBox } from "~/components/post/image-box";
@@ -198,6 +198,8 @@ export const PreprocessedPostBody: Component<PreprocessedPostBodyProps> = (
         }
     });
 
+    let expandButtonRef: HTMLButtonElement;
+
     return (
         <>
             <CardContent class={cn(props.class)} {...rest}>
@@ -237,9 +239,24 @@ export const PreprocessedPostBody: Component<PreprocessedPostBodyProps> = (
                     </div>
                     <Show when={expandButtonVisible() || expandButtonClicked()}>
                         <Button
-                            onClick={() =>
-                                setExpandButtonClicked(!expandButtonClicked())
-                            }
+                            ref={expandButtonRef!}
+                            onClick={() => {
+                                const prevValue = expandButtonClicked();
+                                setExpandButtonClicked(!prevValue);
+                                if (prevValue && expandButtonRef) {
+                                    // After collapsing, make sure the button is in view
+                                    logger.info("scrolling");
+
+                                    setTimeout(() => {
+                                        expandButtonRef.scrollIntoView({
+                                            behavior: prefersReducedMotion()
+                                                ? "instant"
+                                                : "smooth",
+                                            block: "center",
+                                        });
+                                    }, 50);
+                                }
+                            }}
                             class="w-full"
                         >
                             {expandButtonClicked() ? "show less" : "show more"}
