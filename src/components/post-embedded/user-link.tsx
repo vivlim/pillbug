@@ -158,11 +158,11 @@ export const UserContextMenu: Component<{
                 </ContextMenuItem>
                 <ContextMenuItem
                     onSelect={async () => {
-                        await copyToClipboard(props.account.acct);
+                        await copyToClipboard("@" + props.account.acct);
                     }}
                 >
                     <FaSolidLink class="size-6 mr-2" />
-                    copy '{props.account.acct}'
+                    copy '@{props.account.acct}'
                 </ContextMenuItem>
             </ContextMenuContent>
         </ContextMenu>
