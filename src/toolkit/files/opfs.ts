@@ -1,6 +1,10 @@
 import { error } from "console";
 import { logger } from "~/logging";
 
+export async function getFsRoot(): Promise<FileSystemDirectoryHandle> {
+    return await navigator.storage.getDirectory()
+}
+
 export async function getFileAtPath(path: string, fs: FileSystemDirectoryHandle, opts: { create: boolean }): Promise<FileSystemFileHandle | null> {
     const pathParts = path.split("/").filter(p => p.length > 0);
     let targetDir = fs;

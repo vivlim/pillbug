@@ -35,7 +35,11 @@ import {
     ContextMenuTrigger,
 } from "~/components/ui/context-menu";
 import { TextField, TextFieldTextArea } from "~/components/ui/text-field";
-import { FaSolidArrowsRotate, FaSolidScrewdriverWrench } from "solid-icons/fa";
+import {
+    FaRegularFloppyDisk,
+    FaSolidArrowsRotate,
+    FaSolidScrewdriverWrench,
+} from "solid-icons/fa";
 import createUrlRegExp from "url-regex-safe";
 import { VisibilityIcon } from "~/components/visibility-icon";
 import {
@@ -70,6 +74,12 @@ import { unwrapResponse } from "~/lib/clientUtil";
 import { useSettings } from "~/lib/settings-manager";
 import { ProcessedStatus } from "../feed/feed-engine";
 import { MediaAttachments } from "./attachments";
+import {
+    createFileAtPromptedPath,
+    getFileAtPath,
+    getFsRoot,
+} from "~/toolkit/files/opfs";
+import { logger } from "~/logging";
 
 export type PreprocessedPostProps = {
     class?: string;
@@ -453,6 +463,44 @@ export const PreprocessedPost: Component<PreprocessedPostProps> = (
                                     >
                                         <FaSolidScrewdriverWrench class="size-6 mr-2" />
                                         show post json
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                        class="py-4 md:py-2"
+                                        onClick={async () => {
+                                            const fs = await getFsRoot();
+                                            const path = `savedPosts/${postData.status.status.account.acct}-${postData.status.status.id}.post.json`;
+                                            const file = await getFileAtPath(
+                                                path,
+                                                fs,
+                                                { create: true }
+                                            );
+                                            if (!file) {
+                                                logger.warn(
+                                                    "didn't save post, file wasn't created"
+                                                );
+                                                return;
+                                            }
+
+                                            const writable =
+                                                await file.createWritable({
+                                                    keepExistingData: false,
+                                                });
+                                            const encoder = new TextEncoder();
+                                            await writable.write(
+                                                encoder.encode(
+                                                    JSON.stringify(
+                                                        postData.status
+                                                    )
+                                                )
+                                            );
+                                            await writable.close();
+                                            alert(
+                                                `post saved to private filesystem as ${path}`
+                                            );
+                                        }}
+                                    >
+                                        <FaRegularFloppyDisk class="size-6 mr-2" />
+                                        save post json
                                     </DropdownMenuItem>
                                 </Show>
                             </DropdownMenuContent>
