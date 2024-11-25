@@ -104,18 +104,26 @@ export class FeedEngine {
             if (statuses.length === 0) {
                 return { moreAvailable: false }
             }
+
+            const processPromises: Promise<ProcessedStatus>[] = []
             for (let status of statuses) {
                 if (status.id in this.retrievedStatusIds) {
                     // no action since we have already retrieved and processed it
                     continue;
                 }
 
-                const processed = await this.process(status)
-                if (!processed.hide) {
-                    this.processedStatuses.push(processed)
-                }
+                processPromises.push(this.process(status))
                 this.retrievedStatusIds.add(status.id)
             }
+
+            const processedStatuses = await Promise.all(processPromises);
+            for (let processedStatus of processedStatuses) {
+                if (!processedStatus.hide) {
+                    this.processedStatuses.push(processedStatus)
+                }
+            }
+
+
             this.lastRetrievedStatusId = statuses[statuses.length - 1].id
             return { moreAvailable };
         }
