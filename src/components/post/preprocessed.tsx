@@ -80,6 +80,7 @@ import {
     getFsRoot,
 } from "~/toolkit/files/opfs";
 import { logger } from "~/logging";
+import { UserContextMenu } from "../post-embedded/user-link";
 
 export type PreprocessedPostProps = {
     class?: string;
@@ -107,20 +108,27 @@ export const PreprocessedPostUserBar: Component<{
             <Show when={status.pinned}>
                 <BsPinAngleFill aria-label="Pinned post" class="size-4" />
             </Show>
-            <AvatarLink
-                user={status.account}
-                imgClass="size-8"
-                class="inline-block"
-            />
-            <div class="flex flex-row gap-2 items-center">
-                <A href={userHref} class="font-bold whitespace-nowrap">
-                    {status.account.display_name}
-                </A>
-                <VisibilityIcon class="size-4" value={status.visibility} />
-            </div>
-            <A href={userHref} class="text-neutral-500">
-                {status.account.acct}
-            </A>
+            <UserContextMenu account={status.account} href={status.account.url}>
+                <ContextMenuTrigger class="flex flex-row items-center gap-x-2 select-none">
+                    <AvatarLink
+                        user={status.account}
+                        imgClass="size-8"
+                        class="inline-block"
+                    />
+                    <div class="flex flex-row gap-2 items-center">
+                        <A href={userHref} class="font-bold whitespace-nowrap">
+                            {status.account.display_name}
+                        </A>
+                        <VisibilityIcon
+                            class="size-4"
+                            value={status.visibility}
+                        />
+                    </div>
+                    <A href={userHref} class="text-neutral-500">
+                        {status.account.acct}
+                    </A>
+                </ContextMenuTrigger>
+            </UserContextMenu>
             <A href={postHref} class="text-neutral-500 text-xs">
                 <Timestamp ts={DateTime.fromISO(status.created_at)} />
             </A>
