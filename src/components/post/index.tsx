@@ -65,8 +65,16 @@ import {
     PreprocessedPost,
     wrapUnprocessedStatus,
 } from "./preprocessed";
-import { getShareParentUrl } from "../feed/feed-engine";
+import {
+    FeedEngine,
+    FeedManifest,
+    FeedRuleProperties,
+    getShareParentUrl,
+} from "../feed/feed-engine";
 import { logger } from "~/logging";
+import { FeedComponent } from "../feed";
+import { SingleStatusFeed } from "../feed/sources/singlestatus";
+import { defaultHomeFeedRules } from "../feed/preset-rules";
 
 export type PostWithSharedProps = {
     status: Status;
@@ -356,10 +364,21 @@ const ShareButton: Component<ShareButtonProps> = (props) => {
 
 const Post: Component<PostProps> = (postData) => {
     const [, rest] = splitProps(postData, ["status"]);
+    const auth = useAuth();
+    const manifest = createMemo<FeedManifest>(() => {
+        return {
+            source: new SingleStatusFeed(auth, postData.status),
+            fetchReferencedPosts: 10,
+            postsPerPage: null,
+            postsToFetchPerBatch: null,
+        };
+    });
+
     return (
-        <PreprocessedPost
-            status={wrapUnprocessedStatus(postData.status)}
-            {...rest}
+        <FeedComponent
+            manifest={manifest()!}
+            rules={defaultHomeFeedRules}
+            initialOptions={{}}
         />
     );
 };
