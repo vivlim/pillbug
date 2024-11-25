@@ -5,6 +5,7 @@ import {
     FaSolidBell,
     FaSolidBug,
     FaSolidCircle,
+    FaSolidFolder,
     FaSolidGear,
     FaSolidMagnifyingGlass,
     FaSolidPeopleGroup,
@@ -137,7 +138,11 @@ export const FacetNavigation: Component = (props) => {
                     <Show when={settings.getPersistent().enableDevTools}>
                         <FacetNavigationItem href="/dev/editDialog">
                             <FaSolidWrench />
-                            Test Editor
+                            test editor
+                        </FacetNavigationItem>
+                        <FacetNavigationItem href="/files">
+                            <FaSolidFolder />
+                            filesystem
                         </FacetNavigationItem>
                     </Show>
                     <Show when={settings.getPersistent().v2Feeds}>
