@@ -207,7 +207,7 @@ const FrameTopBar: Component = (props) => {
                                                     );
                                                 }}
                                             >
-                                                Toggle light/dark
+                                                webamp
                                             </MenubarItem>
                                         </MenubarContent>
                                     </MenubarMenu>
@@ -235,6 +235,7 @@ const FrameTopBar: Component = (props) => {
                     </Switch>
                 </div>
             </div>
+            <div id="webampDropZone" style="position:absolute; top: 30vh;" />
         </div>
     );
 };
