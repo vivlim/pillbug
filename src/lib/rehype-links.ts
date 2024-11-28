@@ -29,8 +29,12 @@ export default function rehypeLinks(options: RehypeLinksOptions) {
                     return CONTINUE;
                 }
                 //node = h('Link', h('properties', h('children', node.children)))
-                node.tagName = "Link"
-                node.properties['something'] = 'yeah'
+                // do *not* change tagName unless we have a specific component we want to use - otherwise links may disappear
+                //node.tagName = "Link"
+                //node.properties['something'] = 'yeah'
+
+                // normal links should open in a new window though - inject that property.
+                node.properties['target'] = "_blank"
             } catch (e) {
 
                 logger.warn("failed to parse hyperlink in post", tree, e);
