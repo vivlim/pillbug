@@ -601,6 +601,7 @@ const PreprocessedStatusPostBlock: Component<
                                                         : undefined
                                                 }
                                             />
+                                            <PostLabels post={linkedAncestor} />
                                             <PreprocessedPostBody
                                                 class="border-b"
                                                 status={linkedAncestor.status}
@@ -609,7 +610,6 @@ const PreprocessedStatusPostBlock: Component<
                                                     postData.limitInitialHeight
                                                 }
                                             />
-                                            <PostLabels post={linkedAncestor} />
                                         </>
                                     );
                                 }}
@@ -621,25 +621,25 @@ const PreprocessedStatusPostBlock: Component<
                                     linkedAncestors().slice(-1)[0].status
                                 }
                             />
+                            <PostLabels post={postData.status} />
                             <PreprocessedPostBody
                                 class="border-b"
                                 status={status}
                                 processedStatus={postData.status}
                                 limitInitialHeight={postData.limitInitialHeight}
                             />
-                            <PostLabels post={postData.status} />
                         </Match>
                         <Match
                             when={postData.status.linkedAncestors.length === 0}
                         >
                             <PreprocessedPostUserBar status={status} />
+                            <PostLabels post={postData.status} />
                             <PreprocessedPostBody
                                 class="border-b"
                                 status={status}
                                 processedStatus={postData.status}
                                 limitInitialHeight={postData.limitInitialHeight}
                             />
-                            <PostLabels post={postData.status} />
                         </Match>
                     </Switch>
                 </Match>
@@ -658,6 +658,7 @@ const PreprocessedStatusPostBlock: Component<
                                                 : undefined
                                         }
                                     />
+                                    <PostLabels post={linkedAncestor} />
                                     <PreprocessedPostBody
                                         class="border-b"
                                         status={linkedAncestor.status}
@@ -666,19 +667,18 @@ const PreprocessedStatusPostBlock: Component<
                                             postData.limitInitialHeight
                                         }
                                     />
-                                    <PostLabels post={linkedAncestor} />
                                 </>
                             );
                         }}
                     </For>
                     <PreprocessedPostUserBar status={status.reblog!} />
+                    <PostLabels post={postData.status} />
 
                     <PreprocessedPostBody
                         class="border-b"
                         status={status.reblog!}
                         limitInitialHeight={postData.limitInitialHeight}
                     />
-                    <PostLabels post={postData.status} />
                 </Match>
             </Switch>
             <Show when={postData.showRaw}>
@@ -698,9 +698,14 @@ const PreprocessedStatusPostBlock: Component<
 
 const PostLabels: Component<{ post: ProcessedStatus }> = (props) => {
     return (
-        <For each={props.post.labels}>
-            {(label) => <span class="postLabel">{label}</span>}
-        </For>
+        <Show when={props.post.labels.length > 0}>
+            <div class="postLabels">
+                <span>labels:</span>
+                <For each={props.post.labels}>
+                    {(label) => <span class="postLabel">{label}</span>}
+                </For>
+            </div>
+        </Show>
     );
 };
 

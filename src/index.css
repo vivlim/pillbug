@@ -395,16 +395,25 @@ html.setting-unlimitedColumnWidth #layoutColumnsRoot {
     margin-right: 0.5em;
 }
 
+.postLabels {
+    font-size: small;
+    margin-left: 0.5em;
+    margin-right: 0.5em;
+    opacity: 0.8;
+}
+
 .postLabel {
     color: var(--foreground);
     display: inline-block;
     background-color: hsl(var(--card));
     border: 2px solid hsl(var(--border));
     border-radius: var(--radius);
-    padding: 0.45em;
+    padding: 0.15em;
+    padding-left: 0.25em;
+    padding-right: 0.25em;
     margin-left: 0.5em;
     margin-right: 0.5em;
-    margin-top: 0.25em;
+    margin-top: 0.15em;
 }
 
 .hoverAccentBorder:hover {

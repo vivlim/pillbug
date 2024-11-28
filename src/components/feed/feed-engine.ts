@@ -189,8 +189,10 @@ export class FeedEngine {
 
                 const processed = await this.process(status, true)
                 if (processed.hide) {
-                    logger.info(`A linked post was hidden by a rule while retrieving ancestor posts for ${s.status.id}. Returning with ${statuses.length} posts`)
-                    return statuses;
+                    // This catches replies and stops them from being attached. for now ... probably need to ignore this and differentiate 'hide from feed' from 'hide altogether'
+                    logger.info(`a post linked by ${s.status.id} would have been hidden, but isn't as a workaround until more granular hiding is available in feed engine`)
+                    //logger.info(`A linked post was hidden by a rule while retrieving ancestor posts for ${s.status.id}. Returning with ${statuses.length} posts`)
+                    //return statuses;
                 }
 
                 statuses.push(processed)
@@ -228,7 +230,8 @@ export function getShareParentUrl(status: Status): string | undefined {
     if (urls === null) {
         return undefined;
     }
-    return urls.find((u) => u.match(/statuses|objects|\d{18}/)) ?? undefined;
+    let postUrl = urls.find((u) => u.match(/statuses|objects|notes|\d{18}/)) ?? undefined;
+    return postUrl;
 }
 
 export type FeedRuleEventType = "applyLabel" | "collapsePost" | "hidePost" | "attachLinked"
