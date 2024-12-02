@@ -408,6 +408,19 @@ export const PreprocessedPost: Component<PreprocessedPostProps> = (
         return url;
     });
 
+    const replyCount = createMemo(() => {
+        let count = status().replies_count ?? 0;
+        if (status().reblog !== null) {
+            count += status().reblog?.replies_count ?? 0;
+        }
+
+        for (let p of postData.status.linkedAncestors) {
+            count += p.status.replies_count;
+        }
+
+        return count;
+    });
+
     return (
         <div class={cn("pbPostOutside py-1", postData.class)}>
             <ErrorBoundary fallback={(err) => err}>
@@ -425,9 +438,7 @@ export const PreprocessedPost: Component<PreprocessedPostProps> = (
                     <PreprocessedPostFooter>
                         <ContextMenu>
                             <ContextMenuTrigger class="flex-auto">
-                                <A href={postHref}>
-                                    {status().replies_count} replies
-                                </A>
+                                <A href={postHref}>{replyCount()} replies</A>
                             </ContextMenuTrigger>
                             <ContextMenuContent>
                                 <ContextMenuItem

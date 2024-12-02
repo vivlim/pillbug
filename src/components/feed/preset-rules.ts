@@ -99,3 +99,33 @@ export const defaultFeedRules: FeedRuleProperties[] = [
         { type: "applyLabel", params: { label: "pillbug" } }
     )
 ]
+
+export const defaultPostPageRules: FeedRuleProperties[] = [
+    new FeedRuleProperties(
+        "attach linked ancestor posts to all non-comment posts",
+        {
+            all: [
+                {
+                    fact: "in_reply_to_id",
+                    operator: "equal",
+                    value: null,
+                }
+            ]
+        },
+        { type: "attachLinked" }
+    ),
+    new FeedRuleProperties(
+        "label posts written with pillbug",
+        {
+            all: [
+                {
+                    fact: "application",
+                    operator: "equal",
+                    path: "$.name",
+                    value: "pillbug",
+                }
+            ]
+        },
+        { type: "applyLabel", params: { label: "pillbug" } }
+    )
+]

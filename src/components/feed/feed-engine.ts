@@ -28,7 +28,8 @@ export interface ProcessedStatus {
         positive: RuleResult[];
         negative: RuleResult[];
     },
-    linkedAncestors: ProcessedStatus[]
+    linkedAncestors: ProcessedStatus[],
+    replyingTo?: ProcessedStatus, // attached in post page only atm
 }
 
 export class FeedEngine {
@@ -107,7 +108,7 @@ export class FeedEngine {
 
             const processPromises: Promise<ProcessedStatus>[] = []
             for (let status of statuses) {
-                if (status.id in this.retrievedStatusIds) {
+                if (this.retrievedStatusIds.has(status.id)) {
                     // no action since we have already retrieved and processed it
                     continue;
                 }

@@ -46,26 +46,27 @@ import { FaSolidScrewdriverWrench } from "solid-icons/fa";
 import { MenuButton } from "~/components/ui/menubutton";
 import { unwrapResponse } from "~/lib/clientUtil";
 import { UserContextMenu } from "~/components/post-embedded/user-link";
+import { ProcessedStatus } from "~/components/feed/feed-engine";
 export type CommentProps = {
-    status: Status;
+    status: ProcessedStatus;
 };
 
 export const CommentPostComponent: Component<CommentProps> = (postData) => {
     const [status, updateStatus] = createSignal(postData.status);
-    const isLiked = createMemo(() => status().favourited ?? false);
+    const isLiked = createMemo(() => status().status.favourited ?? false);
     const auth = useAuth();
     const settings = useSettings();
 
     const [showingReplyBox, setShowingReplyBox] = createSignal<boolean>(false);
     const [showRaw, setShowRaw] = createSignal<boolean>(false);
 
-    const userHref = createMemo(() => `/user/${status().account.acct}`);
-    const postHref = createMemo(() => `/post/${status().id}`);
+    const userHref = createMemo(() => `/user/${status().status.account.acct}`);
+    const postHref = createMemo(() => `/post/${status().status.id}`);
 
     const postOriginalUrl = createMemo(() => {
-        let url = postData.status.url;
+        let url = postData.status.status.url;
         if (url === undefined || url === "") {
-            url = postData.status.uri;
+            url = postData.status.status.uri;
         }
 
         return url;
@@ -75,37 +76,42 @@ export const CommentPostComponent: Component<CommentProps> = (postData) => {
         <>
             <div class="flex flex-row items-center flex-wrap border-b">
                 <UserContextMenu
-                    account={status().account}
-                    href={status().account.url}
+                    account={status().status.account}
+                    href={status().status.account.url}
                 >
                     <ContextMenuTrigger class="flex flex-row items-center gap-x-2 select-none">
-                        <AvatarLink user={status().account} imgClass="size-6" />
+                        <AvatarLink
+                            user={status().status.account}
+                            imgClass="size-6"
+                        />
                         <A href={userHref()} class="font-bold m-2">
                             <HtmlSandboxSpan
-                                html={status().account.display_name}
-                                emoji={status().account.emojis}
+                                html={status().status.account.display_name}
+                                emoji={status().status.account.emojis}
                             />
                         </A>
                         <A href={userHref()} class="m-1 pbSubtleText text-sm">
-                            {status().account.acct}
+                            {status().status.account.acct}
                         </A>
                         <A href={postHref()} class="m-1 pbSubtleText text-xs">
                             <Timestamp
-                                ts={DateTime.fromISO(status().created_at)}
+                                ts={DateTime.fromISO(
+                                    status().status.created_at
+                                )}
                             />
                         </A>
                     </ContextMenuTrigger>
                 </UserContextMenu>
             </div>
             <div class="md:px-3 pt-2">
-                <ContentGuard warnings={status().spoiler_text}>
+                <ContentGuard warnings={status().status.spoiler_text}>
                     <HtmlSandbox
-                        html={status().content}
-                        emoji={status().emojis}
+                        html={status().status.content}
+                        emoji={status().status.emojis}
                     />
                     <ImageBox
-                        attachments={status().media_attachments}
-                        sensitive={status().sensitive}
+                        attachments={status().status.media_attachments}
+                        sensitive={status().status.sensitive}
                     />
                 </ContentGuard>
             </div>
@@ -123,11 +129,20 @@ export const CommentPostComponent: Component<CommentProps> = (postData) => {
                         class="pbButtonPrimary  p-1 m-1"
                         aria-label="Like Post"
                         onClick={async () => {
+                            // copy the status but with like toggled
+                            // instead of waiting for the api result
+                            const newStatus = { ...status() };
+                            newStatus.status = { ...newStatus.status };
+                            const newLikeStatus = !newStatus.status.favourited;
+                            newStatus.status.favourited = newLikeStatus;
+
+                            updateStatus(newStatus);
+
                             const updated = await toggleLike(
                                 auth.assumeSignedIn.client,
-                                status()
+                                newStatus.status.id,
+                                newLikeStatus
                             );
-                            updateStatus(updated);
                         }}
                     >
                         <Dynamic
@@ -159,7 +174,7 @@ export const CommentPostComponent: Component<CommentProps> = (postData) => {
                         <Show
                             when={
                                 auth.signedIn &&
-                                postData.status.account.acct ===
+                                postData.status.status.account.acct ===
                                     auth.assumeSignedIn.state.accountData.acct
                             }
                         >
@@ -174,7 +189,7 @@ export const CommentPostComponent: Component<CommentProps> = (postData) => {
                                         try {
                                             unwrapResponse(
                                                 await auth.assumeSignedIn.client.deleteStatus(
-                                                    postData.status.id
+                                                    postData.status.status.id
                                                 )
                                             );
                                             alert(
@@ -219,7 +234,7 @@ export const CommentPostComponent: Component<CommentProps> = (postData) => {
             </Show>
             <Show when={showingReplyBox()}>
                 <div>
-                    <NewCommentEditor parentStatus={status()} />
+                    <NewCommentEditor parentStatus={status().status} />
                 </div>
             </Show>
         </>
@@ -244,13 +259,14 @@ function favButton(isLiked: boolean): Component<IconProps> {
 
 async function toggleLike(
     client: MegalodonInterface,
-    status: Status
+    id: string,
+    like: boolean
 ): Promise<Status> {
     let res;
-    if (status.favourited) {
-        res = await client.unfavouriteStatus(status.id);
+    if (!like) {
+        res = await client.unfavouriteStatus(id);
     } else {
-        res = await client.favouriteStatus(status.id);
+        res = await client.favouriteStatus(id);
     }
 
     if (res.status != 200) {

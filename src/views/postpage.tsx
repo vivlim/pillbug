@@ -1,6 +1,8 @@
 import { useParams } from "@solidjs/router";
 import {
     createContext,
+    createEffect,
+    createMemo,
     createResource,
     createSignal,
     ErrorBoundary,
@@ -17,7 +19,7 @@ import {
 } from "solid-js";
 import Post from "~/components/post";
 import { Status } from "megalodon/lib/src/entities/status";
-import { useAuth } from "~/auth/auth-manager";
+import { SessionAuthManager, useAuth } from "~/auth/auth-manager";
 import { ProfileZone } from "~/components/user/profile-zone";
 import { Comment } from "~/components/post/comments";
 import { Card } from "~/components/ui/card";
@@ -31,44 +33,96 @@ import { useFrameContext } from "~/components/frame/context";
 import { NewCommentEditor } from "~/components/editor/comments";
 import { unwrapResponse } from "~/lib/clientUtil";
 import { logger } from "~/logging";
+import {
+    FeedEngine,
+    FeedManifest,
+    ProcessedStatus,
+} from "~/components/feed/feed-engine";
+import { SingleStatusFeed } from "~/components/feed/sources/singlestatus";
+import { StatusListFeed } from "~/components/feed/sources/list";
+import {
+    defaultFeedRules,
+    defaultPostPageRules,
+} from "~/components/feed/preset-rules";
+import { PreprocessedPost } from "~/components/post/preprocessed";
 
 /** Fetch the info for a post and arrange its context in a nested tree structure before returning. */
 export async function fetchPostInfoTree(
     props: {
-        loadProps: LoadPostsProps;
-        signedInState: MaybeSignedInState;
+        postId: string;
+        newCommentId?: string | undefined;
+        auth: SessionAuthManager;
     },
     previousTree: IPostTreeNode | undefined
 ): Promise<IPostTreeNode> {
-    const loadPostsProps = props.loadProps;
-    const signedInState = props.signedInState;
+    const auth = props.auth;
 
-    logger.info(
-        `fetching post info tree with props: ${JSON.stringify(loadPostsProps)}`
-    );
-    if (!signedInState?.signedIn) {
+    if (!auth?.signedIn) {
         return new PostTreePlaceholderNode("not signed in", []);
     }
 
-    const client = signedInState.authenticatedClient;
-    if (
-        previousTree !== undefined &&
-        loadPostsProps.newCommentId !== undefined
-    ) {
-        logger.info(
-            `attempting to patch previous post tree with new comment ${loadPostsProps.newCommentId}`
-        );
-        const newCommentRequest = await client.getStatus(
-            loadPostsProps.newCommentId
-        );
-        if (newCommentRequest.status !== 200) {
-            throw new Error(
-                `Failed to get new comment ${loadPostsProps.newCommentId}: ${newCommentRequest.statusText}`
-            );
+    const client = auth.assumeSignedIn.client;
+
+    const statusesToProcess: Status[] = [];
+    const manifest: FeedManifest = {
+        source: new StatusListFeed(auth, statusesToProcess),
+        fetchReferencedPosts: 10,
+        postsPerPage: null,
+        postsToFetchPerBatch: null,
+    };
+    const feedEngine: FeedEngine = new FeedEngine(
+        manifest,
+        defaultPostPageRules
+    );
+    const processStatuses = async (
+        statuses: Status[]
+    ): Promise<ProcessedStatus[]> => {
+        for (const s of statuses) {
+            statusesToProcess.push(s);
         }
 
-        const newComment = newCommentRequest.data;
-        const targetId = newComment.in_reply_to_id;
+        const posts = await feedEngine.getPosts();
+        if (posts.error !== undefined) {
+            logger.error(
+                "error when processing statuses for post page",
+                posts.error
+            );
+            throw posts.error;
+        }
+
+        // yuck
+        const postMap = new Map<string, ProcessedStatus>();
+        for (const p of posts.posts) {
+            postMap.set(p.status.id, p);
+        }
+
+        // filter down to just the ones that were passed in.
+        const result = statuses
+            .map((s) => postMap.get(s.id))
+            .filter((s) => s !== undefined);
+
+        logger.info(
+            `feed engine produced ${result.length} posts from ${statuses.length} inputs`
+        );
+        return result;
+    };
+
+    if (previousTree !== undefined && props.newCommentId !== undefined) {
+        logger.info(
+            `attempting to patch previous post tree with new comment ${props.newCommentId}`
+        );
+        const newCommentRequest = unwrapResponse(
+            await client.getStatus(props.newCommentId)
+        );
+
+        const processedNewComment = await processStatuses([newCommentRequest]);
+        if (processedNewComment.length === 0) {
+            logger.error("the new comment went away when processed");
+            return previousTree;
+        }
+        const newComment = processedNewComment[0];
+
+        const targetId = newComment.status.in_reply_to_id;
         const visited: string[] = [];
         let success = false;
 
@@ -76,14 +130,14 @@ export async function fetchPostInfoTree(
         const tryAttachTo = (node: IPostTreeNode) => {
             const status = node.tryGetStatus();
             if (status !== undefined) {
-                if (visited.indexOf(status.id) !== -1) {
+                if (visited.indexOf(status.status.id) !== -1) {
                     throw new Error(
-                        `visited the same status ${status.id} twice.`
+                        `visited the same status ${status.status.id} twice.`
                     );
                 }
 
-                visited.push(status.id);
-                if (status.id === targetId) {
+                visited.push(status.status.id);
+                if (status.status.id === targetId) {
                     node.children.push(
                         new PostTreeStatusNode(newComment, [], true)
                     );
@@ -98,8 +152,8 @@ export async function fetchPostInfoTree(
         };
 
         if (targetId === null) {
-            logger.info(
-                `the new comment ${newComment.id} did not set an id it's a reply to, this is a bug.`
+            logger.warn(
+                `the new comment ${newComment.status.id} did not set an id it's a reply to, this is a bug.`
             );
         }
 
@@ -107,7 +161,7 @@ export async function fetchPostInfoTree(
 
         if (!success) {
             logger.info(
-                `couldn't find ${targetId} to attach the new comment ${newComment.id} to. attaching it to the root...`
+                `couldn't find ${targetId} to attach the new comment ${newComment.status.id} to. attaching it to the root...`
             );
             previousTree.children.push(
                 new PostTreeStatusNode(newComment, [], true)
@@ -116,16 +170,27 @@ export async function fetchPostInfoTree(
 
         return previousTree;
     } else {
-        const postId = loadPostsProps.postId;
+        const postId = props.postId;
 
         logger.info(`getting post ${postId}`);
 
-        const requestedStatus = unwrapResponse(await client.getStatus(postId));
+        const requestedStatusRaw = unwrapResponse(
+            await client.getStatus(postId)
+        );
+        const requestedStatusProcessedResult = await processStatuses([
+            requestedStatusRaw,
+        ]);
+        if (requestedStatusProcessedResult.length === 0) {
+            throw new Error(
+                "The requested status was removed after being processed"
+            );
+        }
+        const requestedStatus = requestedStatusProcessedResult[0];
 
         try {
             // If the post we're looking at is a reblog, get context for the reblog target.
             const postIdForContext =
-                requestedStatus.reblog?.id ?? requestedStatus.id;
+                requestedStatus.status.reblog?.id ?? requestedStatus.status.id;
             const requestedStatusContext = unwrapResponse(
                 await client.getStatusContext(postIdForContext)
             );
@@ -133,9 +198,16 @@ export async function fetchPostInfoTree(
                 throw new Error("status context undefined");
             }
 
-            let unsortedStatuses: Status[] = [];
-            unsortedStatuses.push(...requestedStatusContext.ancestors);
-            unsortedStatuses.push(...requestedStatusContext.descendants);
+            const processedAncestors = await processStatuses(
+                requestedStatusContext.ancestors
+            );
+            const processedDescendants = await processStatuses(
+                requestedStatusContext.descendants
+            );
+
+            let unsortedStatuses: ProcessedStatus[] = [];
+            unsortedStatuses.push(...processedAncestors);
+            unsortedStatuses.push(...processedDescendants);
 
             let idMap: Map<string, IPostTreeNode> = new Map();
 
@@ -144,6 +216,35 @@ export async function fetchPostInfoTree(
                 idMap,
                 unsortedStatuses
             );
+
+            /*
+            try {
+                for (const la of rootPost.tryGetStatus()?.linkedAncestors ??
+                    []) {
+                    const context = unwrapResponse(
+                        await client.getStatusContext(la.status.id)
+                    );
+
+                    if (context.descendants.length > 0) {
+                        const processedOtherContext = await processStatuses(
+                            context.descendants
+                        );
+                        for (const poc of processedOtherContext){
+                            poc.replyingTo = la
+                        }
+
+                        unsortedStatuses.push(...processedOtherContext);
+                    }
+                }
+            } catch (e) {
+                if (e instanceof Error) {
+                    logger.error(
+                        "failed to get context for linked ancestor posts",
+                        e
+                    );
+                }
+            }
+                */
 
             // Try to attach all the remaining statuses to the tree somewhere
             attachStatusesToTree(rootPost, idMap, unsortedStatuses);
@@ -180,11 +281,11 @@ export async function fetchPostInfoTree(
 /** Locate the root status and construct a node from it. */
 function locateRootNode(
     /** The status the page is for. Not necessarily the root, if it's a comment. */
-    requestedStatus: Status,
+    requestedStatus: ProcessedStatus,
     /** A map of post ids to nodes. May be modified as a side effect of this function. */
     idMap: Map<string, IPostTreeNode>,
     /** A list of statuses that have not been added to the tree yet. May be modified as a side effect. */
-    unsortedStatuses: Status[]
+    unsortedStatuses: ProcessedStatus[]
 ): IPostTreeNode {
     let rootPost: IPostTreeNode = new PostTreeStatusNode(
         requestedStatus,
@@ -193,26 +294,27 @@ function locateRootNode(
     );
     const status = rootPost.tryGetStatus();
     if (status !== undefined) {
-        idMap.set(requestedStatus.id, rootPost);
+        idMap.set(requestedStatus.status.id, rootPost);
 
         // Go upwards until finding the root, in case the requested status is a reply.
-        while (status.in_reply_to_id !== null) {
+        while (status.status.in_reply_to_id !== null) {
             const parentStatusIndex = unsortedStatuses.findIndex(
                 (s) =>
-                    s.id ===
-                    (rootPost as PostTreeStatusNode).status.in_reply_to_id
+                    s.status.id ===
+                    (rootPost as PostTreeStatusNode).status.status
+                        .in_reply_to_id
             );
             if (parentStatusIndex === -1) {
                 // The parent of this isn't available, so it's just going to be the parent.
                 break;
             }
 
-            const newRootStatus: Status = unsortedStatuses.splice(
+            const newRootStatus: ProcessedStatus = unsortedStatuses.splice(
                 parentStatusIndex,
                 1
             )[0];
             rootPost = new PostTreeStatusNode(newRootStatus, [rootPost]);
-            idMap.set(status.id, rootPost);
+            idMap.set(status.status.id, rootPost);
         }
     }
     return rootPost;
@@ -224,27 +326,27 @@ function attachStatusesToTree(
     /** A map of post ids to nodes. May be modified as a side effect of this function. */
     idMap: Map<string, IPostTreeNode>,
     /** A list of statuses that have not been added to the tree yet. May be modified as a side effect. */
-    unsortedStatuses: Status[]
+    unsortedStatuses: ProcessedStatus[]
 ) {
     while (unsortedStatuses.length > 0) {
         let numAdded = 0;
 
         for (let i = 0; i < unsortedStatuses.length; i++) {
             const status = unsortedStatuses[i];
-            if (status.in_reply_to_id === null) {
+            if (status.status.in_reply_to_id === null) {
                 // This is not attached to anything. Just stick it underneath the root.
                 const s = new PostTreeStatusNode(status, []);
-                idMap.set(status.id, s);
+                idMap.set(status.status.id, s);
                 rootNode.children.push(s);
                 numAdded += 1;
                 unsortedStatuses.splice(i, 1);
                 continue;
             }
-            const existingParent = idMap.get(status.in_reply_to_id);
+            const existingParent = idMap.get(status.status.in_reply_to_id);
             if (existingParent !== undefined) {
                 // The parent of this status has a nestedstatus node, so we can attach this status to it now.
                 const s = new PostTreeStatusNode(status, []);
-                idMap.set(status.id, s);
+                idMap.set(status.status.id, s);
                 existingParent.children.push(s);
                 numAdded += 1;
                 unsortedStatuses.splice(i, 1);
@@ -260,11 +362,11 @@ function attachStatusesToTree(
             let status = unsortedStatuses.pop()!;
             let statusNode = new PostTreeStatusNode(status, [], false);
             let missingPostMarker = new PostTreePlaceholderNode(
-                `Missing post id ${status?.in_reply_to_id}`,
+                `Missing post id ${status?.status.in_reply_to_id}`,
                 [statusNode],
                 false
             );
-            idMap.set(status.id, missingPostMarker);
+            idMap.set(status.status.id, missingPostMarker);
             rootNode.children.push(statusNode);
         }
     }
@@ -277,19 +379,19 @@ export interface IPostTreeNode {
     /** Whether this status should be displayed with a highlight. When following a link to a post, this will indicate which post the link was for. */
     highlighted: boolean;
     /** Try to get the activitypub status in this node, if there is one. */
-    tryGetStatus(): Status | undefined;
+    tryGetStatus(): ProcessedStatus | undefined;
 }
 
 /** An activitypub status whose replies have been arranged in a nested structure. Each status has zero to many child nodes. */
 export class PostTreeStatusNode implements IPostTreeNode {
     /** The source status. */
-    status: Status;
+    status: ProcessedStatus;
     /** All child statuses. */
     children: IPostTreeNode[];
     /** Whether this status should be displayed with a highlight. When following a link to a post, this will indicate which post the link was for. */
     highlighted: boolean;
     constructor(
-        status: Status,
+        status: ProcessedStatus,
         children: IPostTreeNode[],
         highlighted: boolean = false
     ) {
@@ -300,7 +402,7 @@ export class PostTreeStatusNode implements IPostTreeNode {
         /**  */
         this.highlighted = highlighted;
     }
-    tryGetStatus(): Status | undefined {
+    tryGetStatus(): ProcessedStatus | undefined {
         return this.status;
     }
 }
@@ -322,7 +424,7 @@ export class PostTreePlaceholderNode implements IPostTreeNode {
         this.children = children;
         this.highlighted = highlighted;
     }
-    tryGetStatus(): Status | undefined {
+    tryGetStatus(): ProcessedStatus | undefined {
         return undefined;
     }
 }
@@ -397,19 +499,38 @@ const PostWithCommentTree: Component = () => {
     const threadInfoFetcher: ResourceFetcher<
         {
             loadProps: LoadPostsProps;
-            signedInState: MaybeSignedInState;
+            auth: SessionAuthManager;
         },
         IPostTreeNode,
         true
     > = (loadProps, { value, refetching }) =>
-        fetchPostInfoTree(loadProps, value);
+        fetchPostInfoTree({ ...loadProps.loadProps, auth: auth }, value);
     const [loadProps, setLoadProps] = postPageContext.loadProps;
     const [threadInfo, mutateThreadInfo] = createResource(() => {
         return {
             loadProps: loadProps(),
-            signedInState: auth.state,
+            auth: auth,
         };
     }, threadInfoFetcher);
+
+    const [linkedAncestorComments, setLinkedAncestorComments] = createSignal(
+        []
+    );
+
+    createEffect(async () => {
+        if (!threadInfo()) {
+            return;
+        }
+
+        const root = threadInfo()?.tryGetStatus();
+        if (!root) {
+            return;
+        }
+
+        // VIV TODO: fetch the post info trees for the linked ancestors? maybe refactor the fetch out?
+        // it's going to be a headache to update those post info trees if someone responds
+        // probably need to have separate tree components per LA. might need to separate the tree building and finding the root. *or* make the tree itself a stateful thing that gets updated idk... ...
+    });
 
     // i don't like the nested show here for share mode.
     return (
@@ -420,7 +541,7 @@ const PostWithCommentTree: Component = () => {
                     fallback={<div>Loading</div>}
                 >
                     <ProfileZone
-                        userInfo={threadInfo()!.tryGetStatus()!.account}
+                        userInfo={threadInfo()!.tryGetStatus()!.status.account}
                     />
                 </Show>
             </Show>
@@ -430,12 +551,11 @@ const PostWithCommentTree: Component = () => {
                         <div>loading post</div>
                     </Match>
                     <Match when={threadInfo.state === "ready"}>
-                        <Post
+                        <PreprocessedPost
                             class="md:px-0"
                             status={
-                                threadInfo()?.tryGetStatus() as Status /* i don't think a placeholder should ever become root? Unless maybe it can't be found? unclear */
+                                threadInfo()?.tryGetStatus() as ProcessedStatus /* i don't think a placeholder should ever become root? Unless maybe it can't be found? unclear */
                             }
-                            fetchShareParentDepth={5}
                             limitInitialHeight={false}
                         />
                         <Show when={!loadProps().shareEditorMode}>
@@ -445,7 +565,8 @@ const PostWithCommentTree: Component = () => {
                             <Card class="p-4 m-4">
                                 <NewCommentEditor
                                     parentStatus={
-                                        threadInfo()?.tryGetStatus() as Status
+                                        threadInfo()?.tryGetStatus()
+                                            ?.status as Status
                                     }
                                 ></NewCommentEditor>
                             </Card>
