@@ -1,6 +1,7 @@
 import { makePersisted } from "@solid-primitives/storage";
 import { useNavigate, useSearchParams } from "@solidjs/router";
 import {
+    createMemo,
     createSignal,
     For,
     Match,
@@ -61,7 +62,21 @@ export const LoginView: Component = () => {
     //const [appData] = createResource(instance, doOAuth);
     const navigate = useNavigate();
 
-    if (searchParams.code !== undefined) {
+    const code = createMemo(() => {
+        if (searchParams.code !== undefined) {
+            return searchParams.code;
+        }
+
+        if (searchParams.token !== undefined) {
+            // sharkey
+            return searchParams.token;
+        }
+
+        logger.info("did not find a code or token query parameter");
+        return undefined;
+    });
+
+    if (code() !== undefined) {
         const getToken = async () => {
             if (busy()) {
                 logger.info(
@@ -75,7 +90,7 @@ export const LoginView: Component = () => {
                     "trying to acquire a token using the provided code"
                 );
 
-                await auth.completeLogin(searchParams.code!);
+                await auth.completeLogin(code()!);
                 setBusy(false);
                 navigate("/");
             } catch (error) {
