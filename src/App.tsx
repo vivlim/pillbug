@@ -13,7 +13,7 @@ import { SettingsManager } from "./lib/settings-manager";
 import { lazy } from "solid-js";
 import { FeedManager } from "./lib/feed-manager";
 
-import AppFrame from "./components/frame/Frame";
+const AppFrame = lazy(() => import("./components/frame/Frame"));
 
 export class GetClientError extends Error {}
 
