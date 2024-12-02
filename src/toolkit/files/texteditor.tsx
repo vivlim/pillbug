@@ -14,10 +14,11 @@ import { javascript, javascriptLanguage } from "@codemirror/lang-javascript";
 import { json } from "@codemirror/lang-json";
 import { indentWithTab } from "@codemirror/commands";
 import { basicSetup } from "codemirror";
-import { getFileAtPath } from "./opfs";
+import { getFileAtPath, PillbugFilesystem } from "./opfs";
 import { Button } from "~/components/ui/button";
 import { BeforeLeaveEventArgs, useBeforeLeave } from "@solidjs/router";
 import { OpenedFile } from "./multiFileViewer";
+import { logger } from "~/logging";
 
 export type TextEditorProps = {
     file: OpenedFile;
@@ -109,11 +110,12 @@ export const TextEditor: Component<TextEditorProps> = (props) => {
                                 console.log(
                                     `text editor: saving ${props.file.path}`
                                 );
-                                const bytes = new TextEncoder().encode(code());
-                                const writable =
-                                    await props.file.handle.createWritable();
-                                await writable.write(bytes);
-                                await writable.close();
+                                PillbugFilesystem.value.writeText(
+                                    props.file.path,
+                                    code(),
+                                    { append: false, line: false },
+                                    logger
+                                );
                                 console.log(
                                     `wrote to ${props.file.path} successfully`
                                 );

@@ -21,10 +21,12 @@ import {
     exportFileAtPath,
     getFileAtPath,
     pathjoin,
+    PillbugFilesystem,
 } from "./opfs";
 import { getFilesFromInput } from "~/components/editor/attachments";
 import { SingleFileViewer } from "./fileViewer";
 import { useSearchParams } from "@solidjs/router";
+import { logger } from "~/logging";
 
 export interface FilesFacetStore {
     currentFile?: string;
@@ -85,6 +87,7 @@ const FilesFacet: Component = () => {
                                     const destination = dirname(
                                         facetStore.store.currentFile ?? ""
                                     );
+                                    const fs = PillbugFilesystem.value;
                                     for (var file of files) {
                                         const destinationFilePath = pathjoin(
                                             destination,
@@ -96,20 +99,16 @@ const FilesFacet: Component = () => {
                                                 destinationFilePath
                                         );
 
-                                        const handle = await getFileAtPath(
+                                        const buffer = await file.arrayBuffer();
+                                        fs.write(
                                             destinationFilePath,
-                                            opfs()!,
-                                            { create: true }
+                                            buffer,
+                                            { append: false },
+                                            logger
                                         );
-                                        // todo: don't clobber existing files, prompt
-                                        const file = await handle?.getFile();
 
-                                        const writable = await handle
-                                            ?.getFile()!
-                                            .createWritable({
-                                                keepExistingData: false,
-                                            });
-                                        await file.stream().pipeTo(writable);
+                                        // todo: don't clobber existing files, prompt
+
                                         console.log(
                                             "successfully imported file " +
                                                 destinationFilePath

@@ -78,6 +78,7 @@ import {
     createFileAtPromptedPath,
     getFileAtPath,
     getFsRoot,
+    PillbugFilesystem,
 } from "~/toolkit/files/opfs";
 import { logger } from "~/logging";
 import { UserContextMenu } from "../post-embedded/user-link";
@@ -509,31 +510,16 @@ export const PreprocessedPost: Component<PreprocessedPostProps> = (
                                         onClick={async () => {
                                             const fs = await getFsRoot();
                                             const path = `savedPosts/${postData.status.status.account.acct}-${postData.status.status.id}.post.json`;
-                                            const file = await getFileAtPath(
+                                            PillbugFilesystem.value.writeText(
                                                 path,
-                                                fs,
-                                                { create: true }
+                                                JSON.stringify(
+                                                    postData.status,
+                                                    null,
+                                                    2
+                                                ),
+                                                { append: false, line: false },
+                                                logger
                                             );
-                                            if (!file) {
-                                                logger.warn(
-                                                    "didn't save post, file wasn't created"
-                                                );
-                                                return;
-                                            }
-
-                                            const writable =
-                                                await file.createWritable({
-                                                    keepExistingData: false,
-                                                });
-                                            const encoder = new TextEncoder();
-                                            await writable.write(
-                                                encoder.encode(
-                                                    JSON.stringify(
-                                                        postData.status
-                                                    )
-                                                )
-                                            );
-                                            await writable.close();
                                             alert(
                                                 `post saved to private filesystem as ${path}`
                                             );
