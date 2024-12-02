@@ -125,12 +125,12 @@ export const PreprocessedPostUserBar: Component<{
                             value={status.visibility}
                         />
                     </div>
-                    <A href={userHref} class="text-neutral-500">
+                    <A href={userHref} class="pbSubtleText">
                         {status.account.acct}
                     </A>
                 </ContextMenuTrigger>
             </UserContextMenu>
-            <A href={postHref} class="text-neutral-500 text-xs">
+            <A href={postHref} class="pbSubtleText text-xs">
                 <Timestamp ts={DateTime.fromISO(status.created_at)} />
             </A>
             <Show when={shared !== null}>
@@ -143,7 +143,7 @@ export const PreprocessedPostUserBar: Component<{
                 </A>
                 <A
                     href={`/user/${shared!.account.acct}`}
-                    class="text-neutral-500 whitespace-nowrap"
+                    class="pbSubtleText whitespace-nowrap"
                 >
                     {shared!.account.acct}
                 </A>

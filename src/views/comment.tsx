@@ -86,16 +86,10 @@ export const CommentPostComponent: Component<CommentProps> = (postData) => {
                                 emoji={status().account.emojis}
                             />
                         </A>
-                        <A
-                            href={userHref()}
-                            class="m-1 text-neutral-500 text-sm"
-                        >
+                        <A href={userHref()} class="m-1 pbSubtleText text-sm">
                             {status().account.acct}
                         </A>
-                        <A
-                            href={postHref()}
-                            class="m-1 text-neutral-500 text-xs"
-                        >
+                        <A href={postHref()} class="m-1 pbSubtleText text-xs">
                             <Timestamp
                                 ts={DateTime.fromISO(status().created_at)}
                             />

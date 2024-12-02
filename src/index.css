@@ -148,6 +148,10 @@ body {
     scrollbar-gutter: stable;
 }
 
+.pbSubtleText {
+    opacity: 0.75;
+}
+
 .facet-navigation-item {
     border-radius: var(--radius);
 }
@@ -239,6 +243,14 @@ body {
     #layoutMainColumn {
         padding: 0.25rem;
     }
+
+    #followRequests > ul > li.followRequest {
+        flex-direction: row;
+    }
+
+    #followRequests > ul > li.followRequest > .buttons {
+        gap: 0.25em;
+    }
 }
 
 @media (min-width: 1024px) {
@@ -250,6 +262,10 @@ body {
 @media (min-width: 1280px) {
     #layoutMainColumn {
         padding: 1.5rem;
+    }
+
+    #followRequests > ul > li.followRequest > .buttons {
+        gap: 1em;
     }
 }
 /* Singular left column that may contain blocks. Stacks above main column if the viewport is too narrow */
@@ -289,21 +305,73 @@ button {
     grid-auto-flow: columns;
     row-gap: 0.5rem;
     overflow: hidden;
-    margin: auto;
-
 }
 
 #notifications-facet .pbCard {
     display: block;
+    /*
     padding-left: 1rem;
     padding-right: 1rem;
     padding-top: 0.8rem;
     padding-bottom: 0.8rem;
+    */
+}
+
+#notifications-facet .pbCard .pbCardSecondary {
+    padding-left: 0.2em;
+    padding-right: 0.2em;
+}
+#notifications-facet .pbCard .pbNotification {
+    padding-top: 0.4em;
+    padding-left: 0.6em;
+    padding-right: 0.6em;
+    padding-bottom: 0.4em;
 }
 
 #notifications-facet .pbCard>a:not(a.noUnderline) {
     text-decoration: underline;
     margin-inline: 0.2em;
+}
+
+#followRequests {
+    margin: 1em;
+
+}
+
+#followRequests summary {
+    user-select: none;
+}
+
+#followRequests > ul > li.followRequest {
+    padding-top: 0.8em;
+    padding-bottom: 0.8em;
+    padding-left: 0.4em;
+    padding-right: 0.4em;
+    display: flex;
+    gap: 1em;
+    flex-direction: row;
+    margin-left: 1em;
+    margin-right: 1em;
+}
+#followRequests > ul > li.followRequest > .buttons {
+    display: flex;
+    gap: 1em;
+    flex-direction: row;
+}
+
+#followRequests > ul > li + li,
+#notifications-facet > .pbCard > .pbNotification + .pbNotification {
+    border-top: 1px solid hsl(var(--secondary-h) var(--secondary-s) calc(var(--secondary-l) * 0.9));
+}
+
+#followRequests > ul > li.profilePreview div {
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+li.followRequest .info {
+    flex: 1;
 }
 
 .notificationYourStatus {

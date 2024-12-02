@@ -107,14 +107,6 @@ export interface ProfileZoneProps {
 /// The profile sidebar/header that appears on user profile and post pages
 export const ProfileZone: Component<ProfileZoneProps> = (props) => {
     // logger.info(`profilezone for ${props.userInfo.acct}`);
-    const auth = useAuth();
-    const currentUser = createMemo(() => {
-        if (auth.signedIn) {
-            return auth.assumeSignedIn.state.accountData;
-        } else {
-            return null;
-        }
-    });
 
     // Hide the nav if a profile is visible - the profile replaces it
     const frameContext = useFrameContext();
@@ -128,61 +120,78 @@ export const ProfileZone: Component<ProfileZoneProps> = (props) => {
     return (
         <LayoutLeftColumnPortal>
             <div class="pbCardSecondary md:w-72 p-8 md:flex-shrink-0 flex gap-4 min-h-max flex-col md:items-center justify-start bg-secondary text-secondary-foreground">
-                <div class="flex flex-row md:flex-col md:items-center gap-4">
-                    <AvatarLink
-                        user={props.userInfo}
-                        imgClass="size-24"
-                        class="shadow-md"
-                    />
-                    <div class="flex flex-col md:items-center">
-                        <div class="flex flex-row items-center gap-2">
-                            <h2 class="text-xl font-bold">
-                                <HtmlSandboxSpan
-                                    html={props.userInfo.display_name}
-                                    emoji={props.userInfo.emojis}
-                                />
-                            </h2>
-                            <Show when={props.userInfo.locked}>
-                                <FaSolidLock
-                                    class="inline size-5"
-                                    aria-label="Locked account"
-                                    title="This account requires approval to be followed"
-                                />
-                            </Show>
-                        </div>
-                        <h3 class="text-sm">
-                            <A href={`/user/${props.userInfo.acct}`}>
-                                @{props.userInfo.acct}
-                            </A>
-                        </h3>
-                    </div>
-                </div>
-                <Show
-                    when={currentUser()?.id != props.userInfo.id}
-                    fallback={
-                        <p class="text-sm text-muted-foreground">(it's you!)</p>
-                    }
-                >
-                    <FollowButton account={props.userInfo} />
-                </Show>
-                <HtmlSandbox
-                    html={props.userInfo.note}
-                    emoji={props.userInfo.emojis}
-                />
-                <Show when={props.userInfo.fields.length > 0}>
-                    <hr class="border-accent-foreground w-full" />
-                    <div class="flex flex-col justify-start w-full">
-                        <For each={props.userInfo.fields}>
-                            {(field, index) => (
-                                <ProfileField
-                                    field={field}
-                                    emoji={props.userInfo.emojis}
-                                />
-                            )}
-                        </For>
-                    </div>
-                </Show>
+                <ProfileDetail {...props} />
             </div>
         </LayoutLeftColumnPortal>
+    );
+};
+
+export const ProfileDetail: Component<ProfileZoneProps> = (props) => {
+    const auth = useAuth();
+    const currentUser = createMemo(() => {
+        if (auth.signedIn) {
+            return auth.assumeSignedIn.state.accountData;
+        } else {
+            return null;
+        }
+    });
+
+    return (
+        <>
+            <div class="flex flex-row md:flex-col md:items-center gap-4">
+                <AvatarLink
+                    user={props.userInfo}
+                    imgClass="size-24"
+                    class="shadow-md"
+                />
+                <div class="flex flex-col md:items-center">
+                    <div class="flex flex-row items-center gap-2">
+                        <h2 class="text-xl font-bold">
+                            <HtmlSandboxSpan
+                                html={props.userInfo.display_name}
+                                emoji={props.userInfo.emojis}
+                            />
+                        </h2>
+                        <Show when={props.userInfo.locked}>
+                            <FaSolidLock
+                                class="inline size-5"
+                                aria-label="Locked account"
+                                title="This account requires approval to be followed"
+                            />
+                        </Show>
+                    </div>
+                    <h3 class="text-sm">
+                        <A href={`/user/${props.userInfo.acct}`}>
+                            @{props.userInfo.acct}
+                        </A>
+                    </h3>
+                </div>
+            </div>
+            <Show
+                when={currentUser()?.id != props.userInfo.id}
+                fallback={
+                    <p class="text-sm text-muted-foreground">(it's you!)</p>
+                }
+            >
+                <FollowButton account={props.userInfo} />
+            </Show>
+            <HtmlSandbox
+                html={props.userInfo.note}
+                emoji={props.userInfo.emojis}
+            />
+            <Show when={props.userInfo.fields.length > 0}>
+                <hr class="border-accent-foreground w-full" />
+                <div class="flex flex-col justify-start w-full">
+                    <For each={props.userInfo.fields}>
+                        {(field, index) => (
+                            <ProfileField
+                                field={field}
+                                emoji={props.userInfo.emojis}
+                            />
+                        )}
+                    </For>
+                </div>
+            </Show>
+        </>
     );
 };

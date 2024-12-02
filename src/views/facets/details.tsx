@@ -67,7 +67,7 @@ const ThirdPartyComponentComponent: Component<{ item: LicenseReportItem }> = ({
     return (
         <li>
             <span>{item.name}</span>
-            <span class="text-neutral-500 ml-2">{item.installedVersion}</span>
+            <span class="pbSubtleText ml-2">{item.installedVersion}</span>
             <ul>
                 <li>
                     <a href={link} target="_blank">

@@ -31,6 +31,9 @@ import { SessionAuthManager, useAuth } from "~/auth/auth-manager";
 import { logger } from "~/logging";
 import { unwrapResponse } from "~/lib/clientUtil";
 import { PreprocessedPostBody } from "~/components/post/preprocessed";
+import { Account } from "megalodon/lib/src/entities/account";
+import { Button } from "~/components/ui/button";
+import { ProfileDetail, ProfileZone } from "~/components/user/profile-zone";
 
 type NotificationDayGroups = {
     created_day: DateTime<true> | DateTime<false>;
@@ -140,6 +143,9 @@ export const GroupedNotificationComponent: Component<{
         case "reblog":
             typeLabel = "shared your post:";
             break;
+        case "follow_request":
+            typeLabel = "requested to follow you";
+            break;
         default:
             break;
     }
@@ -159,7 +165,7 @@ export const GroupedNotificationComponent: Component<{
 
     return (
         <>
-            <li class="pbNotification pbCard">
+            <div class="pbNotification">
                 <Switch>
                     <Match when={isReplyToYou()}>
                         <ReplyNotification notification={firstNotification} />
@@ -172,12 +178,14 @@ export const GroupedNotificationComponent: Component<{
                                 class="inline-block underline"
                             />
                         </Show>
+                        &nbsp;
                         <a
                             href={`/user/${firstNotification.account?.acct}`}
                             class="underline"
                         >
                             {firstNotification.account?.acct}
                         </a>
+                        &#32;
                         <Switch>
                             <Match when={status === undefined}>
                                 {typeLabel}
@@ -189,7 +197,7 @@ export const GroupedNotificationComponent: Component<{
                         </Switch>
                     </Match>
                     <Match when={notifications.length > 1}>
-                        <span>Several pages</span>
+                        <span>Several pages&#32;</span>
                         <Switch>
                             <Match when={status === undefined}>
                                 {typeLabel}
@@ -248,7 +256,7 @@ export const GroupedNotificationComponent: Component<{
                 </Switch>
 
                 <RawDataViewer data={props.kindGroup} show={false} />
-            </li>
+            </div>
         </>
     );
 };
@@ -280,13 +288,13 @@ const ReplyNotification: Component<{ notification: Notification }> = (
                     class="inline-block underline"
                 />
             </Show>
-
             <a
                 href={`/user/${props.notification.account?.acct}`}
                 class="underline"
             >
                 {props.notification.account?.acct}
             </a>
+            &#32;
             <Show when={!yourStatus.loading} fallback="(retrieving your post)">
                 <Switch>
                     <Match when={yourStatus()?.in_reply_to_id === null}>
@@ -321,8 +329,13 @@ const ReplyNotification: Component<{ notification: Notification }> = (
 export const NotificationsFacet: Component = () => {
     const auth = useAuth();
 
-    const [notifications] = createResource(auth, (ac) => {
-        return getNotificationsAsync(ac);
+    const [notifications] = createResource(auth, async (ac) => {
+        const notifications = getNotificationsAsync(ac);
+        const followReqs = auth.assumeSignedIn.client.getFollowRequests();
+        return {
+            notifications: await notifications,
+            followReqs: unwrapResponse(await followReqs),
+        };
     });
 
     const location = useLocation();
@@ -338,28 +351,164 @@ export const NotificationsFacet: Component = () => {
             });
         }
     });
+
     return (
-        <ul id="notifications-facet">
-            <For each={notifications()}>
-                {(dayGroup, index) => {
-                    const day = createMemo(() => {
-                        return dayGroup.created_day.toLocaleString();
-                    });
-                    return (
-                        <>
-                            <li class="pbCardSecondary">{day()}</li>
-                            <For each={dayGroup.kindGroups}>
-                                {(kindGroup, index) => (
-                                    <GroupedNotificationComponent
-                                        kindGroup={kindGroup}
-                                    />
-                                )}
+        <Switch>
+            <Match when={notifications.loading}>loading notifications...</Match>
+            <Match when={notifications() === undefined}>
+                failed to load notifications
+            </Match>
+            <Match when={notifications() !== undefined}>
+                <Show when={notifications()!.followReqs.length > 0}>
+                    <details class="pbCard" id="followRequests">
+                        <summary class="pbCardSecondary">
+                            {notifications()?.followReqs.length} follow request
+                            {notifications()?.followReqs.length !== 1
+                                ? "s"
+                                : ""}
+                        </summary>
+                        <ul>
+                            <For each={notifications()!.followReqs}>
+                                {(req) => {
+                                    const [action, setAction] = createSignal<
+                                        "none" | "accepted" | "rejected"
+                                    >("none");
+
+                                    const [showProfile, setShowProfile] =
+                                        createSignal<boolean>(false);
+
+                                    return (
+                                        <Switch>
+                                            <Match when={action() === "none"}>
+                                                <li class="followRequest">
+                                                    <AvatarLink
+                                                        user={req as Account}
+                                                        imgClass="size-12"
+                                                    />
+                                                    <a
+                                                        href={`/user/${req.acct}`}
+                                                        class="info"
+                                                    >
+                                                        <ul>
+                                                            <li>
+                                                                {
+                                                                    req.display_name
+                                                                }
+                                                            </li>
+                                                            <li>{req.acct}</li>
+                                                            <li>{req.group}</li>
+                                                        </ul>
+                                                    </a>
+                                                    <div class="buttons">
+                                                        <Button
+                                                            onClick={() => {
+                                                                setShowProfile(
+                                                                    !showProfile()
+                                                                );
+                                                            }}
+                                                        >
+                                                            {showProfile()
+                                                                ? "hide"
+                                                                : "show"}
+                                                            &#32;profile
+                                                        </Button>
+
+                                                        <Button
+                                                            onClick={async () => {
+                                                                setAction(
+                                                                    "accepted"
+                                                                );
+                                                                try {
+                                                                    await auth.assumeSignedIn.client.acceptFollowRequest(
+                                                                        req.id.toString()
+                                                                    );
+                                                                } catch (err) {
+                                                                    logger.error(
+                                                                        "failed to accept follow request",
+                                                                        err
+                                                                    );
+                                                                }
+                                                            }}
+                                                        >
+                                                            accept
+                                                        </Button>
+                                                        <Button
+                                                            onClick={async () => {
+                                                                setAction(
+                                                                    "rejected"
+                                                                );
+                                                                try {
+                                                                    await auth.assumeSignedIn.client.rejectFollowRequest(
+                                                                        req.id.toString()
+                                                                    );
+                                                                } catch (err) {
+                                                                    logger.error(
+                                                                        "failed to reject follow request",
+                                                                        err
+                                                                    );
+                                                                }
+                                                            }}
+                                                        >
+                                                            reject
+                                                        </Button>
+                                                    </div>
+                                                </li>
+
+                                                <Show when={showProfile()}>
+                                                    <li class="profilePreview">
+                                                        <div class="info pbCardSecondary p-8 flex gap-4 flex-col md:items-center justify-start bg-secondary text-secondary-foreground">
+                                                            <ProfileDetail
+                                                                userInfo={
+                                                                    req as Account
+                                                                }
+                                                            ></ProfileDetail>
+                                                        </div>
+                                                    </li>
+                                                </Show>
+                                            </Match>
+                                            <Match when={action() !== "none"}>
+                                                <li class="followRequest">
+                                                    {action()}&#32;follow
+                                                    request from&#32;
+                                                    <AvatarLink
+                                                        user={req as Account}
+                                                        imgClass="size-6"
+                                                    />
+                                                    {req.acct}
+                                                </li>
+                                            </Match>
+                                        </Switch>
+                                    );
+                                }}
                             </For>
-                        </>
-                    );
-                }}
-            </For>
-        </ul>
+                        </ul>
+                    </details>
+                </Show>
+                <div id="notifications-facet">
+                    <For each={notifications()?.notifications}>
+                        {(dayGroup, index) => {
+                            const day = createMemo(() => {
+                                return dayGroup.created_day.toLocaleString();
+                            });
+                            return (
+                                <>
+                                    <ul class="pbCard">
+                                        <h1 class="pbCardSecondary">{day()}</h1>
+                                        <For each={dayGroup.kindGroups}>
+                                            {(kindGroup, index) => (
+                                                <GroupedNotificationComponent
+                                                    kindGroup={kindGroup}
+                                                />
+                                            )}
+                                        </For>
+                                    </ul>
+                                </>
+                            );
+                        }}
+                    </For>
+                </div>
+            </Match>
+        </Switch>
     );
 };
 export default NotificationsFacet;
