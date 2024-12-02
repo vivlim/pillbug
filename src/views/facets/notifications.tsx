@@ -34,6 +34,7 @@ import { PreprocessedPostBody } from "~/components/post/preprocessed";
 import { Account } from "megalodon/lib/src/entities/account";
 import { Button } from "~/components/ui/button";
 import { ProfileDetail, ProfileZone } from "~/components/user/profile-zone";
+import { FaSolidThumbsDown, FaSolidThumbsUp } from "solid-icons/fa";
 
 type NotificationDayGroups = {
     created_day: DateTime<true> | DateTime<false>;
@@ -381,24 +382,31 @@ export const NotificationsFacet: Component = () => {
                                         <Switch>
                                             <Match when={action() === "none"}>
                                                 <li class="followRequest">
-                                                    <AvatarLink
-                                                        user={req as Account}
-                                                        imgClass="size-12"
-                                                    />
-                                                    <a
-                                                        href={`/user/${req.acct}`}
-                                                        class="info"
-                                                    >
-                                                        <ul>
-                                                            <li>
-                                                                {
-                                                                    req.display_name
-                                                                }
-                                                            </li>
-                                                            <li>{req.acct}</li>
-                                                            <li>{req.group}</li>
-                                                        </ul>
-                                                    </a>
+                                                    <div class="info">
+                                                        <AvatarLink
+                                                            user={
+                                                                req as Account
+                                                            }
+                                                            imgClass="size-12"
+                                                        />
+                                                        <a
+                                                            href={`/user/${req.acct}`}
+                                                        >
+                                                            <ul>
+                                                                <li>
+                                                                    {
+                                                                        req.display_name
+                                                                    }
+                                                                </li>
+                                                                <li>
+                                                                    {req.acct}
+                                                                </li>
+                                                                <li>
+                                                                    {req.group}
+                                                                </li>
+                                                            </ul>
+                                                        </a>
+                                                    </div>
                                                     <div class="buttons">
                                                         <Button
                                                             onClick={() => {
@@ -430,6 +438,7 @@ export const NotificationsFacet: Component = () => {
                                                                 }
                                                             }}
                                                         >
+                                                            <FaSolidThumbsUp class="size-5 accept" />
                                                             accept
                                                         </Button>
                                                         <Button
@@ -449,6 +458,7 @@ export const NotificationsFacet: Component = () => {
                                                                 }
                                                             }}
                                                         >
+                                                            <FaSolidThumbsDown class="size-5 reject" />
                                                             reject
                                                         </Button>
                                                     </div>

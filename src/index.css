@@ -244,10 +244,6 @@ body {
         padding: 0.25rem;
     }
 
-    #followRequests > ul > li.followRequest {
-        flex-direction: row;
-    }
-
     #followRequests > ul > li.followRequest > .buttons {
         gap: 0.25em;
     }
@@ -266,6 +262,10 @@ body {
 
     #followRequests > ul > li.followRequest > .buttons {
         gap: 1em;
+    }
+
+    #followRequests > ul > li.followRequest {
+        flex-direction: row !important;
     }
 }
 /* Singular left column that may contain blocks. Stacks above main column if the viewport is too narrow */
@@ -349,7 +349,7 @@ button {
     padding-right: 0.4em;
     display: flex;
     gap: 1em;
-    flex-direction: row;
+    flex-direction: column;
     margin-left: 1em;
     margin-right: 1em;
 }
@@ -357,6 +357,15 @@ button {
     display: flex;
     gap: 1em;
     flex-direction: row;
+}
+#followRequests > ul > li.followRequest > .buttons svg {
+    margin-right: 0.5em;
+}
+#followRequests > ul > li.followRequest > .buttons svg.accept {
+    filter: invert(37%) sepia(33%) saturate(689%) hue-rotate(114deg) brightness(98%) contrast(87%);
+}
+#followRequests > ul > li.followRequest > .buttons svg.reject {
+    filter: invert(13%) sepia(82%) saturate(6130%) hue-rotate(348deg) brightness(100%) contrast(75%);
 }
 
 #followRequests > ul > li + li,
@@ -372,6 +381,9 @@ button {
 
 li.followRequest .info {
     flex: 1;
+    display: flex;
+    flex-direction: row;
+    gap: 0.5em;
 }
 
 .notificationYourStatus {
