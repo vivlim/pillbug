@@ -1,5 +1,9 @@
 import { error } from "console";
-import { logger } from "~/logging";
+import { Lazy } from "~/lib/utils";
+import * as Comlink from "comlink";
+import { IPillbugFilesystem } from "./ipillbugfilesystem";
+import { Logger } from "tslog";
+import { logger, pillbugGlobalLogger } from "~/logging";
 
 export async function getFsRoot(): Promise<FileSystemDirectoryHandle> {
     return await navigator.storage.getDirectory()
@@ -117,3 +121,19 @@ export async function deleteFileAtPath(path: string, fs: FileSystemDirectoryHand
         targetDir.removeEntry(pathParts[0]);
     }
 }
+
+export const PillbugFilesystem = new Lazy<IPillbugFilesystem>(() => {
+    // shared worker looks like this
+    /*
+    const worker = new SharedWorker(new URL('./worker.ts', import.meta.url).href)
+    const proxy = Comlink.wrap(worker.port) as unknown;
+    */
+
+    const worker = new Worker(new URL('./worker/worker.ts', import.meta.url), { type: "module" })
+
+    const proxy = Comlink.wrap(worker) as unknown;
+
+    const fs = proxy as IPillbugFilesystem;
+
+    return proxy as IPillbugFilesystem;
+});

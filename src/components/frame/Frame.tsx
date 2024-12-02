@@ -46,6 +46,9 @@ import { MegalodonInterface } from "megalodon";
 import { Account } from "megalodon/lib/src/entities/account";
 import { logger } from "~/logging";
 import ErrorBox from "../error";
+import { PillbugFilesystem } from "~/toolkit/files/opfs";
+import { Lazy } from "~/lib/utils";
+import { IPillbugFilesystem } from "~/toolkit/files/ipillbugfilesystem";
 
 const CurrentAccountWithAvatar: Component<{
     signInState: SignedInState;
@@ -227,7 +230,10 @@ const FrameTopBar: Component = (props) => {
 };
 
 class PillbugGlobalImpl implements PillbugGlobal {
-    constructor(public auth: SessionAuthManager) {}
+    public fs: Lazy<IPillbugFilesystem>;
+    constructor(public auth: SessionAuthManager) {
+        this.fs = PillbugFilesystem;
+    }
 
     public get client(): MegalodonInterface {
         return this.auth.assumeSignedIn.client;

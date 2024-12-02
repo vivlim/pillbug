@@ -44,6 +44,7 @@
         "class-variance-authority": "^0.7.0",
         "clsx": "^2.1.1",
         "codemirror": "^6.0.1",
+        "comlink": "^4.4.2",
         "digraph-js": "^2.2.3",
         "exifreader": "^4.23.7",
         "filesize": "^10.1.6",

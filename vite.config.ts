@@ -27,5 +27,13 @@ export default defineConfig({
     optimizeDeps: {
         // Add both @codemirror/state and @codemirror/view to included deps to optimize
         include: ['@codemirror/state', '@codemirror/view'],
+    },
+    worker: {
+        format: "es",
+        rollupOptions: {
+            output: {
+                format: "es"
+            }
+        }
     }
 });

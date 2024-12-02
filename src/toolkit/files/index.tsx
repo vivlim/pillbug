@@ -102,8 +102,11 @@ const FilesFacet: Component = () => {
                                             { create: true }
                                         );
                                         // todo: don't clobber existing files, prompt
-                                        const writable =
-                                            await handle!.createWritable({
+                                        const file = await handle?.getFile();
+
+                                        const writable = await handle
+                                            ?.getFile()!
+                                            .createWritable({
                                                 keepExistingData: false,
                                             });
                                         await file.stream().pipeTo(writable);
