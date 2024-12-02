@@ -155,26 +155,25 @@ export const FeedComponentPostList: Component<{
     const [nextButtonElement, setNextButtonElement] = createSignal<Element>();
     const scrollObserver = createMemo(() => {
         return new IntersectionObserver(
-            (entries, observer) => {
+            async (entries, observer) => {
                 for (const entry of entries) {
                     if (entry.isIntersecting) {
                         logger.info("next button has scrolled into view");
                         const nextPage = currentPage() + 1;
                         setNextPageEnabled(false);
                         setLoadingNextPage(true);
-                        requestIdleCallback(async () => {
-                            try {
-                                const posts = await getPosts(
-                                    nextPage,
-                                    props.engine
-                                );
-                                if (posts.posts.length > 0) {
-                                    setNextPageEnabled(true);
-                                }
-                            } finally {
-                                setLoadingNextPage(false);
+
+                        try {
+                            const posts = await getPosts(
+                                nextPage,
+                                props.engine
+                            );
+                            if (posts.posts.length > 0) {
+                                setNextPageEnabled(true);
                             }
-                        });
+                        } finally {
+                            setLoadingNextPage(false);
+                        }
                     }
                 }
             },
