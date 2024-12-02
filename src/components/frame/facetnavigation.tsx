@@ -99,6 +99,7 @@ export const FacetNavigation: Component = (props) => {
                     "md:block": true,
                     "md:static": true,
                 }}
+                style="z-index: 999; margin-top: 0px;"
             >
                 <ul
                     id="facet-menu"
