@@ -1,4 +1,12 @@
-import { Component, createSignal, JSX, Match, Show, Switch } from "solid-js";
+import {
+    Component,
+    createMemo,
+    createSignal,
+    JSX,
+    Match,
+    Show,
+    Switch,
+} from "solid-js";
 import { TextField, TextFieldTextArea } from "./ui/text-field";
 import {
     Card,
@@ -16,8 +24,68 @@ export interface ErrorBoxProps {
 }
 
 export const ErrorBox: Component<ErrorBoxProps> = (props) => {
+    const newVersionError = createMemo(() => {
+        try {
+            if (props.error instanceof Error) {
+                // Super crude heuristic for whether the error was caused by a new version of pillbug being released.
+                return (
+                    props.error.message.endsWith(".js") &&
+                    props.error.message.indexOf("imported module") >= 0
+                );
+            }
+        } catch {}
+        return undefined;
+    });
     return (
         <Switch>
+            <Match when={newVersionError()}>
+                <Card>
+                    <CardHeader>
+                        <CardTitle>
+                            a new version of pillbug was published
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        a new version of pillbug was (probably) published;
+                        please refresh to continue
+                    </CardContent>
+                    <CardFooter>
+                        <details>
+                            <summary>details</summary>
+
+                            <p>
+                                when a new version of pillbug is published,
+                                previous versions' code is no longer available
+                                on the server.
+                            </p>
+                            <p>
+                                pillbug's code is broken up into several pieces
+                                ('code splitting'), so that those parts can be
+                                downloaded when needed, instead of all at once.
+                            </p>
+                            <p>
+                                the pieces of pillbug that are cached in your
+                                web browser don't match the currently published
+                                version. so unfortunately there's currently no
+                                way to continue except refreshing :(
+                            </p>
+                            <p>
+                                <a
+                                    href="https://github.com/vivlim/pillbug/issues/82"
+                                    target="_blank"
+                                >
+                                    related github issue
+                                </a>
+                            </p>
+                            <p>here's the specific error:</p>
+                            <InnerErrorBox
+                                error={props.error}
+                                description={props.description}
+                            ></InnerErrorBox>
+                        </details>
+                    </CardFooter>
+                </Card>
+            </Match>
             <Match when={props.error instanceof Error}>
                 <div class="p-3 border-t">
                     <InnerErrorBox

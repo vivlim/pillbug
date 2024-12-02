@@ -11,10 +11,11 @@ import "@fontsource/atkinson-hyperlegible/400-italic.css";
 import "@fontsource/atkinson-hyperlegible/700-italic.css";
 import { lazy } from "solid-js";
 
+import App from "./App";
+
 const root = document.getElementById("root");
 
 // Lazy import different views to allow code splitting
-const App = lazy(() => import("./App"));
 const HomeView = lazy(() => import("./views/home"));
 const SettingsFacet = lazy(() => import("./views/facets/settings"));
 const ThemeSettingsFacet = lazy(() => import("./views/facets/theme-settings"));
