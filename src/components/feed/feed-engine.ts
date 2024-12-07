@@ -1,9 +1,9 @@
 import { Engine, EngineOptions, EngineResult, EventHandler, RuleProperties, RuleResult, TopLevelCondition } from "json-rules-engine";
 import { Status, StatusTag } from "megalodon/lib/src/entities/status";
 import { MultiTextboxSpec } from "../textbox";
-import createUrlRegExp from "url-regex-safe";
 import { FeedSource } from "./sources/abstract";
 import { logger } from "~/logging";
+import { GetPostRuleEngine, PostRuleEvaluationContext } from "../post/rule-engine/post-rule-engine";
 
 const Facts = {
 
@@ -33,7 +33,6 @@ export interface ProcessedStatus {
 }
 
 export class FeedEngine {
-    private ruleEngine: Engine;
     private retrievedStatusIds: Set<string> = new Set();
     private lastRetrievedStatusId: string | undefined = undefined;
     private statusIds: string[] = []
@@ -42,15 +41,6 @@ export class FeedEngine {
     private fetching: boolean = false;
 
     constructor(public readonly manifest: FeedManifest, private readonly rules: FeedRuleProperties[]) {
-        const options: EngineOptions = {}
-        const engineRules = rules.map(r => r.build())
-
-        this.ruleEngine = new Engine(engineRules, options)
-        this.ruleEngine.addFact("tagList", async (params, almanac) => {
-            const tags = (await almanac.factValue("tags")) as StatusTag[] | undefined
-            if (tags === undefined) { return [] }
-            return tags.map(t => t.name)
-        })
     }
 
     public async getPosts(pageNumber?: number, logCallback?: (msg: string) => void): Promise<{ posts: ProcessedStatus[], error?: Error }> {
@@ -101,31 +91,25 @@ export class FeedEngine {
 
     private async getAndProcessPosts(after?: string): Promise<{ moreAvailable: boolean, error?: Error | undefined }> {
         try {
-            const { statuses, moreAvailable } = await this.manifest.source.fetch(this.manifest, after)
+            let { statuses, moreAvailable } = await this.manifest.source.fetch(this.manifest, after)
             if (statuses.length === 0) {
                 return { moreAvailable: false }
             }
 
-            const processPromises: Promise<ProcessedStatus>[] = []
-            for (let status of statuses) {
-                if (this.retrievedStatusIds.has(status.id)) {
-                    // no action since we have already retrieved and processed it
-                    continue;
+            statuses = statuses.filter(s => !this.retrievedStatusIds.has(s.id));
+
+            const processedPosts: { in: Status, out: ProcessedStatus }[] = await GetPostRuleEngine().process(statuses, this.manifest.source.context(), this.rules)
+
+            for (const result of processedPosts) {
+                this.retrievedStatusIds.add(result.in.id);
+
+                if (!result.out.hide) {
+                    this.processedStatuses.push(result.out)
                 }
 
-                processPromises.push(this.process(status))
-                this.retrievedStatusIds.add(status.id)
+                this.lastRetrievedStatusId = result.in.id;
             }
 
-            const processedStatuses = await Promise.all(processPromises);
-            for (let processedStatus of processedStatuses) {
-                if (!processedStatus.hide) {
-                    this.processedStatuses.push(processedStatus)
-                }
-            }
-
-
-            this.lastRetrievedStatusId = statuses[statuses.length - 1].id
             return { moreAvailable };
         }
         catch (e) {
@@ -137,102 +121,11 @@ export class FeedEngine {
         }
     }
 
-    private async process(s: Status, inner?: boolean): Promise<ProcessedStatus> {
-        const result: EngineResult = await this.ruleEngine.run(s)
-        const labels: string[] = [];
-        const processedStatus: ProcessedStatus = { status: s, labels, rawRuleResults: { positive: result.results, negative: result.failureResults }, hide: false, collapseReasons: [], linkedAncestors: [] }
-        let attachedLinked = false;
-        for (let rawEvent of result.events) {
-            const e = rawEvent as FeedRuleEvent;
-            if (e.type === "applyLabel") {
-                labels.push(e.params.label);
-            } else if (e.type === "hidePost") {
-                processedStatus.hide = true;
-            } else if (e.type === "collapsePost") {
-                processedStatus.collapseReasons.push(e.params.label)
-            } else if (e.type === "attachLinked" && !attachedLinked && !inner) {
-                attachedLinked = true;
-                processedStatus.linkedAncestors = await this.retrieveLinkedAncestors(processedStatus)
-            }
-        }
-
-        // retrieve share parents
-
-        return processedStatus
-    }
-
-    private async retrieveLinkedAncestors(s: ProcessedStatus): Promise<ProcessedStatus[]> {
-        if (s.hide) {
-            return []
-        }
-
-        const statuses: ProcessedStatus[] = []
-
-        let current: ProcessedStatus = s
-        while (true) {
-            try {
-                const url = getShareParentUrl(current.status)
-                if (url === undefined) {
-                    return statuses;
-                }
-
-                const status = await this.manifest.source.getByUrl(url)
-                if (status === null) {
-                    logger.info(`A linked post (${url}) couldn't be found while retrieving ancestor posts for ${s.status.id}. Returning with ${statuses.length} posts`)
-                    return statuses;
-                }
-
-                // check if that status is already in our list, if so then there's a cycle and we'll bail out now.
-                if (statuses.findIndex(ps => ps.status.id === status.id) >= 0) {
-                    logger.info(`Detected link cycle trying to retrieve ancestor posts for ${s.status.id}. Returning with ${statuses.length} posts`)
-                    return statuses;
-                }
-
-                const processed = await this.process(status, true)
-                if (processed.hide) {
-                    // This catches replies and stops them from being attached. for now ... probably need to ignore this and differentiate 'hide from feed' from 'hide altogether'
-                    logger.info(`a post linked by ${s.status.id} would have been hidden, but isn't as a workaround until more granular hiding is available in feed engine`)
-                    //logger.info(`A linked post was hidden by a rule while retrieving ancestor posts for ${s.status.id}. Returning with ${statuses.length} posts`)
-                    //return statuses;
-                }
-
-                statuses.push(processed)
-                current = processed;
-            }
-            catch (e) {
-                if (e instanceof Error) {
-                    logger.info(`Error trying to fetch ${statuses.length}th linked ancestor post for ${s.status.id}. returning whatever's available. ${e.stack ?? e.message}`)
-                    return statuses;
-                }
-
-            }
-        }
-
-    }
-
     //** defining this allows the feed sources to be serialized, which means they can be used as an argument to cache */
     toJSON() {
         const subset: { manifest: FeedManifest, rules: FeedRuleProperties[] } = { manifest: this.manifest, rules: this.rules }
         return subset;
     }
-}
-
-const urlRegex = createUrlRegExp({
-    strict: true,
-    localhost: false,
-});
-
-export function getShareParentUrl(status: Status): string | undefined {
-    let content = status.content;
-    if (status.reblog) {
-        content = status.reblog.content
-    }
-    let urls = content.match(urlRegex);
-    if (urls === null) {
-        return undefined;
-    }
-    let postUrl = urls.find((u) => u.match(/statuses|objects|notes|\d{18}/)) ?? undefined;
-    return postUrl;
 }
 
 export type FeedRuleEventType = "applyLabel" | "collapsePost" | "hidePost" | "attachLinked"

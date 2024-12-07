@@ -541,6 +541,7 @@ const FollowingUser: Component<FollowingUserProps> = ({ acct }) => {
 
 const FollowingUserPosts: Component<{ acct: string }> = (props) => {
     const auth = useAuth();
+    const settings = useSettings();
     const [userFeedManifest, userFeedManifestActions] =
         createResource<FeedManifest>(async () => {
             const targetUser = await fetchUserInfo(
@@ -555,6 +556,7 @@ const FollowingUserPosts: Component<{ acct: string }> = (props) => {
             return {
                 source: new UserFeedSource(
                     auth,
+                    settings,
                     targetUser.id,
                     targetUser.acct
                 ),
@@ -570,9 +572,14 @@ const FollowingUserPosts: Component<{ acct: string }> = (props) => {
 
     return (
         <Switch>
-            <Match when={userFeedManifest.state === "ready"}>
+            <Match
+                when={
+                    userFeedManifest.state === "ready" &&
+                    userFeedManifest() !== undefined
+                }
+            >
                 <FeedComponent
-                    manifest={userFeedManifest()}
+                    manifest={userFeedManifest()!}
                     rules={defaultHomeFeedRules}
                     initialOptions={{ limit: 25 }}
                 />

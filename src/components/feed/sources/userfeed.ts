@@ -1,13 +1,15 @@
 import { SessionAuthManager } from "~/auth/auth-manager";
-import { FeedSource } from "./abstract";
+import { ClientFeedSource, FeedSource } from "./abstract";
 import { Status } from "megalodon/lib/src/entities/status";
 import { FeedManifest } from "../feed-engine";
 import { unwrapResponse } from "~/lib/clientUtil";
 import { logger } from "~/logging";
+import { PostRuleEvaluationContext } from "~/components/post/rule-engine/post-rule-engine";
+import { SettingsManager } from "~/lib/settings-manager";
 
-export class UserFeedSource extends FeedSource {
-    constructor(private auth: SessionAuthManager, private userId: string, private acct: string, private includePinned: boolean = false) {
-        super()
+export class UserFeedSource extends ClientFeedSource {
+    constructor(auth: SessionAuthManager, settings: SettingsManager, private userId: string, private acct: string, private includePinned: boolean = false) {
+        super(auth, settings)
     }
 
     override async fetch(manifest: Omit<FeedManifest, "source">, after?: string | undefined): Promise<{ statuses: Status[]; moreAvailable: boolean; }> {

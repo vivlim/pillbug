@@ -60,6 +60,7 @@ import {
     DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import { useFeeds } from "~/lib/feed-manager";
+import { useSettings } from "~/lib/settings-manager";
 import { StoreBacked } from "~/lib/store-backed";
 import { logger } from "~/logging";
 
@@ -128,7 +129,7 @@ const FeedBuilderFacet: Component = (props) => {
     };
 
     const manifest = {
-        source: new HomeFeedSource(useAuth()),
+        source: new HomeFeedSource(useAuth(), useSettings()),
         fetchReferencedPosts: 5, // unused??
         postsPerPage: 10,
         postsToFetchPerBatch: 40,

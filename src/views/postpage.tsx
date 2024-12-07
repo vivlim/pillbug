@@ -39,12 +39,17 @@ import {
     ProcessedStatus,
 } from "~/components/feed/feed-engine";
 import { SingleStatusFeed } from "~/components/feed/sources/singlestatus";
-import { StatusListFeed } from "~/components/feed/sources/list";
 import {
     defaultFeedRules,
     defaultPostPageRules,
 } from "~/components/feed/preset-rules";
 import { PreprocessedPost } from "~/components/post/preprocessed";
+import {
+    defaultGetByUrl,
+    GetPostRuleEngine,
+    PostRuleEvaluationContext,
+} from "~/components/post/rule-engine/post-rule-engine";
+import { SettingsManager } from "~/lib/settings-manager";
 
 /** Fetch the info for a post and arrange its context in a nested tree structure before returning. */
 export async function fetchPostInfoTree(
@@ -52,10 +57,12 @@ export async function fetchPostInfoTree(
         postId: string;
         newCommentId?: string | undefined;
         auth: SessionAuthManager;
+        settings: SettingsManager;
     },
     previousTree: IPostTreeNode | undefined
 ): Promise<IPostTreeNode> {
     const auth = props.auth;
+    const settings = props.settings;
 
     if (!auth?.signedIn) {
         return new PostTreePlaceholderNode("not signed in", []);
@@ -63,48 +70,22 @@ export async function fetchPostInfoTree(
 
     const client = auth.assumeSignedIn.client;
 
-    const statusesToProcess: Status[] = [];
-    const manifest: FeedManifest = {
-        source: new StatusListFeed(auth, statusesToProcess),
-        fetchReferencedPosts: 10,
-        postsPerPage: null,
-        postsToFetchPerBatch: null,
+    const processingContext: PostRuleEvaluationContext = {
+        auth,
+        settings,
+        inner: false,
+        getByUrl: (u) => defaultGetByUrl(auth.assumeSignedIn.client, u),
     };
-    const feedEngine: FeedEngine = new FeedEngine(
-        manifest,
-        defaultPostPageRules
-    );
+
     const processStatuses = async (
         statuses: Status[]
     ): Promise<ProcessedStatus[]> => {
-        for (const s of statuses) {
-            statusesToProcess.push(s);
-        }
-
-        const posts = await feedEngine.getPosts();
-        if (posts.error !== undefined) {
-            logger.error(
-                "error when processing statuses for post page",
-                posts.error
-            );
-            throw posts.error;
-        }
-
-        // yuck
-        const postMap = new Map<string, ProcessedStatus>();
-        for (const p of posts.posts) {
-            postMap.set(p.status.id, p);
-        }
-
-        // filter down to just the ones that were passed in.
-        const result = statuses
-            .map((s) => postMap.get(s.id))
-            .filter((s) => s !== undefined);
-
-        logger.info(
-            `feed engine produced ${result.length} posts from ${statuses.length} inputs`
+        const result = await GetPostRuleEngine().process(
+            statuses,
+            processingContext,
+            defaultPostPageRules
         );
-        return result;
+        return result.map((r) => r.out);
     };
 
     if (previousTree !== undefined && props.newCommentId !== undefined) {

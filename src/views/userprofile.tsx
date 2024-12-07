@@ -20,6 +20,7 @@ import { FeedComponent } from "~/components/feed";
 import { defaultHomeFeedRules } from "~/components/feed/preset-rules";
 import { unwrapResponse } from "~/lib/clientUtil";
 import { logger } from "~/logging";
+import { useSettings } from "~/lib/settings-manager";
 
 export interface GetAccountFeedOptions
     extends Omit<GetTimelineOptions, "local"> {
@@ -58,6 +59,7 @@ const UserProfilePage: Component = () => {
 };
 export const UserProfile: Component<{ acct: string }> = (props) => {
     const auth = useAuth();
+    const settings = useSettings();
 
     const [account, accountActions] = createResource<
         Account | undefined,
@@ -86,7 +88,7 @@ export const UserProfile: Component<{ acct: string }> = (props) => {
         const a = account();
         if (a !== undefined) {
             return {
-                source: new UserFeedSource(auth, a.id, a.acct, true),
+                source: new UserFeedSource(auth, settings, a.id, a.acct, true),
                 fetchReferencedPosts: 5,
                 postsPerPage: 10,
                 postsToFetchPerBatch: 10,
