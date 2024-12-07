@@ -48,6 +48,7 @@ import { FeedComponent } from "~/components/feed";
 import { FeedManifest } from "~/components/feed/feed-engine";
 import { UserFeedSource } from "~/components/feed/sources/userfeed";
 import { logger } from "~/logging";
+import { useAccountStore } from "~/lib/following-accounts-store";
 
 interface AccountInfo {
     acct: string;
@@ -92,8 +93,8 @@ const FollowingFacet: Component = () => {
     });
 
     const auth = useAuth();
+    const accountStore = useAccountStore();
     auth.assumeSignedIn; // throws if not
-    const [accountStore, setAccountStore] = createStore<AccountInfoMap>({});
     const [facetStore, setFacetStore] = createStore<FollowingFacetStore>({
         requestList: [],
         lastHomeTimelinePostId: undefined,
@@ -107,7 +108,7 @@ const FollowingFacet: Component = () => {
         createSignal<number>(20);
 
     const sortedAccounts = createMemo(() => {
-        const accounts: AccountInfo[] = Object.values(accountStore);
+        const accounts: AccountInfo[] = Object.values(accountStore.store);
         accounts.sort((a, b) => {
             // descending order
             return b.lastKnownStatusUnixTs - a.lastKnownStatusUnixTs;
@@ -130,7 +131,7 @@ const FollowingFacet: Component = () => {
     });
 
     const missingAccounts = createMemo(() => {
-        const accounts: AccountInfo[] = Object.values(accountStore);
+        const accounts: AccountInfo[] = Object.values(accountStore.store);
         return accounts.filter(
             (a) => a.isFollowed && a.lastKnownStatus === undefined
         );
@@ -187,10 +188,10 @@ const FollowingFacet: Component = () => {
             }
         }
 
-        const currentRecord = accountStore[acct];
+        const currentRecord = accountStore.store[acct];
         if (currentRecord === undefined) {
             const { dt, unix } = parseStatusDateTimeUnixTs(lastKnownStatus);
-            setAccountStore(acct, {
+            accountStore.setStore(acct, {
                 acct: acct,
                 account: account,
                 lastKnownStatus: lastKnownStatus,
@@ -207,7 +208,7 @@ const FollowingFacet: Component = () => {
                 isFollowed = currentRecord.isFollowed;
             }
             const { dt, unix } = parseStatusDateTimeUnixTs(lastKnownStatus);
-            setAccountStore(acct, {
+            accountStore.setStore(acct, {
                 ...currentRecord,
                 lastKnownStatus: lastKnownStatus,
                 lastKnownStatusTs: dt,

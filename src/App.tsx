@@ -12,6 +12,7 @@ import { TrackedBlockingLoadComponent } from "./components/tracked-blocking-load
 import { SettingsManager } from "./lib/settings-manager";
 import { lazy } from "solid-js";
 import { FeedManager } from "./lib/feed-manager";
+import { SeenAccountsStore } from "./lib/following-accounts-store";
 
 const AppFrame = lazy(() => import("./components/frame/Frame"));
 
@@ -26,6 +27,8 @@ const App: Component<RouteSectionProps> = (props: RouteSectionProps) => {
     const authManager = new SessionAuthManager();
 
     const feedManager = new FeedManager();
+
+    const seenAccountsStore = new SeenAccountsStore({});
 
     const blockingLoadProgressTracker = new BlockingLoadProgressTracker(
         initialLoadOperations
@@ -44,6 +47,7 @@ const App: Component<RouteSectionProps> = (props: RouteSectionProps) => {
                 blockingLoadProgressTracker,
                 settingsManager,
                 feedManager,
+                seenAccountsStore,
             }}
         >
             <TrackedBlockingLoadComponent

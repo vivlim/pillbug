@@ -3,6 +3,7 @@ import { SessionAuthManager } from "../auth/auth-manager";
 import { BlockingLoadProgressTracker } from "./blocking-load";
 import { SettingsManager } from "./settings-manager";
 import { FeedManager } from "./feed-manager";
+import { SeenAccountsStore } from "./following-accounts-store";
 
 export const SessionContext = createContext<PillbugSessionContext>();
 
@@ -13,6 +14,7 @@ export interface PillbugSessionContext {
     blockingLoadProgressTracker: BlockingLoadProgressTracker;
     settingsManager: SettingsManager;
     feedManager: FeedManager;
+    seenAccountsStore: SeenAccountsStore;
 }
 
 /** Directly access the session context. It is usually more convenient to use more specific helpers like useAuth and useSettings. */
