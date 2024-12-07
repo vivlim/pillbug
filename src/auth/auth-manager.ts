@@ -360,7 +360,7 @@ export class SessionAuthManager extends PersistentStoreBacked<PillbugSessionStor
         }
         catch (e) {
             if (e instanceof Error) {
-                logger.error(`Failed to complete login: ${e}`)
+                logger.error(`Failed to complete login`, e)
                 throw e;
             }
         }

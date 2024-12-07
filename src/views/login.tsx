@@ -64,12 +64,11 @@ export const LoginView: Component = () => {
 
     const code = createMemo(() => {
         if (searchParams.code !== undefined) {
-            return searchParams.code;
+            return searchParams.code as string;
         }
 
         if (searchParams.token !== undefined) {
-            // sharkey
-            return searchParams.token;
+            return searchParams.token as string;
         }
 
         logger.info("did not find a code or token query parameter");
