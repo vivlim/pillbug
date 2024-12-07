@@ -236,12 +236,18 @@ const FollowingFacet: Component = () => {
         }
     };
 
+    const [fetching, setFetching] = createSignal<boolean>(false);
     const dataFetcher = async () => {
         if (accountGapCount() <= 0) {
             // no action needed - we have the needed number of accounts
             return;
         }
 
+        if (fetching()) {
+            return;
+        }
+
+        setFetching(true);
         // Start by grabbing home timeline posts and seeing how many more accounts we need.
         const lastPostId = await ingestHomeTimeline(
             auth.assumeSignedIn.client,
@@ -253,6 +259,7 @@ const FollowingFacet: Component = () => {
             requestLogger
         );
         setFacetStore("lastHomeTimelinePostId", lastPostId);
+        setFetching(false);
     };
 
     const randomFollowerLookup = async (count: number) => {
@@ -307,9 +314,45 @@ const FollowingFacet: Component = () => {
         }
     };
 
+    // scroll handling
+    const [loadingMore, setLoadingMore] = createSignal<boolean>(false);
+    const scrollObserver = createMemo(() => {
+        return new IntersectionObserver(
+            async (entries, observer) => {
+                for (const entry of entries) {
+                    if (entry.isIntersecting) {
+                        if (!fetching()) {
+                            logger.info(
+                                "bottom has scrolled into view, going to attempt fetching accounts."
+                            );
+
+                            expandWindowOnInteraction(8);
+                            setNumAccountsRequested(
+                                numAccountsInput!.valueAsNumber
+                            );
+                            dataFetcher();
+                        }
+                    }
+                }
+            },
+            {
+                threshold: 1.0,
+            }
+        );
+    });
+    const [moreButtonElement, setMoreButtonElement] = createSignal<Element>();
+    createEffect(() => {
+        const e = moreButtonElement();
+        if (e !== undefined) {
+            scrollObserver().observe(e);
+        }
+    });
+
     // stuff to do on first load
     const init = async () => {
         await followingList();
+        await dataFetcher();
+        // pull twice to increase the likelihood of a full list of users
         await dataFetcher();
     };
     init();
@@ -340,6 +383,7 @@ const FollowingFacet: Component = () => {
                         </div>
                         <Button
                             class="followingFetchButton"
+                            ref={setMoreButtonElement}
                             onClick={() => {
                                 expandWindowOnInteraction(8);
                                 setNumAccountsRequested(
@@ -347,6 +391,7 @@ const FollowingFacet: Component = () => {
                                 );
                                 dataFetcher();
                             }}
+                            disabled={fetching()}
                         >
                             look further back in timeline
                         </Button>
