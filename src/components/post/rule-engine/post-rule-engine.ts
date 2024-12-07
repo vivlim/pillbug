@@ -32,9 +32,9 @@ class PostRuleEngine extends RuleEngineBase<Status, ProcessedStatus, PostRuleset
         return engine;
     }
     partitionKey(context: PostRuleEvaluationContext, rules: PostRuleset): CachePartitionKey {
-        return [context.auth.assumeSignedIn.state.accountData.acct,
+        return JSON.stringify([context.auth.assumeSignedIn.state.accountData.acct,
         context.auth.assumeSignedIn.state.domain,
-        JSON.stringify(rules)] as CachePartitionKey
+            rules]) as CachePartitionKey
     }
     cacheKey(input: Status): CacheKey {
         return input.id as CacheKey
@@ -62,7 +62,8 @@ class PostRuleEngine extends RuleEngineBase<Status, ProcessedStatus, PostRuleset
         return processedStatus
     }
     async isCacheItemStillValid(input: Status, output: ProcessedStatus): Promise<boolean> {
-        return false; // always invalidate atm
+        logger.debug(`Unconditionally using cached version of ${input.id} by ${input.account.acct} (${input.url}}`)
+        return true;
     }
 
     private async retrieveLinkedAncestors(s: ProcessedStatus, context: PostRuleEvaluationContext, rules: PostRuleset): Promise<ProcessedStatus[]> {
