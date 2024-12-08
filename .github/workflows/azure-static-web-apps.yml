@@ -41,6 +41,18 @@ jobs:
           production_branch: "main"
         env:
             SKIP_DEPLOY_ON_MISSING_SECRETS: true
+    
+      - run: |
+          echo "pwd"
+          pwd
+          echo "pwd listing"
+          ls -lah
+          echo "workspace"
+          cd ${{ github.workspace }}
+          pwd
+          echo "workspace listing"
+          ls -lah
+
       - name: pack dist
         uses: a7ul/tar-action@v1.1.0
         id: compress
