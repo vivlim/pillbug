@@ -17,6 +17,9 @@ jobs:
     if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
     runs-on: ubuntu-latest
     name: Build and Deploy Job
+    defaults:
+        run:
+            working-directory: ./repo # Azure/static-web-apps-deploy seems to change ownership of the working directory, preventing a7ul/tar-action from being able to write in it
     steps:
       - uses: actions/checkout@v3
         with:
@@ -38,6 +41,24 @@ jobs:
           production_branch: "main"
         env:
             SKIP_DEPLOY_ON_MISSING_SECRETS: true
+      - name: pack dist
+        uses: a7ul/tar-action@v1.1.0
+        id: compress
+        with:
+          command: c
+          cwd: .
+          files: |
+            dist
+          outPath: ${{ github.workspace }}/pillbug_${{ github.ref_name }}_${{ github.run_number }}.tar.gz
+
+      - name: release
+        uses: softprops/action-gh-release@v2
+        if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/staging' }}
+        with:
+          prerelease: true
+          fail_on_unmatched_files: true
+          files: |
+            ${{ github.workspace }}/pillbug_${{ github.ref_name }}_${{ github.run_number }}.tar.gz
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
