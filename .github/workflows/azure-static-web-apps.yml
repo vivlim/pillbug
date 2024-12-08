@@ -39,25 +39,29 @@ jobs:
         env:
             SKIP_DEPLOY_ON_MISSING_SECRETS: true
     
-      - run: |
-          echo "pwd"
-          pwd
-          echo "pwd listing"
-          ls -lah
-          echo "fixing perms"
+      - name: fix permissions
+        if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/staging' }}
+        run: |
           sudo chown -R $(whoami) .
-          echo "listing"
-          ls -lah
 
       - name: pack dist
         uses: a7ul/tar-action@v1.1.0
         id: compress
+        if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/staging' }}
         with:
           command: c
           cwd: .
           files: |
             dist
           outPath: ${{ github.workspace }}/pillbug_${{ github.ref_name }}_${{ github.run_number }}.tar.gz
+
+      - name: Create tag
+        id: create_tag
+        if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/staging' }}
+        run: |
+          tag_name="v0.0.${{ github.run_number }}-ci.${{ github.ref_name }}"
+          git tag $tag_name
+          git push origin $tag_name
 
       - name: release
         uses: softprops/action-gh-release@v2
