@@ -44,10 +44,9 @@ jobs:
           pwd
           echo "pwd listing"
           ls -lah
-          echo "workspace"
-          cd ${{ github.workspace }}
-          pwd
-          echo "workspace listing"
+          echo "fixing perms"
+          sudo chown -R $(whoami) .
+          echo "listing"
           ls -lah
 
       - name: pack dist
