@@ -82,6 +82,7 @@ import {
 } from "~/toolkit/files/opfs";
 import { logger } from "~/logging";
 import { UserContextMenu } from "../post-embedded/user-link";
+import "./post.css";
 
 export type PreprocessedPostProps = {
     class?: string;
@@ -105,48 +106,59 @@ export const PreprocessedPostUserBar: Component<{
     const shared = props.sharedStatus ?? status.reblog ?? null;
 
     return (
-        <div class="pbPostUserBar border-b flex flex-row flex-wrap items-center gap-x-2 p-2 flex-auto">
+        <div class="pbPostUserBar pbUserBar border-b items-center flex-auto">
             <Show when={status.pinned}>
                 <BsPinAngleFill aria-label="Pinned post" class="size-4" />
             </Show>
             <UserContextMenu account={status.account} href={status.account.url}>
-                <ContextMenuTrigger class="flex flex-row items-center gap-x-2 select-none">
+                <ContextMenuTrigger class="pbContents">
                     <AvatarLink
                         user={status.account}
                         imgClass="size-8"
-                        class="inline-block"
+                        class=""
+                        linkClass="authorAvatar"
                     />
-                    <div class="flex flex-row gap-2 items-center">
-                        <A href={userHref} class="font-bold whitespace-nowrap">
+                    <div class="pbContents">
+                        <A
+                            href={userHref}
+                            class="authorDisplayName font-bold whitespace-nowrap"
+                        >
                             {status.account.display_name}
                         </A>
                         <VisibilityIcon
-                            class="size-4"
+                            class="visibilityIcon size-4"
                             value={status.visibility}
                         />
                     </div>
-                    <A href={userHref} class="pbSubtleText">
+                    <A href={userHref} class="authorAcct pbSubtleText">
                         {status.account.acct}
                     </A>
                 </ContextMenuTrigger>
             </UserContextMenu>
-            <A href={postHref} class="pbSubtleText text-xs">
+            <A href={postHref} class="postTimestamp pbSubtleText text-xs">
                 <Timestamp ts={DateTime.fromISO(status.created_at)} />
             </A>
             <Show when={shared !== null}>
-                <FaSolidArrowsRotate />
-                <A
-                    href={`/user/${shared!.account.acct}`}
-                    class="font-bold whitespace-nowrap"
+                <UserContextMenu
+                    account={shared!.account}
+                    href={shared!.account.url}
                 >
-                    {shared!.account.display_name}
-                </A>
-                <A
-                    href={`/user/${shared!.account.acct}`}
-                    class="pbSubtleText whitespace-nowrap"
-                >
-                    {shared!.account.acct}
-                </A>
+                    <ContextMenuTrigger class="pbContents originalAuthor">
+                        <FaSolidArrowsRotate class="sharedIcon" />
+                        <A
+                            href={`/user/${shared!.account.acct}`}
+                            class="originalAuthorDisplayName font-bold whitespace-nowrap"
+                        >
+                            {shared!.account.display_name}
+                        </A>
+                        <A
+                            href={`/user/${shared!.account.acct}`}
+                            class="originalAuthorAcct pbSubtleText whitespace-nowrap"
+                        >
+                            {shared!.account.acct}
+                        </A>
+                    </ContextMenuTrigger>
+                </UserContextMenu>
             </Show>
         </div>
     );

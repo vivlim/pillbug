@@ -74,34 +74,40 @@ export const CommentPostComponent: Component<CommentProps> = (postData) => {
 
     return (
         <>
-            <div class="flex flex-row items-center flex-wrap border-b">
+            <div class="pbCommentUserBar pbUserBar border-b items-center flex-auto">
                 <UserContextMenu
                     account={status().status.account}
                     href={status().status.account.url}
                 >
-                    <ContextMenuTrigger class="flex flex-row items-center gap-x-2 select-none">
+                    <ContextMenuTrigger class="pbContents">
                         <AvatarLink
                             user={status().status.account}
-                            imgClass="size-6"
+                            imgClass="size-8"
+                            class=""
+                            linkClass="authorAvatar"
                         />
-                        <A href={userHref()} class="font-bold m-2">
-                            <HtmlSandboxSpan
-                                html={status().status.account.display_name}
-                                emoji={status().status.account.emojis}
+                        <div class="pbContents">
+                            <A
+                                href={userHref()}
+                                class="authorDisplayName font-bold whitespace-nowrap"
+                            >
+                                {status().status.account.display_name}
+                            </A>
+                            <VisibilityIcon
+                                class="visibilityIcon size-4"
+                                value={status().status.visibility}
                             />
-                        </A>
-                        <A href={userHref()} class="m-1 pbSubtleText text-sm">
+                        </div>
+                        <A href={userHref()} class="authorAcct pbSubtleText">
                             {status().status.account.acct}
-                        </A>
-                        <A href={postHref()} class="m-1 pbSubtleText text-xs">
-                            <Timestamp
-                                ts={DateTime.fromISO(
-                                    status().status.created_at
-                                )}
-                            />
                         </A>
                     </ContextMenuTrigger>
                 </UserContextMenu>
+                <A href={postHref()} class="postTimestamp pbSubtleText text-xs">
+                    <Timestamp
+                        ts={DateTime.fromISO(status().status.created_at)}
+                    />
+                </A>
             </div>
             <div class="md:px-3 pt-2">
                 <ContentGuard warnings={status().status.spoiler_text}>

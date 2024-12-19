@@ -49,11 +49,14 @@ export const AvatarImage: Component<AvatarProps> = (props) => {
  * A helper component that wraps {@link AvatarImage} with a link to the user's
  * profile page.
  */
-export const AvatarLink: Component<AvatarProps> = (props) => {
+export const AvatarLink: Component<AvatarProps & { linkClass?: string }> = (
+    props
+) => {
     const profileRoute = `/user/${props.user.acct}`;
+    const c = props.linkClass ?? "h-max";
 
     return (
-        <A href={profileRoute} class="h-max">
+        <A href={profileRoute} class={c}>
             <AvatarImage {...props} />
         </A>
     );
