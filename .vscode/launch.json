@@ -9,6 +9,8 @@
       "request": "launch",
       "runtimeExecutable": "npx",
       "runtimeArgs": [
+        "--workspace",
+        "pillbug-app",
         "vite",
       ],
       "type": "node",
