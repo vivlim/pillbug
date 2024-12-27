@@ -20,14 +20,14 @@ import {
 import { createStore } from "solid-js/store";
 import { useAuth } from "~/auth/auth-manager";
 import { Timestamp } from "~/components/post/timestamp";
-import { Button } from "~/components/ui/button";
+import { Button } from "pillbug-components/ui/button";
 import {
     Card,
     CardDescription,
     CardFooter,
     CardHeader,
     CardTitle,
-} from "~/components/ui/card";
+} from "pillbug-components/ui/card";
 import { LoggedRequest, unwrapLoggedResponseAsync } from "~/lib/clientUtil";
 import { SingleLinePostPreviewLink } from "./notifications";
 import { Checkbox } from "~/components/checkbox";

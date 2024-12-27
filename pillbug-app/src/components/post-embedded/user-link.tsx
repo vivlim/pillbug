@@ -20,7 +20,7 @@ import {
     ContextMenuContent,
     ContextMenuItem,
     ContextMenuTrigger,
-} from "../ui/context-menu";
+} from "pillbug-components/ui/context-menu";
 import { Account } from "megalodon/lib/src/entities/account";
 import { BsWindowPlus } from "solid-icons/bs";
 import { useNavigate } from "@solidjs/router";

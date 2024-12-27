@@ -23,7 +23,7 @@ import {
     ContextMenuContent,
     ContextMenuItem,
     ContextMenuTrigger,
-} from "~/components/ui/context-menu";
+} from "pillbug-components/ui/context-menu";
 import { HtmlSandboxSpan } from "../htmlsandbox";
 import { Timestamp } from "~/components/post/timestamp";
 import { AvatarLink } from "~/components/user/avatar";
@@ -32,7 +32,7 @@ import { logger } from "~/logging";
 import { unwrapResponse } from "~/lib/clientUtil";
 import { PreprocessedPostBody } from "~/components/post/preprocessed";
 import { Account } from "megalodon/lib/src/entities/account";
-import { Button } from "~/components/ui/button";
+import { Button } from "pillbug-components/ui/button";
 import { ProfileDetail, ProfileZone } from "~/components/user/profile-zone";
 import { FaSolidThumbsDown, FaSolidThumbsUp } from "solid-icons/fa";
 

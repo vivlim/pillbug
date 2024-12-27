@@ -16,8 +16,13 @@ import {
     IndexDropdown,
 } from "~/components/dropdown-or-other";
 import { Timestamp } from "~/components/post/timestamp";
-import { Button } from "~/components/ui/button";
-import { Card, CardHeader, CardTitle, CardContent } from "~/components/ui/card";
+import { Button } from "pillbug-components/ui/button";
+import {
+    Card,
+    CardHeader,
+    CardTitle,
+    CardContent,
+} from "pillbug-components/ui/card";
 import {
     ColorSetting,
     FilterPropertiesByType,

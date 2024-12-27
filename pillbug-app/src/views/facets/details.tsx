@@ -7,7 +7,7 @@ import {
     CardFooter,
     CardHeader,
     CardTitle,
-} from "~/components/ui/card";
+} from "pillbug-components/ui/card";
 
 interface LicenseReportItem {
     department: string;

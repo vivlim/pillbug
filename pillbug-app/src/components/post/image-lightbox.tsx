@@ -7,10 +7,10 @@ import {
     createSignal,
     Show,
 } from "solid-js";
-import { Dialog, DialogOverlay } from "../ui/dialog";
+import { Dialog, DialogOverlay } from "pillbug-components/ui/dialog";
 import * as DialogPrimitive from "@kobalte/core/dialog";
 import { Dynamic } from "solid-js/web";
-import { Button } from "../ui/button";
+import { Button } from "pillbug-components/ui/button";
 import { logger } from "~/logging";
 
 const InnerImage: Component<{ image: Attachment }> = (props) => {

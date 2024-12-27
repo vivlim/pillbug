@@ -6,7 +6,7 @@ import { AccountBase, MaybeSignedInState, OAuthRegistration, PillbugAccount, Pil
 import { unwrapResponse } from "../lib/clientUtil";
 import { PersistentStoreBacked } from "../lib/store-backed";
 import { useSessionContext } from "pillbug-app/lib/session-context";
-import { logger } from "pillbug-app/logging";
+import { logger } from "pillbug-app";
 
 const AppDisplayName: string = "pillbug";
 

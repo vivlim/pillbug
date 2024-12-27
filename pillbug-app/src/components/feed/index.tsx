@@ -25,10 +25,10 @@ import ErrorBox from "../error";
 import Post from "../post";
 import { HomeFeedSource } from "./sources/homefeed";
 import { PreprocessedPost } from "../post/preprocessed";
-import { Button } from "../ui/button";
+import { Button } from "pillbug-components/ui/button";
 import { cache, useSearchParams } from "@solidjs/router";
 import { createStore } from "solid-js/store";
-import { PageNav } from "../ui/page-footer";
+import { PageNav } from "pillbug-components/ui/page-footer";
 import { useSettings } from "~/lib/settings-manager";
 import { logger } from "~/logging";
 

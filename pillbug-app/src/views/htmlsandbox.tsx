@@ -17,7 +17,7 @@ import { unified } from "unified";
 import rehypeEmoji from "~/lib/rehype-emoji";
 import { Fragment, jsx, jsxs } from "solid-jsx";
 import rehypeLinks from "~/lib/rehype-links";
-import { Button } from "~/components/ui/button";
+import { Button } from "pillbug-components/ui/button";
 import {
     PostEmbeddedUserLink,
     PostEmbeddedUserLinkProps,

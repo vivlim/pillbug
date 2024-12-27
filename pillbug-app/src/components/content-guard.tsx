@@ -1,5 +1,5 @@
 import { IoWarningOutline } from "solid-icons/io";
-import { Button } from "./ui/button";
+import { Button } from "pillbug-components/ui/button";
 import { Component, createSignal, JSX, Match, Switch } from "solid-js";
 
 export interface ContentGuardProps {

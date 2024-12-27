@@ -22,8 +22,8 @@ import {
     MenubarMenu,
     MenubarSeparator,
     MenubarTrigger,
-} from "../ui/menubar";
-import { Button } from "../ui/button";
+} from "pillbug-components/ui/menubar";
+import { Button } from "pillbug-components/ui/button";
 import EditOverlay from "../../views/editoverlay";
 import { SessionAuthManager, useAuth } from "../../auth/auth-manager";
 import { useEditOverlayContext } from "../../lib/edit-overlay-context";

@@ -15,7 +15,7 @@ import { json } from "@codemirror/lang-json";
 import { indentWithTab } from "@codemirror/commands";
 import { basicSetup } from "codemirror";
 import { getFileAtPath, PillbugFilesystem } from "./opfs";
-import { Button } from "~/components/ui/button";
+import { Button } from "pillbug-components/ui/button";
 import { BeforeLeaveEventArgs, useBeforeLeave } from "@solidjs/router";
 import { OpenedFile } from "./multiFileViewer";
 import { logger } from "~/logging";

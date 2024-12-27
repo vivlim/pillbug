@@ -10,13 +10,18 @@ import {
     type Component,
 } from "solid-js";
 import { ErrorBox } from "~/components/error";
-import { Button } from "~/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import { Button } from "pillbug-components/ui/button";
+import {
+    Card,
+    CardContent,
+    CardHeader,
+    CardTitle,
+} from "pillbug-components/ui/card";
 import {
     TextField,
     TextFieldInput,
     TextFieldLabel,
-} from "~/components/ui/text-field";
+} from "pillbug-components/ui/text-field";
 import { AvatarImage } from "~/components/user/avatar";
 import { SessionAuthManager, useAuth } from "~/auth/auth-manager";
 import { SignedInAccount } from "~/auth/auth-types";

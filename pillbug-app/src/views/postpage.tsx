@@ -22,7 +22,7 @@ import { Status } from "megalodon/lib/src/entities/status";
 import { SessionAuthManager, useAuth } from "~/auth/auth-manager";
 import { ProfileZone } from "~/components/user/profile-zone";
 import { Comment } from "~/components/post/comments";
-import { Card } from "~/components/ui/card";
+import { Card } from "pillbug-components/ui/card";
 import { ErrorBox } from "~/components/error";
 import { MaybeSignedInState } from "~/auth/auth-types";
 import {

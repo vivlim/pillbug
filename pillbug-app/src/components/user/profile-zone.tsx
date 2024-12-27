@@ -1,4 +1,4 @@
-import { Button } from "~/components/ui/button";
+import { Button } from "pillbug-components/ui/button";
 import { A } from "@solidjs/router";
 import { Entity, Response } from "megalodon";
 import {

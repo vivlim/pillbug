@@ -1,5 +1,10 @@
 import type { Component } from "solid-js";
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import {
+    Card,
+    CardContent,
+    CardHeader,
+    CardTitle,
+} from "pillbug-components/ui/card";
 
 const ErrorView: Component = () => {
     return (

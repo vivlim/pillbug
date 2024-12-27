@@ -14,7 +14,12 @@ import {
     Suspense,
 } from "solid-js";
 import { Timestamp } from "~/components/post/timestamp";
-import { Card, CardHeader, CardTitle, CardContent } from "~/components/ui/card";
+import {
+    Card,
+    CardHeader,
+    CardTitle,
+    CardContent,
+} from "pillbug-components/ui/card";
 import { PersistentFlagNames, useSettings } from "~/lib/settings-manager";
 import PostEditor from "../editdialog";
 import {

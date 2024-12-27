@@ -17,8 +17,8 @@ import {
     ContextMenuContent,
     ContextMenuItem,
     ContextMenuTrigger,
-} from "~/components/ui/context-menu";
-import { TextField, TextFieldTextArea } from "~/components/ui/text-field";
+} from "pillbug-components/ui/context-menu";
+import { TextField, TextFieldTextArea } from "pillbug-components/ui/text-field";
 import { VisibilityIcon } from "~/components/visibility-icon";
 import { ContentGuard } from "~/components/content-guard";
 import { ImageBox } from "~/components/post/image-box";
@@ -41,9 +41,9 @@ import {
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuTrigger,
-} from "~/components/ui/dropdown-menu";
+} from "pillbug-components/ui/dropdown-menu";
 import { FaSolidScrewdriverWrench } from "solid-icons/fa";
-import { MenuButton } from "~/components/ui/menubutton";
+import { MenuButton } from "pillbug-components/ui/menubutton";
 import { unwrapResponse } from "~/lib/clientUtil";
 import { UserContextMenu } from "~/components/post-embedded/user-link";
 import { ProcessedStatus } from "~/components/feed/feed-engine";

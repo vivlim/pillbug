@@ -18,7 +18,7 @@ import {
     type Component,
 } from "solid-js";
 import { SessionAuthManager, useAuth } from "~/auth/auth-manager";
-import { Button } from "~/components/ui/button";
+import { Button } from "pillbug-components/ui/button";
 import {
     Card,
     CardContent,
@@ -26,15 +26,15 @@ import {
     CardFooter,
     CardHeader,
     CardTitle,
-} from "~/components/ui/card";
+} from "pillbug-components/ui/card";
 import HtmlSandbox from "../../views/htmlsandbox";
 import {
     ContextMenu,
     ContextMenuContent,
     ContextMenuItem,
     ContextMenuTrigger,
-} from "~/components/ui/context-menu";
-import { TextField, TextFieldTextArea } from "~/components/ui/text-field";
+} from "pillbug-components/ui/context-menu";
+import { TextField, TextFieldTextArea } from "pillbug-components/ui/text-field";
 import {
     FaRegularFloppyDisk,
     FaSolidArrowsRotate,
@@ -68,8 +68,8 @@ import {
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
-import { MenuButton } from "../ui/menubutton";
+} from "pillbug-components/ui/dropdown-menu";
+import { MenuButton } from "pillbug-components/ui/menubutton";
 import { unwrapResponse } from "~/lib/clientUtil";
 import { useSettings } from "~/lib/settings-manager";
 import { ProcessedStatus } from "../feed/feed-engine";

@@ -9,7 +9,7 @@ import {
     type Component,
 } from "solid-js";
 import { useAuth } from "~/auth/auth-manager";
-import { Button, ButtonProps } from "~/components/ui/button";
+import { Button, ButtonProps } from "pillbug-components/ui/button";
 import {
     Dialog,
     DialogContent,
@@ -18,13 +18,13 @@ import {
     DialogHeader,
     DialogTitle,
     DialogTrigger,
-} from "~/components/ui/dialog";
+} from "pillbug-components/ui/dialog";
 import {
     TextFieldLabel,
     TextFieldInput,
     TextField,
     TextFieldTextArea,
-} from "~/components/ui/text-field";
+} from "pillbug-components/ui/text-field";
 import { DialogRootProps } from "@kobalte/core/dialog";
 import {
     DropdownMenu,
@@ -33,13 +33,13 @@ import {
     DropdownMenuRadioGroup,
     DropdownMenuRadioItem,
     DropdownMenuTrigger,
-} from "~/components/ui/dropdown-menu";
+} from "pillbug-components/ui/dropdown-menu";
 import { PolymorphicProps } from "@kobalte/core/polymorphic";
 import { cn } from "~/lib/utils";
 import { useEditOverlayContext } from "~/lib/edit-overlay-context";
 import { VisibilityIcon } from "~/components/visibility-icon";
 import { IoWarningOutline } from "solid-icons/io";
-import { MenuButton } from "~/components/ui/menubutton";
+import { MenuButton } from "pillbug-components/ui/menubutton";
 import { logger } from "~/logging";
 
 export interface EditDialogProps extends DialogRootProps {

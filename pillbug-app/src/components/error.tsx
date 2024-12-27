@@ -7,15 +7,15 @@ import {
     Show,
     Switch,
 } from "solid-js";
-import { TextField, TextFieldTextArea } from "./ui/text-field";
+import { TextField, TextFieldTextArea } from "pillbug-components/ui/text-field";
 import {
     Card,
     CardContent,
     CardFooter,
     CardHeader,
     CardTitle,
-} from "./ui/card";
-import { Button } from "./ui/button";
+} from "pillbug-components/ui/card";
+import { Button } from "pillbug-components/ui/button";
 import LoginView from "~/views/login";
 
 export interface ErrorBoxProps {

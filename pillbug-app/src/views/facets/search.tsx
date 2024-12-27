@@ -18,7 +18,7 @@ import {
     wrapUnprocessedStatus,
 } from "~/components/post/preprocessed";
 import { EnterToSubmitShortcut, Textbox } from "~/components/textbox";
-import { Button } from "~/components/ui/button";
+import { Button } from "pillbug-components/ui/button";
 import { AvatarImage, AvatarLink } from "~/components/user/avatar";
 import { unwrapResponse } from "~/lib/clientUtil";
 

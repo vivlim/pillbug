@@ -17,16 +17,16 @@ import {
     type Component,
 } from "solid-js";
 import { SessionAuthManager, useAuth } from "~/auth/auth-manager";
-import { Button } from "~/components/ui/button";
-import { Card, CardContent } from "~/components/ui/card";
+import { Button } from "pillbug-components/ui/button";
+import { Card, CardContent } from "pillbug-components/ui/card";
 import HtmlSandbox from "../../views/htmlsandbox";
 import {
     ContextMenu,
     ContextMenuContent,
     ContextMenuItem,
     ContextMenuTrigger,
-} from "~/components/ui/context-menu";
-import { TextField, TextFieldTextArea } from "~/components/ui/text-field";
+} from "pillbug-components/ui/context-menu";
+import { TextField, TextFieldTextArea } from "pillbug-components/ui/text-field";
 import { FaSolidArrowsRotate, FaSolidScrewdriverWrench } from "solid-icons/fa";
 import createUrlRegExp from "url-regex-safe";
 import { VisibilityIcon } from "~/components/visibility-icon";
@@ -56,8 +56,8 @@ import {
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
-import { MenuButton } from "../ui/menubutton";
+} from "pillbug-components/ui/dropdown-menu";
+import { MenuButton } from "pillbug-components/ui/menubutton";
 import { unwrapResponse } from "~/lib/clientUtil";
 import { useSettings } from "~/lib/settings-manager";
 import {

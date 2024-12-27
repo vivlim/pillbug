@@ -4,11 +4,7 @@ import { MultiTextboxSpec } from "../textbox";
 import { FeedSource } from "./sources/abstract";
 import { logger } from "../../logging";
 import { GetPostRuleEngine, PostRuleEvaluationContext } from "../post/rule-engine/post-rule-engine";
-import { EditableRule, FeedRule, IEditableRule, RuleAction, RuleActionSet } from "json-rules-editor";
-
-const Facts = {
-
-}
+import { IEditableRule, RuleAction, RuleActionSet, RuleEvent } from "json-rules-editor";
 
 export interface FeedManifest {
     source: FeedSource;
@@ -177,14 +173,14 @@ export const FeedRuleActions: RuleActionSet<FeedRuleEventType> = {
 
 
 export class FeedRuleProperties implements IEditableRule<FeedRuleEventType> {
-    constructor(public description: string, public conditions: TopLevelCondition, public ev: FeedRuleEvent, public enabled: boolean = true, public name?: string, public priority?: number) {
+    constructor(public description: string, public conditions: TopLevelCondition, public event: RuleEvent<FeedRuleEventType>, public enabled: boolean = true, public name?: string, public priority?: number) {
 
     }
 
     public build(): RuleProperties {
         return {
             conditions: this.conditions,
-            event: this.ev,
+            event: this.event,
             name: this.name,
             priority: this.priority,
         }

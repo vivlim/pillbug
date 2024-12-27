@@ -41,3 +41,5 @@ export interface IEditableRule<TEventType extends RuleEventType<TEventType>> {
     priority?: number
     build(): RuleProperties
 }
+
+export { RuleEditor } from "./editor"

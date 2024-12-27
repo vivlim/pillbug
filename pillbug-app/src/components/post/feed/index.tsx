@@ -11,8 +11,8 @@ import {
 } from "solid-js";
 import { useAuth } from "~/auth/auth-manager";
 import Post from "..";
-import { PageNav } from "~/components/ui/page-footer";
-import { Button } from "~/components/ui/button";
+import { PageNav } from "pillbug-components/ui/page-footer";
+import { Button } from "pillbug-components/ui/button";
 import { FeedContext } from "./feed-context";
 import { ErrorBox } from "~/components/error";
 import { MaybeSignedInState } from "~/auth/auth-types";

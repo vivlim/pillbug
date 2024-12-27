@@ -11,7 +11,7 @@ import { useFrameContext } from "~/components/frame/context";
 import { LayoutLeftColumnPortal } from "~/components/layout/columns";
 import { FileTree } from "./filetree";
 import { TextEditor } from "./texteditor";
-import { Button } from "~/components/ui/button";
+import { Button } from "pillbug-components/ui/button";
 import { StoreBacked } from "~/lib/store-backed";
 import "./files.css";
 import {

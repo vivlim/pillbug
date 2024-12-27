@@ -11,7 +11,12 @@ import {
     Show,
 } from "solid-js";
 import { Timestamp } from "~/components/post/timestamp";
-import { Card, CardHeader, CardTitle, CardContent } from "~/components/ui/card";
+import {
+    Card,
+    CardHeader,
+    CardTitle,
+    CardContent,
+} from "pillbug-components/ui/card";
 import { PersistentFlagNames, useSettings } from "~/lib/settings-manager";
 import PostEditor from "../editdialog";
 import {
@@ -27,7 +32,7 @@ import {
     ValidationError,
 } from "~/components/editor/editor-types";
 import { RawDataViewer } from "~/components/raw-data";
-import { Button } from "~/components/ui/button";
+import { Button } from "pillbug-components/ui/button";
 import {
     MegalodonEditorTransformer,
     MegalodonPostStatus,
@@ -40,7 +45,7 @@ import {
     DropdownMenuRadioGroup,
     DropdownMenuRadioItem,
     DropdownMenuTrigger,
-} from "~/components/ui/dropdown-menu";
+} from "pillbug-components/ui/dropdown-menu";
 import { CommentTransformer } from "~/components/editor/comment-transformer";
 import { ShareTransformer } from "~/components/editor/share-transformer";
 import { Status } from "megalodon/lib/src/entities/status";

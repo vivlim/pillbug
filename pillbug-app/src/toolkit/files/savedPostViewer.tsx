@@ -17,7 +17,7 @@ import { createStore, produce } from "solid-js/store";
 import { Dynamic } from "solid-js/web";
 import { getFileAtPath } from "./opfs";
 import { TextEditor } from "./texteditor";
-import { Button } from "~/components/ui/button";
+import { Button } from "pillbug-components/ui/button";
 import { OpenedFile } from "./multiFileViewer";
 import { PreprocessedPost } from "~/components/post/preprocessed";
 import { ProcessedStatus } from "~/components/feed/feed-engine";

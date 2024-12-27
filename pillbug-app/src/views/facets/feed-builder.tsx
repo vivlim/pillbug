@@ -44,25 +44,31 @@ import {
     OrNullTextbox,
     Textbox,
 } from "~/components/textbox";
-import { Button } from "~/components/ui/button";
+import { Button } from "pillbug-components/ui/button";
 import {
     Card,
     CardContent,
     CardFooter,
     CardHeader,
     CardTitle,
-} from "~/components/ui/card";
+} from "pillbug-components/ui/card";
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuRadioGroup,
     DropdownMenuRadioItem,
     DropdownMenuTrigger,
-} from "~/components/ui/dropdown-menu";
+} from "pillbug-components/ui/dropdown-menu";
 import { useFeeds } from "~/lib/feed-manager";
 import { useSettings } from "~/lib/settings-manager";
 import { StoreBacked } from "~/lib/store-backed";
 import { logger } from "~/logging";
+import {
+    IEditableRule,
+    RuleActionSet,
+    RuleEditor,
+    RuleEvent,
+} from "json-rules-editor";
 
 type FeedSource = "homeTimeline";
 class FeedBuilderFacetStore {
@@ -106,13 +112,13 @@ const FeedBuilderFacet: Component = (props) => {
         return Object.keys(f);
     });
 
-    const editingRules: Accessor<StoreBacked<RuleProperties[]>> = createMemo(
-        () => {
-            const fsr = facetStore.rules;
-            const rules = unwrap(fsr).map((r) => r.build());
-            return new StoreBacked<RuleProperties[]>(rules);
-        }
-    );
+    const editingRules: Accessor<
+        StoreBacked<IEditableRule<FeedRuleEventType>[]>
+    > = createMemo(() => {
+        const fsr = facetStore.rules;
+        //const rules = unwrap(fsr).map((r) => r.build());
+        return new StoreBacked<FeedRuleProperties[]>(fsr);
+    });
     // TODO: don't transform feedruleproperties to be able to edit them.
     const toFeedRules: () => FeedRuleProperties[] = () => {
         return unwrap(editingRules().store).map(
@@ -217,7 +223,7 @@ const FeedBuilderFacet: Component = (props) => {
                                         new FeedRuleProperties(
                                             r.description,
                                             r.conditions,
-                                            r.ev,
+                                            r.event,
                                             r.enabled,
                                             r.name,
                                             r.priority
@@ -341,7 +347,7 @@ const FeedBuilderFacet: Component = (props) => {
                         <CardTitle>Editor</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <FeedRulesEditorComponent rules={editingRules()} />
+                        <FeedEditorComponent rules={editingRules()} />
                     </CardContent>
                     <CardFooter>
                         <Button
@@ -372,85 +378,60 @@ type FeedRulesEditorUpdaterFn = () => void;
 class FeedRuleset {
     constructor(public rules: RuleProperties[]) {}
 }
-const FeedRulesEditorComponent: Component<FeedRulesEditorProps> = (props) => {
-    const ruleStore = props.rules;
-    // deep clone the rules so that they can be mutated directly and reconciled against the store contents
-    const ruleState = createMemo(
-        () =>
-            JSON.parse(
-                JSON.stringify(ruleStore.store)
-            ) as unknown as RuleProperties[]
-    );
-    const updater: FeedRulesEditorUpdaterFn = () => {
-        ruleStore.setStore(reconcile(ruleState()));
-    };
 
-    return (
-        <>
-            <For each={ruleState()}>
-                {(rule, idx) => {
-                    const action =
-                        FeedRuleActions[rule.event.type as FeedRuleEventType];
-                    return (
-                        <ul class="rule">
-                            <li class="condition">
-                                <ConditionComponent
-                                    condition={rule.conditions}
-                                    updater={updater}
-                                />
-                            </li>
-                            <li class="action">
-                                <ActionDropdown
-                                    allowOther={false}
-                                    choices={FeedRuleActions}
-                                    value={rule.event.type}
-                                    setter={(t) => {
-                                        if (t !== rule.event.type) {
-                                            const eventParams: any = {};
-                                            const newAction =
-                                                FeedRuleActions[
-                                                    t as FeedRuleEventType
-                                                ];
-                                            for (const sp of newAction.stringParams) {
-                                                eventParams[sp.key] =
-                                                    sp.defaultValue;
-                                            }
-                                            rule.event.type = t;
-                                            rule.event.params = eventParams;
-                                            updater();
-                                        }
-                                    }}
-                                >
-                                    <MultiTextbox
-                                        specs={action.stringParams}
-                                        value={rule.event.params}
-                                        setter={(k, v) => {
-                                            if (
-                                                rule.event.params === undefined
-                                            ) {
-                                                rule.event.params = {};
-                                            }
-                                            rule.event.params[k] = v;
-                                            updater();
-                                        }}
-                                    />
-                                </ActionDropdown>
-                            </li>
-                        </ul>
-                    );
-                }}
-            </For>
-            <Button
-                onClick={() => {
-                    ruleState().push(defaultRule());
-                    updater();
-                }}
-            >
-                Add rule
-            </Button>
-        </>
-    );
-};
+class FeedEditorClass extends RuleEditor<FeedRuleEventType, StatusFact> {
+    defaultRule(): IEditableRule<FeedRuleEventType> {
+        const defaultAction: keyof typeof FeedRuleActions = "collapsePost";
+
+        const eventParams: any = {};
+        for (const sp of FeedRuleActions[defaultAction].stringParams) {
+            eventParams[sp.key] = sp.defaultValue;
+        }
+        const newRule: RuleProperties = {
+            conditions: {
+                all: [defaultCondition()],
+            },
+            event: {
+                type: defaultAction,
+                params: eventParams,
+            },
+        };
+        return new FeedRuleProperties(
+            "newly created rule",
+            {
+                all: [defaultCondition()],
+            },
+            {
+                type: defaultAction,
+                params: eventParams,
+            }
+        );
+    }
+    defaultCondition(): ConditionProperties {
+        return {
+            fact: "spoiler_text",
+            operator: "equal",
+            value: "test",
+        };
+    }
+    getAvailableActions(): RuleActionSet<FeedRuleEventType> {
+        return FeedRuleActions;
+    }
+    getConditionFactChoices() {
+        return {
+            in_reply_to_id: {
+                label: "in_reply_to_id",
+            },
+            favourited: { label: "favourited" },
+            reblogged: { label: "reblogged" },
+            "sensitive flag": { label: "sensitive" },
+            "cw text": { label: "cw text" },
+        };
+    }
+}
+
+const feedEditorInstance = new FeedEditorClass();
+const FeedEditorComponent = feedEditorInstance.editorComponent();
 
 function defaultCondition(): ConditionProperties {
     return {
@@ -460,147 +441,16 @@ function defaultCondition(): ConditionProperties {
     };
 }
 
-function defaultRule(): RuleProperties {
-    const defaultAction: keyof typeof FeedRuleActions = "collapsePost";
-
-    const eventParams: any = {};
-    for (const sp of FeedRuleActions[defaultAction].stringParams) {
-        eventParams[sp.key] = sp.defaultValue;
-    }
-    const newRule: RuleProperties = {
-        conditions: {
-            all: [defaultCondition()],
-        },
-        event: {
-            type: defaultAction,
-            params: eventParams,
-        },
-    };
-    return newRule;
-}
-
-const ConditionComponent: Component<{
-    condition: NestedCondition;
-    updater: FeedRulesEditorUpdaterFn;
-}> = (props) => {
-    if ("all" in props.condition) {
-        return (
-            <ul class="allCondition">
-                ALL:
-                <Button
-                    onClick={() => {
-                        const c = props.condition as AllConditions;
-                        c.all.push(defaultCondition());
-                        props.updater();
-                    }}
-                >
-                    +
-                </Button>
-                <NestedConditionComponent
-                    conditions={props.condition.all}
-                    updater={props.updater}
-                />
-            </ul>
-        );
-    } else if ("any" in props.condition) {
-        return (
-            <ul class="anyCondition">
-                ANY:
-                <NestedConditionComponent
-                    conditions={props.condition.any}
-                    updater={props.updater}
-                />
-            </ul>
-        );
-    } else if ("not" in props.condition) {
-        return (
-            <ul class="notCondition">
-                NOT:
-                <NestedConditionComponent
-                    conditions={[props.condition.not]}
-                    updater={props.updater}
-                />
-            </ul>
-        );
-    } else if ("condition" in props.condition) {
-        return <p class="referenceCondition">reference (todo)</p>;
-    }
-
-    const c: ConditionProperties = props.condition;
-
-    return (
-        <ul class="conditionProperties">
-            <li class="conditionFact">
-                <FactDropdown
-                    value={c.fact}
-                    setter={(v) => {
-                        c.fact = v;
-                        props.updater();
-                    }}
-                    allowOther={true}
-                    choices={{
-                        sensitive: { label: "flagged as sensitive" },
-                        spoiler_text: { label: "cw text" },
-                        tagList: { label: "tag list" },
-                        favourited: { label: "favourited" },
-                        reblogged: { label: "reblogged" },
-                        in_reply_to_id: { label: "reply to id" },
-                    }}
-                >
-                    fact
-                </FactDropdown>
-            </li>
-            <li class="conditionOperator">
-                <OperatorDropdown
-                    value={c.operator}
-                    setter={(v) => {
-                        c.operator = v;
-                        props.updater();
-                    }}
-                    allowOther={false}
-                    choices={{
-                        equal: { label: "equals" },
-                        notEqual: { label: "does not equal" },
-                        contains: { label: "contains" },
-                        doesNotContain: { label: "does not contain" },
-                    }}
-                >
-                    operator
-                </OperatorDropdown>
-            </li>
-            <li class="conditionValue">
-                <OrNullTextbox
-                    value={c.value}
-                    setter={(v) => {
-                        c.value = v;
-                        props.updater();
-                    }}
-                >
-                    value:
-                </OrNullTextbox>
-            </li>
-        </ul>
-    );
-};
-const NestedConditionComponent: Component<{
-    conditions: NestedCondition[];
-    updater: FeedRulesEditorUpdaterFn;
-}> = (props) => {
-    return (
-        <For each={props.conditions}>
-            {(item, idx) => {
-                return (
-                    <li>
-                        <ConditionComponent
-                            condition={item}
-                            updater={props.updater}
-                        />
-                    </li>
-                );
-            }}
-        </For>
-    );
-};
+type StatusFact =
+    | Pick<
+          Status,
+          | "in_reply_to_id"
+          | "favourited"
+          | "reblogged"
+          | "sensitive"
+          | "spoiler_text"
+      >
+    | { tagList: [] };
 
 type StatusFactDropdown =
     | Pick<

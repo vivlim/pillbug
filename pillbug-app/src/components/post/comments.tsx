@@ -14,7 +14,7 @@ import {
     PostTreePlaceholderNode,
     usePostPageContext,
 } from "~/views/postpage";
-import { Card } from "../ui/card";
+import { Card } from "pillbug-components/ui/card";
 import { useAuth } from "~/auth/auth-manager";
 import { Entity, MegalodonInterface } from "megalodon";
 import { isValidVisibility, PostOptions } from "~/views/editdialog";
@@ -25,11 +25,15 @@ import {
     DropdownMenuRadioGroup,
     DropdownMenuRadioItem,
     DropdownMenu,
-} from "../ui/dropdown-menu";
-import { TextFieldTextArea, TextFieldInput, TextField } from "../ui/text-field";
+} from "pillbug-components/ui/dropdown-menu";
+import {
+    TextFieldTextArea,
+    TextFieldInput,
+    TextField,
+} from "pillbug-components/ui/text-field";
 import { VisibilityIcon } from "../visibility-icon";
-import { MenuButton } from "../ui/menubutton";
-import { Button } from "../ui/button";
+import { MenuButton } from "pillbug-components/ui/menubutton";
+import { Button } from "pillbug-components/ui/button";
 import { Status } from "megalodon/lib/src/entities/status";
 
 /** A root comment appearing underneath a post. */

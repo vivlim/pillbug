@@ -1,6 +1,11 @@
 import { A } from "@solidjs/router";
 import { createMemo, For, Match, Show, Switch, type Component } from "solid-js";
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import {
+    Card,
+    CardContent,
+    CardHeader,
+    CardTitle,
+} from "pillbug-components/ui/card";
 import { useAuth } from "~/auth/auth-manager";
 import { useFrameContext } from "~/components/frame/context";
 import { LayoutLeftColumnPortal } from "~/components/layout/columns";
