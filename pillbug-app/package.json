@@ -24,7 +24,8 @@
         "license-report-deps": "license-report --only=prod --output=json > license-report.json",
         "license-report-devDeps": "license-report --only=dev --output=json > license-report-dev.json",
         "license-report": "npm-run-all license-report-deps license-report-devDeps",
-        "test": "vitest"
+        "test": "vitest",
+        "postinstall": "cd ../ && npm run patch:pillbug-app"
     },
     "license": "MIT",
     "devDependencies": {
@@ -73,6 +74,7 @@
         "lodash-es": "^4.17.21",
         "luxon": "^3.5.0",
         "megalodon": "^10.0.7",
+        "patch-package": "^8.0.0",
         "rehype-parse": "^9.0.1",
         "rehype-react": "^8.0.0",
         "rehype-sanitize": "^6.0.0",

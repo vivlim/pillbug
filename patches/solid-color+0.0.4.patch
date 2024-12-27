@@ -1,0 +1,16 @@
+diff --git a/node_modules/solid-color/package.json b/node_modules/solid-color/package.json
+index 2262b84..68a4df9 100644
+--- a/node_modules/solid-color/package.json
++++ b/node_modules/solid-color/package.json
+@@ -31,7 +31,10 @@
+   "exports": {
+     ".": {
+       "solid": "./dist/source/index.jsx",
+-      "import": "./dist/esm/index.js",
++      "import": {
++        "types": "./dist/types/index.d.ts",
++        "default": "./dist/esm/index.js"
++      },
+       "browser": {
+         "import": "./dist/esm/index.js",
+         "require": "./dist/cjs/index.js"

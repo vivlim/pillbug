@@ -4,5 +4,8 @@
     "pillbug-app",
     "pillbug-components",
     "json-rules-editor"
-]
+],
+"scripts": {
+    "patch:pillbug-app": "patch-package"
+}
 }
