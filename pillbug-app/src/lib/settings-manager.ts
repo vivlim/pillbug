@@ -4,7 +4,8 @@ import { useSessionContext } from "./session-context";
 import { createEffect } from "solid-js";
 import { Color, HslColor } from "solid-color";
 import { useAuth } from "pillbug-app";
-import { attachFileLoggerTransport, logger } from "pillbug-app/logging";
+import { logger } from "pillbug-app";
+import { attachFileLoggerTransport } from "~/logging";
 
 export function useSettings(): SettingsManager {
     const sessionContext = useSessionContext();
