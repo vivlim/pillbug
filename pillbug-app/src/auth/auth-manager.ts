@@ -5,8 +5,8 @@ import { produce, SetStoreFunction, StoreSetter, unwrap } from "solid-js/store";
 import { AccountBase, MaybeSignedInState, OAuthRegistration, PillbugAccount, PillbugPersistentStore, PillbugSessionStore, SignedInAccount, SignedInState, SignedOutState, TokenState } from "./auth-types";
 import { unwrapResponse } from "../lib/clientUtil";
 import { PersistentStoreBacked } from "../lib/store-backed";
-import { useSessionContext } from "~/lib/session-context";
-import { logger } from "~/logging";
+import { useSessionContext } from "pillbug-app/lib/session-context";
+import { logger } from "pillbug-app/logging";
 
 const AppDisplayName: string = "pillbug";
 

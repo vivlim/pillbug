@@ -30,9 +30,6 @@ export const logger = Comlink.proxy(loggerImpl)
 // alternate name for convenience, when 'logger' is already used
 export const pillbugGlobalLogger = logger;
 
-
-
-
 export async function attachFileLoggerTransport() {
     const ts = DateTime.now().toFormat("yy-MM-dd_HH-mm-ss");
     const path = `logs/pillbug-${ts}.log`

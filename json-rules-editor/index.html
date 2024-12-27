@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#000000" />
+    <link rel="shortcut icon" type="image/ico" href="/src/assets/favicon.ico" />
+    <title>pillbug!</title>
+    <script>
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark')
+        } else {
+            document.documentElement.classList.remove('dark')
+        }
+
+    /* need to manually set the height to fill the screen; there are lots of corner cases with mobile devices so it can't really be done cleanly in css */
+    let root;
+    function updateHeight() {
+        try {
+            if (!root) {
+                root = document.getElementById("root");
+            }
+            root.style.height = window.visualViewport.height + "px";
+            console.log("new root element height:" + root.style.height)
+        }
+        catch { }
+    }
+
+    /* disable - was making the top bar not follow all the way down the page
+    window.visualViewport.onresize = () => {
+        updateHeight();
+    }
+    window.onload = () => {
+        updateHeight();
+    }
+        */
+    </script>
+  </head>
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="root" class="flex flex-col"></div>
+
+    <script src="/src/index.tsx" type="module"></script>
+  </body>
+</html>

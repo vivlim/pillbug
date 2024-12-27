@@ -4,6 +4,16 @@
     "description": "",
     "type": "module",
     "homepage": "https://pillbug.vivl.im",
+    "exports": {
+        ".": "./src/exports.ts",
+        "./lib/*": "./src/lib/*.ts",
+        "./components/*": "./src/components/*.tsx",
+        "./components/feed": "./src/components/feed/index.tsx",
+        "./components/feed/feed-engine": "./src/components/feed/feed-engine.ts",
+        "./components/feed/sources/*": "./src/components/feed/sources/*.ts",
+        "./components/feed/preset-rules": "./src/components/feed/preset-rules.ts",
+        "./logging": "./src/logging"
+    },
     "scripts": {
         "start": "vite",
         "dev": "vite",
@@ -13,22 +23,28 @@
         "serve": "vite preview",
         "license-report-deps": "license-report --only=prod --output=json > license-report.json",
         "license-report-devDeps": "license-report --only=dev --output=json > license-report-dev.json",
-        "license-report": "npm-run-all license-report-deps license-report-devDeps"
+        "license-report": "npm-run-all license-report-deps license-report-devDeps",
+        "test": "vitest"
     },
     "license": "MIT",
     "devDependencies": {
+        "@solidjs/testing-library": "^0.8.10",
+        "@testing-library/jest-dom": "^6.6.3",
+        "@testing-library/user-event": "^14.5.2",
         "@types/hast": "^3.0.4",
         "@types/luxon": "^3.4.2",
         "@types/node": "^22.5.5",
         "@types/url-regex-safe": "^1.0.2",
         "autoprefixer": "^10.4.20",
+        "jsdom": "^25.0.1",
         "license-report": "^6.7.0",
         "npm-run-all": "^4.1.5",
         "solid-devtools": "^0.29.2",
         "tailwindcss": "^3.4.12",
         "typescript": "^5.3.3",
         "vite": "^5.0.11",
-        "vite-plugin-solid": "^2.8.2"
+        "vite-plugin-solid": "^2.8.2",
+        "vitest": "^2.1.8"
     },
     "dependencies": {
         "@codemirror/commands": "^6.7.1",

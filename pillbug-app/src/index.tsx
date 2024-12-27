@@ -31,7 +31,9 @@ const ErrorBox = lazy(() => import("./components/error"));
 const ErrorView = lazy(() => import("./views/error"));
 const AboutDetailsFacet = lazy(() => import("./views/facets/details"));
 const FollowingFacet = lazy(() => import("./views/facets/following"));
-const FeedBuilderFacet = lazy(() => import("./views/facets/feed-builder"));
+const FeedBuilderFacet = lazy(
+    () => import("../../json-rules-editor/src/editor")
+);
 const FilesFacet = lazy(() => import("./toolkit/files"));
 
 if (import.meta.env.DEV && !(root instanceof HTMLElement)) {

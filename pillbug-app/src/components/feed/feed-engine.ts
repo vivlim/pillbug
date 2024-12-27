@@ -2,8 +2,9 @@ import { Engine, EngineOptions, EngineResult, EventHandler, RuleProperties, Rule
 import { Status, StatusTag } from "megalodon/lib/src/entities/status";
 import { MultiTextboxSpec } from "../textbox";
 import { FeedSource } from "./sources/abstract";
-import { logger } from "~/logging";
+import { logger } from "../../logging";
 import { GetPostRuleEngine, PostRuleEvaluationContext } from "../post/rule-engine/post-rule-engine";
+import { EditableRule, FeedRule, IEditableRule, RuleAction, RuleActionSet } from "json-rules-editor";
 
 const Facts = {
 
@@ -145,15 +146,7 @@ export type FeedRuleEvent = {
     type: 'attachLinked'
 };
 
-type FeedRuleAction = {
-    label: string;
-    stringParams: FeedRuleActionParam[];
-}
-
-interface FeedRuleActionParam extends MultiTextboxSpec {
-}
-
-export const FeedRuleActions: Record<FeedRuleEventType, FeedRuleAction> = {
+export const FeedRuleActions: RuleActionSet<FeedRuleEventType> = {
     applyLabel: {
         label: "apply label",
         stringParams: [{
@@ -183,16 +176,7 @@ export const FeedRuleActions: Record<FeedRuleEventType, FeedRuleAction> = {
 }
 
 
-export interface FeedRule {
-    description: string,
-    conditions: TopLevelCondition,
-    ev: FeedRuleEvent,
-    enabled: boolean,
-    name?: string,
-    priority?: number
-}
-
-export class FeedRuleProperties implements FeedRule {
+export class FeedRuleProperties implements IEditableRule<FeedRuleEventType> {
     constructor(public description: string, public conditions: TopLevelCondition, public ev: FeedRuleEvent, public enabled: boolean = true, public name?: string, public priority?: number) {
 
     }

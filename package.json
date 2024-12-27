@@ -1,6 +1,8 @@
 {
 "name": "pillbug-workspace",
 "workspaces": [
-    "pillbug-app"
+    "pillbug-app",
+    "pillbug-components",
+    "json-rules-editor"
 ]
 }

@@ -3,8 +3,8 @@ import { PersistentStoreBacked } from "./store-backed";
 import { useSessionContext } from "./session-context";
 import { createEffect } from "solid-js";
 import { Color, HslColor } from "solid-color";
-import { useAuth } from "~/auth/auth-manager";
-import { attachFileLoggerTransport, logger } from "~/logging";
+import { useAuth } from "pillbug-app";
+import { attachFileLoggerTransport, logger } from "pillbug-app/logging";
 
 export function useSettings(): SettingsManager {
     const sessionContext = useSessionContext();
