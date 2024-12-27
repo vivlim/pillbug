@@ -27,3 +27,5 @@ export function useSessionContext(): PillbugSessionContext {
     }
     return value;
 }
+
+var staticSessionContext: PillbugSessionContext | undefined = undefined;
