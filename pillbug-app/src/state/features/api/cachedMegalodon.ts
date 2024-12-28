@@ -14,7 +14,7 @@ export function CreateCachedMegalodon(megalodon: MegalodonInterface) {
                     logger.debug("Using detoured megalodon cache for method", propertyName)
                     return async function (...args: any[]) {
                         const detouredCall: DetouredMegalodonCall = {
-                            method: propertyName as MegalodonCachedMethodsType,
+                            _method: propertyName as MegalodonCachedMethodsType,
                             args,
                             extraTags: []
                         }
