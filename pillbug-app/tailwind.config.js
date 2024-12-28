@@ -3,7 +3,7 @@ import * as tailwindcssAnimate from "tailwindcss-animate";
 
 export default {
   darkMode: ["selector"],
-  content: ["./src/**/*.{ts,tsx}"],
+  content: ["./src/**/*.{ts,tsx}", "../pillbug-components/src/**/*.{ts,tsx}"],
   theme: {
     container: {
       center: true,
