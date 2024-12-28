@@ -28,7 +28,7 @@ export class SessionAuthManagerAssumingSignedIn {
         if (!client) {
             throw new Error("Not signed in")
         }
-        return CreateCachedMegalodon(client);
+        return client;
     }
 
     public get state(): SignedInState {
@@ -496,8 +496,11 @@ export async function updateAuthStateForActiveAccount(accountIndex: number, pers
         return prev;
     });
 
+    const cachingClient = CreateCachedMegalodon(client);
+
     return {
-        authenticatedClient: client,
+        authenticatedClient: cachingClient,
+        directClient: client,
         instanceData: instanceInfo,
         accountData: creds,
         domain: domain,
