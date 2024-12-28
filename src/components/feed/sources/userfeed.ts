@@ -13,7 +13,7 @@ export class UserFeedSource extends ClientFeedSource {
     }
 
     override async fetch(manifest: Omit<FeedManifest, "source">, after?: string | undefined): Promise<{ statuses: Status[]; moreAvailable: boolean; }> {
-        const statuses = unwrapResponse(await this.auth.assumeSignedIn.client.getAccountStatuses(this.userId, {
+        var statuses = unwrapResponse(await this.auth.assumeSignedIn.client.getAccountStatuses(this.userId, {
             pinned: false,
             limit: manifest.postsToFetchPerBatch ?? undefined,
             max_id: after
@@ -37,14 +37,17 @@ export class UserFeedSource extends ClientFeedSource {
             // situation where we're clobbering an otherwise
             // valid value.
             if (pinnedStatuses.length > 0) {
-                statuses.unshift(
+                statuses = [
                     ...pinnedStatuses.map(
                         (status) => {
-                            status.pinned = true;
-                            return status;
+                            return {
+                                ...status,
+                                pinned: true
+                            }
                         }
-                    )
-                );
+                    ),
+                    ...statuses
+                ];
             }
         }
 

@@ -82,7 +82,6 @@ export async function fetchPostInfoTree(
     const processStatuses = async (
         statuses: Status[]
     ): Promise<ProcessedStatus[]> => {
-        await getSingleStatus(statuses[0].id);
         const result = await GetPostRuleEngine().process(
             statuses,
             processingContext,
