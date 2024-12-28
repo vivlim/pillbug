@@ -81,7 +81,7 @@ export const apiSlice = createApi({
                         throw new Error("Not signed in");
                     }
                     const megalodonClient = auth.state.authenticatedClient as any;
-                    const result = await megalodonClient[arg.method](...arg.args);
+                    const result = await megalodonClient[arg._method](...arg.args);
                     // Need to unpack the resulting data object and drop header info
                     const { headers, ...rest } = result
                     // logger.debug("In queryfn, result data:", result, arg)
@@ -104,7 +104,7 @@ export const apiSlice = createApi({
 })
 
 export type DetouredMegalodonCall = {
-    method: MegalodonCachedMethodsType,
+    _method: MegalodonCachedMethodsType, // The name starts with a _ so it is sorted before args when serialized - that improves readability
     args: any,
     extraTags: (typeof MegalodonExtraTags[number])[]
 }
