@@ -1,10 +1,11 @@
-import { Status } from 'megalodon/lib/src/entities/status'
-import { apiSlice } from './features/api/apiSlice'
+import { apiSlice, NormalizedStatus } from './features/api/apiSlice'
 import { Action, ThunkAction, configureStore } from '@reduxjs/toolkit'
+import { entityGraphSlice } from './features/entityGraph/entityGraphSlice'
 
 export const store = configureStore({
     reducer: {
-        [apiSlice.reducerPath]: apiSlice.reducer
+        [apiSlice.reducerPath]: apiSlice.reducer,
+        entityGraph: entityGraphSlice.reducer,
     },
     middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(apiSlice.middleware),
 })
@@ -19,7 +20,7 @@ export type RootState = ReturnType<typeof store.getState>
 export type AppThunk = ThunkAction<void, RootState, unknown, Action>
 
 
-export async function getSingleStatus(id: string): Promise<Status | undefined> {
+export async function getSingleStatus(id: string): Promise<NormalizedStatus | undefined> {
     const result = await store.dispatch(apiSlice.endpoints.getStatus.initiate(id));
     return result.data
 }
