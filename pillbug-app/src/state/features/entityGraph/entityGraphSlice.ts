@@ -5,6 +5,7 @@ import { MegalodonInterface } from "megalodon";
 import { logger } from "~/logging";
 import { inherits } from "util";
 import { Account } from "megalodon/lib/src/entities/account";
+import { RootState } from "~/state/store";
 
 export type PostRelationshipKinds = typeof PostRelationshipTemplate;
 
@@ -125,3 +126,5 @@ export const entityGraphSlice = createSlice({
         })
     }
 })
+
+export const postSelectors = postAdapter.getSelectors<RootState>((state) => state.entityGraph.posts)

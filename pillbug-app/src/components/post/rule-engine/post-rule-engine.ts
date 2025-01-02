@@ -8,6 +8,9 @@ import { logger } from "~/logging";
 import createUrlRegExp from "url-regex-safe";
 import { MegalodonInterface } from "megalodon";
 import { unwrapResponse } from "~/lib/clientUtil";
+import { RuleEvaluation } from "~/state/features/rules/rulesSlice";
+import { postSelectors } from "~/state/features/entityGraph/entityGraphSlice";
+import { store } from "~/state/store";
 
 export interface PostRuleEvaluationContext {
     auth: SessionAuthManager;
@@ -19,17 +22,9 @@ export interface PostRuleEvaluationContext {
 export type PostRuleset = FeedRuleProperties[]
 
 class PostRuleEngine extends RuleEngineBase<Status, ProcessedStatus, PostRuleset, PostRuleEvaluationContext> {
-    buildEngine(context: PostRuleEvaluationContext, rules: PostRuleset): Engine {
-        const options: EngineOptions = {}
+    buildRules(context: PostRuleEvaluationContext, rules: PostRuleset): RuleProperties[] {
         const engineRules = rules.map(r => r.build())
-
-        const engine = new Engine(engineRules, options)
-        engine.addFact("tagList", async (params, almanac) => {
-            const tags = (await almanac.factValue("tags")) as StatusTag[] | undefined
-            if (tags === undefined) { return [] }
-            return tags.map(t => t.name)
-        })
-        return engine;
+        return engineRules;
     }
     partitionKey(context: PostRuleEvaluationContext, rules: PostRuleset): CachePartitionKey {
         return JSON.stringify([context.auth.assumeSignedIn.state.accountData.acct,
@@ -39,27 +34,35 @@ class PostRuleEngine extends RuleEngineBase<Status, ProcessedStatus, PostRuleset
     cacheKey(input: Status): CacheKey {
         return input.id as CacheKey
     }
-    async postprocessEngineResult(input: Status, result: EngineResult, context: PostRuleEvaluationContext, rules: PostRuleset): Promise<ProcessedStatus> {
-        const labels: string[] = [];
-        const processedStatus: ProcessedStatus = { status: input, labels, rawRuleResults: { positive: result.results, negative: result.failureResults }, hide: false, collapseReasons: [], linkedAncestors: [] }
-        let attachedLinked = false;
-        for (let rawEvent of result.events) {
-            const e = rawEvent as FeedRuleEvent;
-            if (e.type === "applyLabel") {
-                labels.push(e.params.label);
-            } else if (e.type === "hidePost") {
-                processedStatus.hide = true;
-            } else if (e.type === "collapsePost") {
-                processedStatus.collapseReasons.push(e.params.label)
-            } else if (e.type === "attachLinked" && !attachedLinked && !context.inner) {
-                attachedLinked = true;
-                processedStatus.linkedAncestors = await this.retrieveLinkedAncestors(processedStatus, context, rules)
+    async postprocessEngineResult(input: Status[], result: RuleEvaluation[], context: PostRuleEvaluationContext, rules: PostRuleset): Promise<ProcessedStatus[]> {
+
+        const processedStatuses: ProcessedStatus[] = [];
+        const storeState = store.getState()
+        for (const r of result) {
+            const labels: string[] = [];
+            // TODO: Use normalized status from the result, instead of input status here.
+            // I don't want to write a status denormalizer atm.
+            const status = input.filter(s => s.id === r.inputId)[0];
+            const processedStatus: ProcessedStatus = { status, labels, rawRuleResults: { positive: r.out.results, negative: r.out.failureResults }, hide: false, collapseReasons: [], linkedAncestors: [] }
+            let attachedLinked = false;
+            for (let rawEvent of r.out.events) {
+                const e = rawEvent as FeedRuleEvent;
+                if (e.type === "applyLabel") {
+                    labels.push(e.params.label);
+                } else if (e.type === "hidePost") {
+                    processedStatus.hide = true;
+                } else if (e.type === "collapsePost") {
+                    processedStatus.collapseReasons.push(e.params.label)
+                } else if (e.type === "attachLinked" && !attachedLinked && !context.inner) {
+                    attachedLinked = true;
+                    processedStatus.linkedAncestors = await this.retrieveLinkedAncestors(processedStatus, context, rules)
+                }
             }
+
+            processedStatuses.push(processedStatus);
         }
 
-        // retrieve share parents
-
-        return processedStatus
+        return processedStatuses
     }
     async isCacheItemStillValid(input: Status, output: ProcessedStatus): Promise<boolean> {
         //logger.debug(`Unconditionally using cached version of ${input.id} by ${input.account.acct} (${input.url}}`)
@@ -99,7 +102,7 @@ class PostRuleEngine extends RuleEngineBase<Status, ProcessedStatus, PostRuleset
                     break;
                 }
 
-                const processed = processedResult[0].out;
+                const processed = processedResult[0];
 
                 if (processed.hide) {
                     // This catches replies and stops them from being attached. for now ... probably need to ignore this and differentiate 'hide from feed' from 'hide altogether'
