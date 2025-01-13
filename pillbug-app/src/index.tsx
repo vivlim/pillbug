@@ -33,6 +33,7 @@ const AboutDetailsFacet = lazy(() => import("./views/facets/details"));
 const FollowingFacet = lazy(() => import("./views/facets/following"));
 const FeedBuilderFacet = lazy(() => import("./views/facets/feed-builder"));
 const FilesFacet = lazy(() => import("./toolkit/files"));
+const LinkHistoryFacet = lazy(() => import("./views/facets/link-history"));
 
 if (import.meta.env.DEV && !(root instanceof HTMLElement)) {
     throw new Error(
@@ -107,6 +108,7 @@ render(
                 <Route path="/post/:postId" component={PostPage} />
                 <Route path="*paramName" component={ErrorView} />
                 <Route path="/dev/editDialog" component={DevEditDialogPage} />
+                <Route path="/history/links" component={LinkHistoryFacet} />
                 <Route path="/feed-builder" component={FeedBuilderFacet} />
                 <Route
                     path="/files/:path1?/:path2?/:path3?/:path4?"

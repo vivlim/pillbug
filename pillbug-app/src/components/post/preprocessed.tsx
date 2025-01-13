@@ -2,6 +2,7 @@ import { A, useNavigate } from "@solidjs/router";
 import { Entity, MegalodonInterface } from "megalodon";
 import { Status } from "megalodon/lib/src/entities/status";
 import {
+    createContext,
     createEffect,
     createMemo,
     createResource,
@@ -15,6 +16,7 @@ import {
     splitProps,
     Suspense,
     Switch,
+    useContext,
     type Component,
 } from "solid-js";
 import { SessionAuthManager, useAuth } from "~/auth/auth-manager";
@@ -398,6 +400,8 @@ export function wrapUnprocessedStatus(status: Status): ProcessedStatus {
     };
 }
 
+export const PreprocessedPostContext = createContext<PreprocessedPostProps>();
+
 export const PreprocessedPost: Component<PreprocessedPostProps> = (
     postData
 ) => {
@@ -434,149 +438,161 @@ export const PreprocessedPost: Component<PreprocessedPostProps> = (
     });
 
     return (
-        <div class={cn("pbPostOutside py-1", postData.class)}>
-            <ErrorBoundary fallback={(err) => err}>
-                <AvatarLink
-                    user={status().account}
-                    imgClass="size-16"
-                    class="outsideAvatar hidden md:block md:m-4"
-                />
-                <Card class="m-1 md:m-4 flex-auto">
-                    <PreprocessedStatusPostBlock
-                        status={postData.status}
-                        showRaw={showRaw()}
-                        limitInitialHeight={postData.limitInitialHeight}
-                    ></PreprocessedStatusPostBlock>
-                    <PreprocessedPostFooter>
-                        <ContextMenu>
-                            <ContextMenuTrigger class="flex-auto">
-                                <A href={postHref}>{replyCount()} replies</A>
-                            </ContextMenuTrigger>
-                            <ContextMenuContent>
-                                <ContextMenuItem
-                                    onClick={() => setShowRaw(!showRaw())}
-                                >
-                                    Show raw status
-                                </ContextMenuItem>
-                            </ContextMenuContent>
-                        </ContextMenu>
-                        <DropdownMenu>
-                            <DropdownMenuTrigger
-                                as={MenuButton<"button">}
-                                type="button"
-                            >
-                                <IoEllipsisHorizontal class="size-6" />
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent class="w-48">
-                                <DropdownMenuItem
-                                    class="py-4 md:py-2"
-                                    as="a"
-                                    href={postOriginalUrl()}
-                                    target="_blank"
-                                >
-                                    <IoLinkOutline class="size-6 mr-2" />
-                                    view on origin
-                                </DropdownMenuItem>
-                                <Show
-                                    when={
-                                        auth.signedIn &&
-                                        status().account.acct ===
-                                            auth.assumeSignedIn.state
-                                                .accountData.acct
-                                    }
-                                >
-                                    <DropdownMenuItem
-                                        class="py-4 md:py-2"
-                                        onClick={async () => {
-                                            if (
-                                                window.confirm(
-                                                    "are you sure you want to delete this post?"
-                                                )
-                                            ) {
-                                                try {
-                                                    unwrapResponse(
-                                                        await auth.assumeSignedIn.client.deleteStatus(
-                                                            status().id
-                                                        )
-                                                    );
-                                                    alert(
-                                                        "post deleted. (you may need to refresh)"
-                                                    );
-                                                } catch (e) {
-                                                    if (e instanceof Error) {
-                                                        alert(
-                                                            `Failed to delete: ${e.message}`
-                                                        );
-                                                    }
-                                                }
-                                            }
-                                        }}
-                                    >
-                                        <IoTrashBinOutline class="size-6 mr-2" />
-                                        delete post
-                                    </DropdownMenuItem>
-                                </Show>
-                                <Show
-                                    when={
-                                        settings.getPersistent().enableDevTools
-                                    }
-                                >
-                                    <DropdownMenuItem
-                                        class="py-4 md:py-2"
+        <PreprocessedPostContext.Provider value={postData}>
+            <div class={cn("pbPostOutside py-1", postData.class)}>
+                <ErrorBoundary fallback={(err) => err}>
+                    <AvatarLink
+                        user={status().account}
+                        imgClass="size-16"
+                        class="outsideAvatar hidden md:block md:m-4"
+                    />
+                    <Card class="m-1 md:m-4 flex-auto">
+                        <PreprocessedStatusPostBlock
+                            status={postData.status}
+                            showRaw={showRaw()}
+                            limitInitialHeight={postData.limitInitialHeight}
+                        ></PreprocessedStatusPostBlock>
+                        <PreprocessedPostFooter>
+                            <ContextMenu>
+                                <ContextMenuTrigger class="flex-auto">
+                                    <A href={postHref}>
+                                        {replyCount()} replies
+                                    </A>
+                                </ContextMenuTrigger>
+                                <ContextMenuContent>
+                                    <ContextMenuItem
                                         onClick={() => setShowRaw(!showRaw())}
                                     >
-                                        <FaSolidScrewdriverWrench class="size-6 mr-2" />
-                                        show post json
-                                    </DropdownMenuItem>
+                                        Show raw status
+                                    </ContextMenuItem>
+                                </ContextMenuContent>
+                            </ContextMenu>
+                            <DropdownMenu>
+                                <DropdownMenuTrigger
+                                    as={MenuButton<"button">}
+                                    type="button"
+                                >
+                                    <IoEllipsisHorizontal class="size-6" />
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent class="w-48">
                                     <DropdownMenuItem
                                         class="py-4 md:py-2"
-                                        onClick={async () => {
-                                            const fs = await getFsRoot();
-                                            const path = `savedPosts/${postData.status.status.account.acct}-${postData.status.status.id}.post.json`;
-                                            PillbugFilesystem.value.writeText(
-                                                path,
-                                                JSON.stringify(
-                                                    postData.status,
-                                                    null,
-                                                    2
-                                                ),
-                                                { append: false, line: false },
-                                                logger
-                                            );
-                                            alert(
-                                                `post saved to private filesystem as ${path}`
-                                            );
-                                        }}
+                                        as="a"
+                                        href={postOriginalUrl()}
+                                        target="_blank"
                                     >
-                                        <FaRegularFloppyDisk class="size-6 mr-2" />
-                                        save post json
+                                        <IoLinkOutline class="size-6 mr-2" />
+                                        view on origin
                                     </DropdownMenuItem>
-                                </Show>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-                        <Show when={auth.signedIn}>
-                            <ShareButton status={status()} />
-                            <Button
-                                class="hover:bg-transparent p-0 px-4"
-                                aria-label="Like Post"
-                                onClick={async () => {
-                                    const updated = await toggleLike(
-                                        auth.assumeSignedIn.client,
-                                        status()
-                                    );
-                                    updateStatus(updated);
-                                }}
-                            >
-                                <Dynamic
-                                    component={favButton(isLiked())}
-                                    class="size-6"
-                                />
-                            </Button>
-                        </Show>
-                    </PreprocessedPostFooter>
-                </Card>
-            </ErrorBoundary>
-        </div>
+                                    <Show
+                                        when={
+                                            auth.signedIn &&
+                                            status().account.acct ===
+                                                auth.assumeSignedIn.state
+                                                    .accountData.acct
+                                        }
+                                    >
+                                        <DropdownMenuItem
+                                            class="py-4 md:py-2"
+                                            onClick={async () => {
+                                                if (
+                                                    window.confirm(
+                                                        "are you sure you want to delete this post?"
+                                                    )
+                                                ) {
+                                                    try {
+                                                        unwrapResponse(
+                                                            await auth.assumeSignedIn.client.deleteStatus(
+                                                                status().id
+                                                            )
+                                                        );
+                                                        alert(
+                                                            "post deleted. (you may need to refresh)"
+                                                        );
+                                                    } catch (e) {
+                                                        if (
+                                                            e instanceof Error
+                                                        ) {
+                                                            alert(
+                                                                `Failed to delete: ${e.message}`
+                                                            );
+                                                        }
+                                                    }
+                                                }
+                                            }}
+                                        >
+                                            <IoTrashBinOutline class="size-6 mr-2" />
+                                            delete post
+                                        </DropdownMenuItem>
+                                    </Show>
+                                    <Show
+                                        when={
+                                            settings.getPersistent()
+                                                .enableDevTools
+                                        }
+                                    >
+                                        <DropdownMenuItem
+                                            class="py-4 md:py-2"
+                                            onClick={() =>
+                                                setShowRaw(!showRaw())
+                                            }
+                                        >
+                                            <FaSolidScrewdriverWrench class="size-6 mr-2" />
+                                            show post json
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem
+                                            class="py-4 md:py-2"
+                                            onClick={async () => {
+                                                const fs = await getFsRoot();
+                                                const path = `savedPosts/${postData.status.status.account.acct}-${postData.status.status.id}.post.json`;
+                                                PillbugFilesystem.value.writeText(
+                                                    path,
+                                                    JSON.stringify(
+                                                        postData.status,
+                                                        null,
+                                                        2
+                                                    ),
+                                                    {
+                                                        append: false,
+                                                        line: false,
+                                                    },
+                                                    logger
+                                                );
+                                                alert(
+                                                    `post saved to private filesystem as ${path}`
+                                                );
+                                            }}
+                                        >
+                                            <FaRegularFloppyDisk class="size-6 mr-2" />
+                                            save post json
+                                        </DropdownMenuItem>
+                                    </Show>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                            <Show when={auth.signedIn}>
+                                <ShareButton status={status()} />
+                                <Button
+                                    class="hover:bg-transparent p-0 px-4"
+                                    aria-label="Like Post"
+                                    onClick={async () => {
+                                        const updated = await toggleLike(
+                                            auth.assumeSignedIn.client,
+                                            status()
+                                        );
+                                        updateStatus(updated);
+                                    }}
+                                >
+                                    <Dynamic
+                                        component={favButton(isLiked())}
+                                        class="size-6"
+                                    />
+                                </Button>
+                            </Show>
+                        </PreprocessedPostFooter>
+                    </Card>
+                </ErrorBoundary>
+            </div>
+        </PreprocessedPostContext.Provider>
     );
 };
 

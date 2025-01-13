@@ -23,6 +23,10 @@ import {
     PostEmbeddedUserLinkProps,
 } from "~/components/post-embedded/user-link";
 import rehypeWrapTextRoot from "~/lib/rehype-wrap-text-root";
+import {
+    PostEmbeddedHyperlink,
+    PostEmbeddedHyperlinkProps,
+} from "~/components/post-embedded/hyperlink";
 
 export type HtmlSandboxProps = {
     html: string;
@@ -38,6 +42,9 @@ export interface HtmlPreviewSpanProps
 export const ParsedComponents = {
     Link: (props: JSX.HTMLAttributes<HTMLAnchorElement>) => (
         <a {...props}>{props.children}</a>
+    ),
+    Hyperlink: (props: PostEmbeddedHyperlinkProps) => (
+        <PostEmbeddedHyperlink {...props} />
     ),
     UserLink: (props: PostEmbeddedUserLinkProps) => (
         <PostEmbeddedUserLink {...props} />

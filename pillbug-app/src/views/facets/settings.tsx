@@ -114,6 +114,9 @@ const SettingsFacet: Component = () => {
                         Do not preload the next page when reaching the bottom of
                         a page
                     </PersistentFlagCheckbox>
+                    <PersistentFlagCheckbox flag="linkHistory">
+                        enable hyperlink history
+                    </PersistentFlagCheckbox>
                     <hr />
                     <PersistentFlagCheckbox flag="v2Feeds">
                         Enable feed filter editor

@@ -33,7 +33,10 @@ export default function rehypeLinks(options: RehypeLinksOptions) {
                 //node.tagName = "Link"
                 //node.properties['something'] = 'yeah'
 
+                // normal links
+
                 // normal links should open in a new window though - inject that property.
+                node.tagName = "Hyperlink";
                 node.properties['target'] = "_blank"
             } catch (e) {
 

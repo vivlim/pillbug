@@ -7,6 +7,8 @@ import {
     FaSolidCircle,
     FaSolidFolder,
     FaSolidGear,
+    FaSolidHourglass,
+    FaSolidLink,
     FaSolidMagnifyingGlass,
     FaSolidPeopleGroup,
     FaSolidPerson,
@@ -136,6 +138,12 @@ export const FacetNavigation: Component = (props) => {
                         <FaSolidQuestion />
                         about pillbug
                     </FacetNavigationItem>
+                    <Show when={settings.getPersistent().linkHistory}>
+                        <FacetNavigationItem href="/history/links">
+                            <FaSolidLink />
+                            link history
+                        </FacetNavigationItem>
+                    </Show>
                     <Show when={settings.getPersistent().enableDevTools}>
                         <FacetNavigationItem href="/dev/editDialog">
                             <FaSolidWrench />

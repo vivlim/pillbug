@@ -41,6 +41,7 @@ export interface PersistentSettings {
     doNotPreloadNextPage?: Flag
     showUnreadNotificationsIcon?: Flag
     globalState?: Flag
+    linkHistory?: Flag
     flatAppearance?: Flag
     beveledAppearance?: Flag
     unroundedCornersAppearance?: Flag
