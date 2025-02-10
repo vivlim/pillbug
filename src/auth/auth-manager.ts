@@ -485,7 +485,7 @@ export async function updateAuthStateForActiveAccount(accountIndex: number, pers
         return prev;
     });
 
-    const cachingClient = CreateCachedMegalodon(client);
+    const cachingClient = CreateCachedMegalodon(client, creds, instanceInfo);
 
     return {
         authenticatedClient: cachingClient,
