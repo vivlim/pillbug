@@ -32,7 +32,7 @@ export abstract class ClientFeedSource extends FeedSource {
         this.ctx = {
             auth,
             settings,
-            inner: false,
+            parent: undefined,
             getByUrl: (url) => this.getByUrl(url),
         }
     }

@@ -60,8 +60,9 @@ export abstract class RuleEngineBase<TInput extends Record<string, any>, TOutput
                         return { in: input, out: existing as TOutput }
                     }
                     else {
-                        const engineResult = await this.processSingle(input, engine);
-                        const postprocessed = await this.postprocessEngineResult(input, engineResult, context, rules);
+                        const i = this.preprocessEngineResult(input, context);
+                        const engineResult = await this.processSingle(i, engine);
+                        const postprocessed = await this.postprocessEngineResult(i, engineResult, context, rules);
                         cachePartition.set(cacheKey, postprocessed);
                         return { in: input, out: postprocessed };
                     }
@@ -69,8 +70,9 @@ export abstract class RuleEngineBase<TInput extends Record<string, any>, TOutput
             }
             else {
                 promises.push((async () => {
-                    const engineResult = await this.processSingle(input, engine);
-                    const postprocessed = await this.postprocessEngineResult(input, engineResult, context, rules);
+                    const i = this.preprocessEngineResult(input, context);
+                    const engineResult = await this.processSingle(i, engine);
+                    const postprocessed = await this.postprocessEngineResult(i, engineResult, context, rules);
                     cachePartition.set(cacheKey, postprocessed);
                     return { in: input, out: postprocessed };
                 })())
@@ -85,6 +87,7 @@ export abstract class RuleEngineBase<TInput extends Record<string, any>, TOutput
         return await engine.run(input);
     }
 
+    abstract preprocessEngineResult(input: TInput, context: TContext): TInput;
     abstract postprocessEngineResult(input: TInput, engineResult: EngineResult, context: TContext, rules: TRules): Promise<TOutput>;
 
     abstract isCacheItemStillValid(input: TInput, output: TOutput): Promise<boolean>
