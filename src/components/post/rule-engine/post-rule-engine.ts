@@ -12,7 +12,7 @@ import { unwrapResponse } from "~/lib/clientUtil";
 export interface PostRuleEvaluationContext {
     auth: SessionAuthManager;
     settings: SettingsManager;
-    inner: boolean;
+    parent?: ProcessedStatus;
     getByUrl(postUrl: string): Promise<Status | null>;
 }
 
@@ -51,15 +51,29 @@ class PostRuleEngine extends RuleEngineBase<Status, ProcessedStatus, PostRuleset
                 processedStatus.hide = true;
             } else if (e.type === "collapsePost") {
                 processedStatus.collapseReasons.push(e.params.label)
-            } else if (e.type === "attachLinked" && !attachedLinked && !context.inner) {
+            } else if (e.type === "attachLinked" && !attachedLinked && context.parent === undefined) {
                 attachedLinked = true;
                 processedStatus.linkedAncestors = await this.retrieveLinkedAncestors(processedStatus, context, rules)
             }
         }
 
-        // retrieve share parents
-
         return processedStatus
+    }
+    preprocessEngineResult(input: Status, context: PostRuleEvaluationContext): Status {
+        if (context.parent === undefined) {
+            return input
+        }
+
+        // Inherit cw from share parent if there is one
+        var patch: Partial<Status> = {};
+        if (context.parent.status.spoiler_text?.length > 0 && (input.spoiler_text === undefined || input.spoiler_text.length === 0)) {
+            patch.spoiler_text = `${context.parent.status.spoiler_text} (inherited from linking post)`;
+        }
+        if (context.parent.status.sensitive && !input.sensitive) {
+            patch.sensitive = true;
+        }
+
+        return { ...input, ...patch };
     }
     async isCacheItemStillValid(input: Status, output: ProcessedStatus): Promise<boolean> {
         //logger.debug(`Unconditionally using cached version of ${input.id} by ${input.account.acct} (${input.url}}`)
@@ -94,7 +108,7 @@ class PostRuleEngine extends RuleEngineBase<Status, ProcessedStatus, PostRuleset
                     return statuses;
                 }
 
-                const processedResult = await this.process([status], { ...context, inner: true }, rules)
+                const processedResult = await this.process([status], { ...context, parent: current }, rules)
                 if (processedResult.length === 0) {
                     break;
                 }
