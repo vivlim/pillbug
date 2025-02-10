@@ -43,6 +43,8 @@ import {
 import createUrlRegExp from "url-regex-safe";
 import { VisibilityIcon } from "~/components/visibility-icon";
 import {
+    IoBookmark,
+    IoBookmarkOutline,
     IoChatboxEllipses,
     IoChatboxEllipsesOutline,
     IoEllipsisHorizontal,
@@ -332,6 +334,24 @@ async function toggleLike(
     return res.data;
 }
 
+async function toggleBookmark(
+    client: MegalodonInterface,
+    status: Status
+): Promise<Status> {
+    let res;
+    if (status.bookmarked) {
+        res = await client.unbookmarkStatus(status.id);
+    } else {
+        res = await client.bookmarkStatus(status.id);
+    }
+
+    if (res.status != 200) {
+        throw new Error(res.statusText);
+    }
+
+    return res.data;
+}
+
 type ShareButtonProps = { status: Status };
 const ShareButton: Component<ShareButtonProps> = (props) => {
     const navigate = useNavigate();
@@ -404,6 +424,7 @@ export const PreprocessedPost: Component<PreprocessedPostProps> = (
     const auth = useAuth();
     const settings = useSettings();
     const [status, updateStatus] = createSignal(postData.status.status);
+    const [disableAsyncButtons, setDisableAsyncButtons] = createSignal(false);
 
     const [showRaw, setShowRaw] = createSignal<boolean>(false);
     const isLiked = createMemo(() => status().favourited ?? false);
@@ -477,6 +498,32 @@ export const PreprocessedPost: Component<PreprocessedPostProps> = (
                                     <IoLinkOutline class="size-6 mr-2" />
                                     view on origin
                                 </DropdownMenuItem>
+                                <Show when={auth.signedIn}>
+                                    <DropdownMenuItem
+                                        class="py-4 md:py-2"
+                                        onClick={async () => {
+                                            setDisableAsyncButtons(true);
+                                            const updated =
+                                                await toggleBookmark(
+                                                    auth.assumeSignedIn.client,
+                                                    status()
+                                                );
+                                            setDisableAsyncButtons(false);
+                                            updateStatus(updated);
+                                        }}
+                                    >
+                                        <Switch>
+                                            <Match when={status().bookmarked}>
+                                                <IoBookmark class="size-6 mr-2" />
+                                                unbookmark
+                                            </Match>
+                                            <Match when={!status().bookmarked}>
+                                                <IoBookmarkOutline class="size-6 mr-2" />
+                                                bookmark
+                                            </Match>
+                                        </Switch>
+                                    </DropdownMenuItem>
+                                </Show>
                                 <Show
                                     when={
                                         auth.signedIn &&
@@ -559,11 +606,14 @@ export const PreprocessedPost: Component<PreprocessedPostProps> = (
                             <Button
                                 class="hover:bg-transparent p-0 px-4"
                                 aria-label="Like Post"
+                                disabled={disableAsyncButtons()}
                                 onClick={async () => {
+                                    setDisableAsyncButtons(true);
                                     const updated = await toggleLike(
                                         auth.assumeSignedIn.client,
                                         status()
                                     );
+                                    setDisableAsyncButtons(false);
                                     updateStatus(updated);
                                 }}
                             >
