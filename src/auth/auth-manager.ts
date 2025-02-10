@@ -225,17 +225,6 @@ export class SessionAuthManager extends PersistentStoreBacked<PillbugSessionStor
         this.setPersistentStore("accounts", unwrap(this.store.currentAccountIndex), f)
     }
 
-    public unsetNotificationsFlag() {
-        if (this.store.currentAccountIndex === undefined) {
-            throw new Error(`Can't mutate active account when there isn't one`)
-        }
-        logger.info(`trying to update account at index ${this.store.currentAccountIndex}`)
-        this.setPersistentStore("accounts", this.store.currentAccountIndex, (prev) => {
-            return { signedIn: false }
-        });
-
-    }
-
     public removeAccount(idx: number): void {
         logger.info(`Removing account at index ${idx}`)
 
