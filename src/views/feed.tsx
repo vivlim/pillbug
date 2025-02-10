@@ -1,5 +1,11 @@
 import { useLocation } from "@solidjs/router";
-import { createEffect, createSignal, type Component } from "solid-js";
+import {
+    createEffect,
+    createMemo,
+    createSignal,
+    Show,
+    type Component,
+} from "solid-js";
 import { useAuth } from "~/auth/auth-manager";
 import { FeedComponent } from "~/components/feed";
 import { FeedManifest } from "~/components/feed/feed-engine";
@@ -7,6 +13,7 @@ import { defaultHomeFeedRules } from "~/components/feed/preset-rules";
 import { HomeFeedSource } from "~/components/feed/sources/homefeed";
 import { PostFeed } from "~/components/post/feed";
 import { useSettings } from "~/lib/settings-manager";
+import { logger } from "~/logging";
 import { ShowIfInstance } from "~/website-league/showIfInstance";
 import { WebsiteLeagueBroadcast } from "~/website-league/websiteLeagueBroadcast";
 
@@ -16,6 +23,7 @@ export interface SubmitFeedState {
 
 const Feed: Component = () => {
     const location = useLocation<SubmitFeedState>();
+    const auth = useAuth();
 
     const [lastRefresh, setLastRefresh] = createSignal(Date.now());
     const [feedLoaded, setFeedLoaded] = createSignal(false);
@@ -25,24 +33,33 @@ const Feed: Component = () => {
             setLastRefresh(Date.now());
         }
     });
-    const feedManifest: FeedManifest = {
-        source: new HomeFeedSource(useAuth(), useSettings()),
-        fetchReferencedPosts: 5,
-        postsPerPage: 10,
-        postsToFetchPerBatch: 40,
-    };
+    const manifest = createMemo<FeedManifest>(() => {
+        logger.info("creating manifest");
+        setFeedLoaded(false);
+        return {
+            source: new HomeFeedSource(useAuth(), useSettings()),
+            fetchReferencedPosts: 5,
+            postsPerPage: 10,
+            postsToFetchPerBatch: 40,
+        };
+    });
 
     return (
         <>
-            <FeedComponent
-                manifest={feedManifest}
-                rules={defaultHomeFeedRules}
-                initialOptions={{ limit: 25 }}
-                onLoaded={() => setFeedLoaded(true)}
-            />
-            <ShowIfInstance in="Website League" when={feedLoaded()}>
-                <WebsiteLeagueBroadcast />
-            </ShowIfInstance>
+            <Show
+                when={auth.store.accountIsSwitching === false}
+                fallback={<div>please wait...</div>}
+            >
+                <FeedComponent
+                    manifest={manifest()}
+                    rules={defaultHomeFeedRules}
+                    initialOptions={{ limit: 25 }}
+                    onLoaded={() => setFeedLoaded(true)}
+                />
+                <ShowIfInstance in="Website League" when={feedLoaded()}>
+                    <WebsiteLeagueBroadcast />
+                </ShowIfInstance>
+            </Show>
         </>
     );
 };

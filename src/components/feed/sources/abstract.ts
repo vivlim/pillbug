@@ -3,6 +3,7 @@ import { FeedManifest } from "../feed-engine";
 import { PostRuleEvaluationContext } from "~/components/post/rule-engine/post-rule-engine";
 import { SettingsManager } from "~/lib/settings-manager";
 import { SessionAuthManager } from "~/auth/auth-manager";
+import { logger } from "~/logging";
 
 export interface LinkedPostRetriever {
     getByUrl(postUrl: string): Promise<Status | null>
@@ -29,6 +30,7 @@ export abstract class ClientFeedSource extends FeedSource {
     private ctx: PostRuleEvaluationContext;
     constructor(protected auth: SessionAuthManager, protected settings: SettingsManager) {
         super()
+        logger.info(`Constructed a new ClientFeedSource`, auth, settings)
         this.ctx = {
             auth,
             settings,

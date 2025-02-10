@@ -1,6 +1,6 @@
 import generator, { detector, MegalodonInterface } from "megalodon";
 import OAuth from "megalodon/lib/src/oauth";
-import { createResource, Resource } from "solid-js";
+import { createEffect, createResource, Resource } from "solid-js";
 import { produce, SetStoreFunction, StoreSetter, unwrap } from "solid-js/store";
 import { AccountBase, MaybeSignedInState, OAuthRegistration, PillbugAccount, PillbugPersistentStore, PillbugSessionStore, SignedInAccount, SignedInState, SignedOutState, TokenState } from "./auth-types";
 import { unwrapResponse } from "../lib/clientUtil";
@@ -8,6 +8,8 @@ import { PersistentStoreBacked } from "../lib/store-backed";
 import { useSessionContext } from "~/lib/session-context";
 import { logger } from "~/logging";
 import { CreateCachedMegalodon } from "~/state/features/api/cachedMegalodon";
+import { store } from "~/state/store";
+import { apiSlice } from "~/state/features/api/apiSlice";
 
 const AppDisplayName: string = "pillbug";
 
@@ -62,6 +64,7 @@ export class SessionAuthManager extends PersistentStoreBacked<PillbugSessionStor
     constructor() {
         const initialEphemeral: PillbugSessionStore = {
             currentAccountIndex: undefined,
+            accountIsSwitching: true,
         };
         const initialPersistent: PillbugPersistentStore = {
         }
@@ -78,6 +81,27 @@ export class SessionAuthManager extends PersistentStoreBacked<PillbugSessionStor
                     this.setPersistentStore
                 )
         );
+
+        createEffect(() => {
+            if (authState.state === "ready" && authState.latest?.signedIn) {
+                const a: SignedInState = authState.latest;
+
+                this.setPersistentStore("accounts", a.accountIndex, (prev) => {
+                    if (!prev.signedIn) {
+                        throw new Error("Tried to update an account which we were able to create an authenticated client for, but state is still signed out.")
+                    }
+                    if (prev.appData.client_id !== a.clientId) {
+                        throw new Error("Mismatch when trying to update account info");
+                    }
+                    prev.fullAcct = `${a.accountData.acct}@${a.domain}`;
+                    prev.cachedAccount = a.accountData;
+                    prev.cachedInstance = a.instanceData;
+                    return prev;
+                });
+                this.setStore("accountIsSwitching", false);
+
+            }
+        })
 
         this.authState = authState;
 
@@ -187,8 +211,6 @@ export class SessionAuthManager extends PersistentStoreBacked<PillbugSessionStor
                     logger.warn(`error when refreshing notifications for account ${i}: ${e.message}`)
                 }
             }
-
-
         }
 
     }
@@ -202,6 +224,9 @@ export class SessionAuthManager extends PersistentStoreBacked<PillbugSessionStor
     }
 
     public switchActiveAccount(newIdx: number): void {
+        // Invalidate any cached api requests
+        this.setStore("accountIsSwitching", true)
+        store.dispatch(apiSlice.util.invalidateTags(['accountSpecific']));
         this.setStore("currentAccountIndex", newIdx);
         this.setPersistentStore("lastUsedAccount", newIdx);
     }
@@ -439,6 +464,7 @@ function wrapToken(token: OAuth.TokenData): TokenState {
 
 export async function updateAuthStateForActiveAccount(accountIndex: number, persistentStore: PillbugPersistentStore, setPersistentStore: SetStoreFunction<PillbugPersistentStore>): Promise<MaybeSignedInState> {
     // not sure if i need to use store fns passed in or i can use the ones belonging to this class. it is called from a resource context.
+    logger.info(`Switching to account ${accountIndex}.`);
 
     if (persistentStore.accounts === undefined || persistentStore.accounts.length === 0) {
         return { signedIn: false };
@@ -472,6 +498,7 @@ export async function updateAuthStateForActiveAccount(accountIndex: number, pers
     } catch { }
 
     // Update persisted state with current account info
+    /*
     setPersistentStore("accounts", accountIndex, (prev) => {
         if (prev.appData.client_id !== account.appData.client_id) {
             throw new Error("Mismatch when trying to update account info");
@@ -484,9 +511,11 @@ export async function updateAuthStateForActiveAccount(accountIndex: number, pers
         prev.cachedInstance = instanceInfo;
         return prev;
     });
+    */
 
-    const cachingClient = CreateCachedMegalodon(client);
+    const cachingClient = CreateCachedMegalodon(client, creds, instanceInfo);
 
+    logger.info(`Returning switched account ${accountIndex}.`);
     return {
         authenticatedClient: cachingClient,
         directClient: client,
@@ -494,7 +523,9 @@ export async function updateAuthStateForActiveAccount(accountIndex: number, pers
         accountData: creds,
         domain: domain,
         signedIn: true,
-        software: account.instanceSoftware
+        software: account.instanceSoftware,
+        accountIndex: accountIndex,
+        clientId: account.appData.client_id,
     }
 
 }

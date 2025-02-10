@@ -108,18 +108,25 @@ export const FeedComponentPostList: Component<{
 
     const auth = useAuth();
     const client = auth.assumeSignedIn.client;
-    const getPosts = cache(async (page: number, engine: FeedEngine) => {
-        logger.info("fetching posts");
-        const posts = await engine.getPosts(page, (msg) => {
-            setInProgressStatusMessage(msg);
-        });
-        if (posts.error !== undefined) {
-            logger.error(`error while fetching posts`, posts.error);
-        } else {
-            logger.info(`successfully fetched ${posts.posts.length} posts`);
-        }
-        return posts;
-    }, `cached-feed-${props.engine.manifest.source.describe()}` /* use the source as part of the cache key, since it should be unique */);
+    const getPosts = cache(
+        async (
+            page: number,
+            engine: FeedEngine,
+            accountIndex: number | undefined
+        ) => {
+            logger.info(`fetching posts for user ${accountIndex}`);
+            const posts = await engine.getPosts(page, (msg) => {
+                setInProgressStatusMessage(msg);
+            });
+            if (posts.error !== undefined) {
+                logger.error(`error while fetching posts`, posts.error);
+            } else {
+                logger.info(`successfully fetched ${posts.posts.length} posts`);
+            }
+            return posts;
+        },
+        `cached-feed-${props.engine.manifest.source.describe()}` /* use the source as part of the cache key, since it should be unique */
+    );
 
     const currentPage = createMemo(() => {
         return Number.parseInt((searchParams.page as string) ?? "1");
@@ -129,7 +136,11 @@ export const FeedComponentPostList: Component<{
         async (page) => {
             logger.info(`showing posts for page ${page}`);
             setInProgressStatusMessage("showing posts for page " + page);
-            const p = await getPosts(page, props.engine);
+            const p = await getPosts(
+                page,
+                props.engine,
+                auth.currentAccountIndex
+            );
             if (p.error !== undefined) {
                 logger.error(`error getting posts: ${p.error.message}`);
             } else {
@@ -166,7 +177,8 @@ export const FeedComponentPostList: Component<{
                         try {
                             const posts = await getPosts(
                                 nextPage,
-                                props.engine
+                                props.engine,
+                                auth.currentAccountIndex
                             );
                             if (posts.posts.length > 0) {
                                 setNextPageEnabled(true);

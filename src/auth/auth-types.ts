@@ -35,6 +35,8 @@ export interface SignedInState {
     | "firefish"
     | "gotosocial"
     | undefined;
+    accountIndex: number;
+    clientId: string;
 }
 
 export interface SignedOutState {
@@ -49,6 +51,7 @@ export interface TokenState {
 /** 'Live' data store related to the current pillbug tab / instance. */
 export interface PillbugSessionStore {
     currentAccountIndex: number | undefined;
+    accountIsSwitching: boolean;
 }
 
 /** Persistent data store shared across all sessions of Pillbug. */
