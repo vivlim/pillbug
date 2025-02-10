@@ -31,6 +31,7 @@ import { createStore } from "solid-js/store";
 import { PageNav } from "../ui/page-footer";
 import { useSettings } from "~/lib/settings-manager";
 import { logger } from "~/logging";
+import { PillbugLoadingSpinner } from "../loading-spinner";
 
 export type FeedComponentProps = {
     rules: FeedRuleProperties[];
@@ -250,6 +251,9 @@ export const FeedComponentPostList: Component<{
                             </Button>
                         </PageNav>
                     </Show>
+                </Match>
+                <Match when={posts.loading}>
+                    <PillbugLoadingSpinner label="loading posts..." />
                 </Match>
             </Switch>
             <Show when={settings.getPersistent().enableDevTools}>
