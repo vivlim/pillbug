@@ -31,6 +31,8 @@ const ErrorBox = lazy(() => import("./components/error"));
 const ErrorView = lazy(() => import("./views/error"));
 const AboutDetailsFacet = lazy(() => import("./views/facets/details"));
 const FollowingFacet = lazy(() => import("./views/facets/following"));
+const FavoritesFacet = lazy(() => import("./views/facets/favorites"));
+const BookmarksFacet = lazy(() => import("./views/facets/bookmarks"));
 const FeedBuilderFacet = lazy(() => import("./views/facets/feed-builder"));
 const FilesFacet = lazy(() => import("./toolkit/files"));
 
@@ -108,6 +110,8 @@ render(
                 <Route path="*paramName" component={ErrorView} />
                 <Route path="/dev/editDialog" component={DevEditDialogPage} />
                 <Route path="/feed-builder" component={FeedBuilderFacet} />
+                <Route path="/favorites" component={FavoritesFacet} />
+                <Route path="/bookmarks" component={BookmarksFacet} />
                 <Route
                     path="/files/:path1?/:path2?/:path3?/:path4?"
                     component={FilesFacet}

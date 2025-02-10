@@ -3,10 +3,12 @@ import { hrtime } from "process";
 import {
     FaRegularBell,
     FaSolidBell,
+    FaSolidBookmark,
     FaSolidBug,
     FaSolidCircle,
     FaSolidFolder,
     FaSolidGear,
+    FaSolidHeart,
     FaSolidMagnifyingGlass,
     FaSolidPeopleGroup,
     FaSolidPerson,
@@ -127,6 +129,14 @@ export const FacetNavigation: Component = (props) => {
                     <FacetNavigationItem href="/following">
                         <FaSolidPeopleGroup />
                         following (wip)
+                    </FacetNavigationItem>
+                    <FacetNavigationItem href="/favorites">
+                        <FaSolidHeart />
+                        favorites
+                    </FacetNavigationItem>
+                    <FacetNavigationItem href="/bookmarks">
+                        <FaSolidBookmark />
+                        bookmarks
                     </FacetNavigationItem>
                     <FacetNavigationItem href="/settings">
                         <FaSolidGear />

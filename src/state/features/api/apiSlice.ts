@@ -18,6 +18,8 @@ export const MegalodonCachedMethods = [
     'getStatusContext',
     'getAccountFollowing',
     'lookupAccount',
+    'getFavourites',
+    'getBookmarks',
 ] as const satisfies Array<keyof MegalodonInterface>;
 
 //** Methods that will be detoured to and cached by redux */
