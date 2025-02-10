@@ -5,6 +5,14 @@
   "version": "0.2.0",
   "configurations": [
     {
+        "type": "firefox",
+        "request": "launch",
+        "reAttach": true,
+        "name": "Launch firefox",
+        "url": "http://localhost:3000/",
+        "webRoot": "${workspaceFolder}"
+    },
+    {
       "name": "Launch Vite DEV server",
       "request": "launch",
       "runtimeExecutable": "npx",
