@@ -432,10 +432,12 @@ export const PostPageContext = createContext<PostPageContextValue>();
 const PostPage: Component = () => {
     const params = useParams();
     return (
-        <PostPageForId
-            postId={params.postId}
-            shareEditorMode={false}
-        ></PostPageForId>
+        <Show when={params.postId} keyed>
+            <PostPageForId
+                postId={params.postId}
+                shareEditorMode={false}
+            ></PostPageForId>
+        </Show>
     );
 };
 
