@@ -1,19 +1,20 @@
 import { DateTime } from "luxon";
+import { Status } from "megalodon/lib/src/entities/status";
 import {
     Accessor,
     Component,
     createEffect,
     createMemo,
     createSignal,
-    For,
     JSX,
     Setter,
     Show,
 } from "solid-js";
-import { Timestamp } from "~/components/post/timestamp";
-import { Card, CardHeader, CardTitle, CardContent } from "~/components/ui/card";
-import { PersistentFlagNames, useSettings } from "~/lib/settings-manager";
-import PostEditor from "../editdialog";
+import { useAuth } from "~/auth/auth-manager";
+import { Checkbox } from "~/components/checkbox";
+import { CommentEditorComponent } from "~/components/editor/comment-component";
+import { CommentTransformer } from "~/components/editor/comment-transformer";
+import { MegalodonStatusEditorComponent } from "~/components/editor/component";
 import {
     EditorActions,
     EditorAttachment,
@@ -26,14 +27,11 @@ import {
     IEditorTransformer,
     ValidationError,
 } from "~/components/editor/editor-types";
+import { MegalodonPostStatus } from "~/components/editor/megalodon-status-transformer";
+import { PostTransformer } from "~/components/editor/post-transformer";
+import { ShareTransformer } from "~/components/editor/share-transformer";
 import { RawDataViewer } from "~/components/raw-data";
 import { Button } from "~/components/ui/button";
-import {
-    MegalodonEditorTransformer,
-    MegalodonPostStatus,
-} from "~/components/editor/megalodon-status-transformer";
-import { MegalodonStatusEditorComponent } from "~/components/editor/component";
-import { PostTransformer } from "~/components/editor/post-transformer";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -41,12 +39,7 @@ import {
     DropdownMenuRadioItem,
     DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
-import { CommentTransformer } from "~/components/editor/comment-transformer";
-import { ShareTransformer } from "~/components/editor/share-transformer";
-import { Status } from "megalodon/lib/src/entities/status";
-import { useAuth } from "~/auth/auth-manager";
-import { CommentEditorComponent } from "~/components/editor/comment-component";
-import { Checkbox } from "~/components/checkbox";
+import { useSettings } from "~/lib/settings-manager";
 
 type EditorVariant<TDoc extends EditorDocument, T> = {
     name: string;
@@ -64,9 +57,9 @@ const DevEditDialogPage: Component = () => {
     const initialDoc: EditorDocument = {
         body: "hi",
         cwContent: "",
-        cwVisible: false,
         visibility: "unlisted",
         attachments: [],
+        tags: [],
     };
     const model = new EditorDocumentModel(initialDoc);
 
@@ -199,7 +192,7 @@ const DevEditDialogPage: Component = () => {
                     </Show>
                 </p>
                 <p>
-                    <Checkbox id="sub" setter={setAutoReset} getter={autoReset}>
+                    <Checkbox setter={setAutoReset} getter={autoReset}>
                         Automatically reset to idle state after submitting
                     </Checkbox>
                 </p>
@@ -207,7 +200,6 @@ const DevEditDialogPage: Component = () => {
                 <ul>
                     <li>
                         <Checkbox
-                            id="val"
                             setter={setAllowValidation}
                             getter={allowValidation}
                         >
@@ -215,11 +207,7 @@ const DevEditDialogPage: Component = () => {
                         </Checkbox>
                     </li>
                     <li>
-                        <Checkbox
-                            id="sub"
-                            setter={setAllowSubmit}
-                            getter={allowSubmit}
-                        >
+                        <Checkbox setter={setAllowSubmit} getter={allowSubmit}>
                             Post submits successfully
                         </Checkbox>
                     </li>

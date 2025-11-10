@@ -1,29 +1,18 @@
-import { Status } from "megalodon/lib/src/entities/status";
+import { MegalodonInterface } from "megalodon";
+import { SessionAuthManager } from "~/auth/auth-manager";
 import {
     EditorDocument,
     EditorTransformerBase,
     ValidationError,
 } from "./editor-types";
-import { Entity } from "megalodon";
-import { SessionAuthManager } from "~/auth/auth-manager";
 
-/** This type is copied from megalodon.d.ts MegalodonInterface.postStatus; it's not a named type, so I can't reference it. */
-export type MegalodonPostStatusOptions = {
-    media_ids?: Array<string>;
-    poll?: {
-        options: Array<string>;
-        expires_in: number;
-        multiple?: boolean;
-        hide_totals?: boolean;
-    };
-    in_reply_to_id?: string;
-    sensitive?: boolean;
-    spoiler_text?: string;
-    visibility?: Entity.StatusVisibility;
-    scheduled_at?: string;
-    language?: string;
-    quote_id?: string;
-};
+/**
+ * Represents the options you can pass to `MegalodonInterface.postStatus`.
+ * This is not a named type upstream, so we're pulling it directly from that method signature.
+ */
+export type MegalodonPostStatusOptions = Required<
+    Parameters<MegalodonInterface["postStatus"]>
+>[1];
 
 export type MegalodonPostStatus = {
     status: string;
@@ -68,7 +57,15 @@ export class MegalodonEditorTransformer<
     protected async preTransform(
         doc: TDoc
     ): Promise<{ newStatus: string; extra: TPreTransform | undefined }> {
-        return { newStatus: doc.body, extra: undefined };
+        return {
+            // This replicates the "markdown hack" currently used in website league akkoma.
+            // Ideally, we could pass the tags as their own API field, instead?
+            newStatus:
+                doc.tags.length > 0
+                    ? doc.body + "\n---\n" + doc.tags.join(" ")
+                    : doc.body,
+            extra: undefined,
+        };
     }
 
     /** By default this has no effect, but derived classes may use it do to things like add reply ids */

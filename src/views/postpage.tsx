@@ -485,6 +485,7 @@ const PostWithCommentTree: Component = () => {
         {
             loadProps: LoadPostsProps;
             auth: SessionAuthManager;
+            settings: SettingsManager;
         },
         IPostTreeNode,
         true
