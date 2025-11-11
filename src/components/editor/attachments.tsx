@@ -1,59 +1,18 @@
-import {
-    Accessor,
-    Component,
-    createMemo,
-    createResource,
-    createSignal,
-    ErrorBoundary,
-    For,
-    JSX,
-    Match,
-    Setter,
-    Show,
-    Switch,
-} from "solid-js";
-import { CommentPostComponent } from "~/views/comment";
-import {
-    PostTreeStatusNode,
-    IPostTreeNode,
-    PostTreePlaceholderNode,
-    usePostPageContext,
-} from "~/views/postpage";
-import { Card } from "../ui/card";
-import { useAuth } from "~/auth/auth-manager";
-import { Entity, MegalodonInterface } from "megalodon";
-import { isValidVisibility, PostOptions } from "~/views/editdialog";
-import { IoAttachOutline, IoWarningOutline } from "solid-icons/io";
-import {
-    DropdownMenuTrigger,
-    DropdownMenuContent,
-    DropdownMenuRadioGroup,
-    DropdownMenuRadioItem,
-    DropdownMenu,
-    DropdownMenuItem,
-} from "../ui/dropdown-menu";
-import { TextFieldTextArea, TextFieldInput, TextField } from "../ui/text-field";
-import { VisibilityIcon } from "../visibility-icon";
-import { MenuButton } from "../ui/menubutton";
+import * as ExifReader from "exifreader";
+import { filesize } from "filesize";
+import { IoAttachOutline } from "solid-icons/io";
+import { Component, createResource, createSignal, For, Show } from "solid-js";
+import { logger } from "~/logging";
+import { runTegaki } from "~/tegaki/run-tegaki";
 import { Button } from "../ui/button";
 import {
-    EditorActions,
-    EditorAttachment,
-    EditorConfig,
-    EditorDocumentModel,
-    EditorProps,
-    IEditorSubmitter,
-    IEditorTransformer,
-    NewCommentEditorProps,
-    ValidationError,
-} from "./editor-types";
-import { unwrap } from "solid-js/store";
-import { MegalodonPostStatus } from "./megalodon-status-transformer";
-import { KeyboardShortcutTextArea } from "../ui/keyboard-shortcut-text-field";
-import { KeyBindingMap } from "tinykeys";
-import { filesize } from "filesize";
-import * as ExifReader from "exifreader";
-import { logger } from "~/logging";
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
+import { MenuButton } from "../ui/menubutton";
+import { EditorAttachment, EditorDocumentModel } from "./editor-types";
 
 interface GetFilesFromInputOptions {
     accept?: string;
@@ -102,14 +61,10 @@ export interface AddAttachmentMenuProps {
 export const AddAttachmentMenu: Component<AddAttachmentMenuProps> = (props) => {
     const [status, setStatus] = createSignal<string>("");
 
-    const getAttachment = async (options: GetFilesFromInputOptions = {}) => {
+    const attachFileFromPicker = async () => {
         try {
             setStatus("awaiting attachment...");
-            const combinedOptions = {
-                accept: props.accept,
-                ...options,
-            };
-            const files = await getFilesFromInput(combinedOptions);
+            const files = await getFilesFromInput({ accept: props.accept });
 
             if (files.length === 0) {
                 setStatus("no files added");
@@ -127,6 +82,19 @@ export const AddAttachmentMenu: Component<AddAttachmentMenuProps> = (props) => {
         }
     };
 
+    const attachFileFromPainter = async () => {
+        const imageBlob = await runTegaki();
+        if (imageBlob) {
+            const imageFile = new File([imageBlob], "doodle.png", {
+                type: "image/png",
+            });
+            props.onFileAdded(imageFile);
+            setStatus(`attachment ok`);
+        } else {
+            setStatus("doodle cancelled");
+        }
+    };
+
     return (
         <>
             <DropdownMenu>
@@ -137,10 +105,18 @@ export const AddAttachmentMenu: Component<AddAttachmentMenuProps> = (props) => {
                     <DropdownMenuItem
                         class="py-4 md:py-2"
                         onClick={() => {
-                            getAttachment();
+                            attachFileFromPicker();
                         }}
                     >
                         attach a file
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                        class="py-4 md:py-2"
+                        onClick={() => {
+                            attachFileFromPainter();
+                        }}
+                    >
+                        create a doodle
                     </DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>
