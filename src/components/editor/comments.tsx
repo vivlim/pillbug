@@ -65,6 +65,7 @@ export const NewCommentEditor: Component<NewCommentEditorProps> = (props) => {
     const editorModel = new EditorDocumentModel<EditorCommentDocument>({
         body: "",
         cwContent: props.parentStatus.spoiler_text,
+        cwVisible: props.parentStatus.sensitive,
         visibility: props.parentStatus.visibility,
         attachments: [],
         tags: [],

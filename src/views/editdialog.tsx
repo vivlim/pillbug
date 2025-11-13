@@ -95,11 +95,12 @@ const PostEditor: Component<EditDialogProps> = (props) => {
     });
 
     const [busy, setBusy] = createSignal(false);
+    const [cwVisible, setCwVisible] = createSignal(false);
     const [rawCwContent, setCwContent] = createSignal("");
     /// Gets the content warning in a way that can be transferred to Megalodon
     const cwContent = createMemo(() => {
         const rawCw = rawCwContent().trim();
-        return rawCw == "" ? null : rawCw;
+        return !cwVisible() || rawCw == "" ? null : rawCw;
     });
     // TODO: meaningfully hook this up
     const [postErrors, setErrors] = createSignal<Array<string>>([]);
@@ -174,6 +175,7 @@ const PostEditor: Component<EditDialogProps> = (props) => {
                 <DialogTitle>New post</DialogTitle>
             </DialogHeader>
             <div class="flex flex-col py-3 gap-3">
+                {/* body */}
                 <TextField class="border-none w-full flex-grow py-0 items-start justify-between min-h-24">
                     <TextFieldTextArea
                         tabindex="0"
@@ -185,7 +187,11 @@ const PostEditor: Component<EditDialogProps> = (props) => {
                         }}
                     ></TextFieldTextArea>
                 </TextField>
-                <TextField class="border-none w-full flex-shrink">
+                {/* Content Warnings */}
+                <TextField
+                    class="border-none w-full flex-shrink"
+                    hidden={!cwVisible()}
+                >
                     <TextFieldInput
                         type="text"
                         class="resize-none h-6 px-3 py-0 text-sm border-none rounded-none focus-visible:ring-0"
@@ -199,6 +205,13 @@ const PostEditor: Component<EditDialogProps> = (props) => {
             </div>
             <DialogFooter>
                 <div class="flex-grow flex flex-row gap-2">
+                    <MenuButton
+                        onClick={() => {
+                            setCwVisible(!cwVisible());
+                        }}
+                    >
+                        <IoWarningOutline class="size-5" />
+                    </MenuButton>
                     <DropdownMenu>
                         <DropdownMenuTrigger
                             as={MenuButton<"button">}

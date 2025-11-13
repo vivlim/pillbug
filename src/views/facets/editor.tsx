@@ -94,6 +94,7 @@ const EditorFacetEditor: Component<EditorFacetProps> = (props) => {
         const initialDoc: EditorDocument = {
             body: "",
             cwContent: "",
+            cwVisible: false,
             visibility: "unlisted",
             attachments: [],
             tags: [],
