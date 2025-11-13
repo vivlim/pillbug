@@ -57,6 +57,7 @@ const DevEditDialogPage: Component = () => {
     const initialDoc: EditorDocument = {
         body: "hi",
         cwContent: "",
+        cwVisible: false,
         visibility: "unlisted",
         attachments: [],
         tags: [],

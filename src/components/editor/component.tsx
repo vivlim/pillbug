@@ -232,19 +232,6 @@ export class EditorComponentBase<TOutput, TDoc extends EditorDocument> {
 
         return (
             <>
-                {/* content warnings */}
-                <TextField class="border-none w-full flex-shrink">
-                    <TextFieldInput
-                        type="text"
-                        class="resize-none px-3 py-2 text-sm border-2 rounded-md focus-visible:ring-0"
-                        placeholder="content warnings"
-                        disabled={this.busy()}
-                        onInput={(e) => {
-                            model.set("cwContent", e.currentTarget.value);
-                        }}
-                        value={model.document.cwContent}
-                    />
-                </TextField>
                 {/* body */}
                 <TextField class="border-none w-full flex-grow py-0 items-start justify-between">
                     <KeyboardShortcutTextArea
@@ -271,8 +258,31 @@ export class EditorComponentBase<TOutput, TDoc extends EditorDocument> {
                         value={model.document.tags.join(" ")}
                     />
                 </TextField>
+                {/* content warnings */}
+                <TextField
+                    class="border-none w-full flex-shrink"
+                    hidden={!model.document.cwVisible}
+                >
+                    <TextFieldInput
+                        type="text"
+                        class="resize-none px-3 py-2 text-sm border-2 rounded-md focus-visible:ring-0"
+                        placeholder="content warnings"
+                        disabled={this.busy()}
+                        onInput={(e) => {
+                            model.set("cwContent", e.currentTarget.value);
+                        }}
+                        value={model.document.cwContent}
+                    />
+                </TextField>
                 {/* buttons */}
                 <div class="flex flex-row gap-2">
+                    <MenuButton
+                        onClick={() => {
+                            model.set("cwVisible", !model.document.cwVisible);
+                        }}
+                    >
+                        <IoWarningOutline class="size-5" />
+                    </MenuButton>
                     <DropdownMenu>
                         <DropdownMenuTrigger
                             as={MenuButton<"button">}

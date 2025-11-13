@@ -15,6 +15,7 @@ export interface NewCommentEditorProps {
 }
 
 export interface EditorDocument {
+    cwVisible: boolean;
     cwContent: string;
     body: string;
     tags: string[];
