@@ -10,21 +10,30 @@ import {
 } from "~/components/ui/card";
 
 interface LicenseReportItem {
-    department: string;
-    relatedTo: string;
     name: string;
-    licensePeriod: string;
-    material: string;
-    licenseType: string;
-    link: string;
-    remoteVersion: string;
-    installedVersion: string;
-    definedVersion: string;
     author: string;
+    link: string;
+    installedVersion: string;
+    remoteVersion?: string;
+    definedVersion?: string;
+    licenseType: string;
+    licensePeriod?: string;
+    department?: string;
+    material?: string;
+    relatedTo?: string;
 }
 
 const ThirdPartyLicensesFacet: Component = () => {
-    const extras: LicenseReportItem[] = [];
+    const extras: LicenseReportItem[] = [
+        {
+            // manually vendored under /src/tegaki
+            name: "Tegaki",
+            author: "@desuwa",
+            link: "https://github.com/desuwa/tegaki",
+            installedVersion: "0.9.4",
+            licenseType: "MIT",
+        },
+    ];
     const thirdPartyComponents = extras.concat(licenseReport);
     return (
         <div class="flex flex-col w-full list-none p-6 gap-4">
