@@ -62,7 +62,7 @@ export class MegalodonEditorTransformer<
             // Ideally, we could pass the tags as their own API field, instead?
             newStatus:
                 doc.tags.length > 0
-                    ? doc.body + "\n---\n" + doc.tags.join(" ")
+                    ? doc.body + "\n\n---\n\n" + doc.tags.join(" ")
                     : doc.body,
             extra: undefined,
         };
