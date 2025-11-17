@@ -64,6 +64,10 @@ these tips might be out of date depending on when you read them. feel free to up
 - the main feed's pagination might be a useful example for doing pagination generally (though it's not perfect)
 - you can view post and notification raw json by right clicking the bottom widget on posts, or a notification. feel free to add more ways to view raw json as seems appropriate.
 
+## policy on AI contributions
+
+not allowed, *especially* code written by a coding assistant or agent. such tools are forbidden because they are inherently at odds with the intent of this project.
+
 ## feedback
 
 if you have any questions, comments, or concerns about anything in here please open an issue and/or reach out on zulip.
