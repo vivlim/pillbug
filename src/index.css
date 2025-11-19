@@ -428,15 +428,20 @@ li.followRequest .info {
     text-wrap: nowrap;
 }
 
-.pbPostEditor {
-    min-height: 5em;
+.pbPostEditor .cm-editor {
+    height: 5em;
+}
+
+.pbPostEditor .cm-scroller {
+    overflow: auto;
+    font-family: inherit;
 }
 
 #editorRoot {
     padding-right: 1.0em;
 }
-#editorRoot .pbPostEditor {
-    min-height: 50vh;
+#editorRoot .pbPostEditor .cm-editor {
+    height: 50vh;
 }
 
 summary::marker {
