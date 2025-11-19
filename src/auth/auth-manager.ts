@@ -7,7 +7,6 @@ import { unwrapResponse } from "../lib/clientUtil";
 import { PersistentStoreBacked } from "../lib/store-backed";
 import { useSessionContext } from "~/lib/session-context";
 import { logger } from "~/logging";
-import { CreateCachedMegalodon } from "~/state/features/api/cachedMegalodon";
 
 const AppDisplayName: string = "pillbug";
 
@@ -28,7 +27,7 @@ export class SessionAuthManagerAssumingSignedIn {
         if (!client) {
             throw new Error("Not signed in")
         }
-        return CreateCachedMegalodon(client);
+        return client;
     }
 
     public get state(): SignedInState {

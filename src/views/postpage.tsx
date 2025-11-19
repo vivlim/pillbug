@@ -50,8 +50,6 @@ import {
     PostRuleEvaluationContext,
 } from "~/components/post/rule-engine/post-rule-engine";
 import { SettingsManager } from "~/lib/settings-manager";
-import { apiSlice, getStatus } from "~/state/features/api/apiSlice";
-import { getSingleStatus } from "~/state/store";
 
 /** Fetch the info for a post and arrange its context in a nested tree structure before returning. */
 export async function fetchPostInfoTree(
@@ -82,7 +80,6 @@ export async function fetchPostInfoTree(
     const processStatuses = async (
         statuses: Status[]
     ): Promise<ProcessedStatus[]> => {
-        await getSingleStatus(statuses[0].id);
         const result = await GetPostRuleEngine().process(
             statuses,
             processingContext,

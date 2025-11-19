@@ -3,7 +3,7 @@ import { createSignal, type Component } from "solid-js";
 import { RouteSectionProps } from "@solidjs/router";
 import { SessionAuthManager } from "./auth/auth-manager";
 import { EditingOverlayContext } from "./lib/edit-overlay-context";
-import { PillbugSessionContext, SessionContext } from "./lib/session-context";
+import { SessionContext } from "./lib/session-context";
 import {
     BlockingLoadProgressTracker,
     initialLoadOperations,
@@ -17,13 +17,6 @@ import { SeenAccountsStore } from "./lib/following-accounts-store";
 const AppFrame = lazy(() => import("./components/frame/Frame"));
 
 export class GetClientError extends Error {}
-
-var staticSessionContext: PillbugSessionContext | undefined = undefined;
-
-//** Expose session context statically so it's available in non-ui places (e.g. redux) */
-export function StaticSessionContextWorkaround() {
-    return staticSessionContext;
-}
 
 const App: Component<RouteSectionProps> = (props: RouteSectionProps) => {
     // This is where the session context gets constructed and built.
@@ -47,16 +40,16 @@ const App: Component<RouteSectionProps> = (props: RouteSectionProps) => {
         authManager.authState
     );
 
-    staticSessionContext = {
-        authManager,
-        blockingLoadProgressTracker,
-        settingsManager,
-        feedManager,
-        seenAccountsStore,
-    };
-
     return (
-        <SessionContext.Provider value={staticSessionContext}>
+        <SessionContext.Provider
+            value={{
+                authManager,
+                blockingLoadProgressTracker,
+                settingsManager,
+                feedManager,
+                seenAccountsStore,
+            }}
+        >
             <TrackedBlockingLoadComponent
                 tracker={blockingLoadProgressTracker}
                 loadingCardClass="m-8"
