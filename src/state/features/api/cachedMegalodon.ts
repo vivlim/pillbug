@@ -15,15 +15,13 @@ export function CreateCachedMegalodon(megalodon: MegalodonInterface, account: Ac
                 const targetMethod = (target as any)[propertyName];
                 if (typeof targetMethod === "function") {
                     logger.debug("Using detoured megalodon cache for method", propertyName)
-                    const tags = ['accountSpecific']
-
                     return async function (...args: any[]) {
                         const detouredCall: DetouredMegalodonCall = {
                             _method: propertyName as MegalodonCachedMethodsType,
                             args,
                             accountId: account.id,
                             instanceUri: instance.uri,
-                            extraTags: ['accountSpecific', 'megalodon']
+                            extraTags: ['accountSpecific']
                         }
                         const result = await store.dispatch(apiSlice.endpoints.megalodon.initiate(detouredCall))
                         // logger.debug(`Detoured result for ${propertyName}`, result)

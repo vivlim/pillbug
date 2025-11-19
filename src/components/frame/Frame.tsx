@@ -49,8 +49,6 @@ import ErrorBox from "../error";
 import { PillbugFilesystem } from "~/toolkit/files/opfs";
 import { Lazy } from "~/lib/utils";
 import { IPillbugFilesystem } from "~/toolkit/files/ipillbugfilesystem";
-import { store } from "~/state/store";
-import { apiSlice } from "~/state/features/api/apiSlice";
 
 const CurrentAccountWithAvatar: Component<{
     signInState: SignedInState;
@@ -118,13 +116,7 @@ const FrameTopBar: Component = (props) => {
                     <div class="flex-1 sm:hidden" />
                     <div
                         class="flex-shrink flex cursor-pointer select-none h-full overflow-hidden"
-                        onClick={async () => {
-                            // clear cached reqs
-                            await store.dispatch(
-                                apiSlice.util.invalidateTags(["megalodon"])
-                            );
-                            navigate("/");
-                        }}
+                        onClick={() => navigate("/")}
                     >
                         <UserInstanceBanner />
                     </div>
