@@ -76,9 +76,8 @@ class PostRuleEngine extends RuleEngineBase<Status, ProcessedStatus, PostRuleset
         return { ...input, ...patch };
     }
     async isCacheItemStillValid(input: Status, output: ProcessedStatus): Promise<boolean> {
-        //logger.debug(`Unconditionally using cached version of ${input.id} by ${input.account.acct} (${input.url}}`)
-        // Disable using rule engine cache as part of migration to redux
-        return false;
+        logger.debug(`Unconditionally using cached version of ${input.id} by ${input.account.acct} (${input.url}}`)
+        return true;
     }
 
     private async retrieveLinkedAncestors(s: ProcessedStatus, context: PostRuleEvaluationContext, rules: PostRuleset): Promise<ProcessedStatus[]> {
