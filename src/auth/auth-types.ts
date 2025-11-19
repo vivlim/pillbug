@@ -20,10 +20,7 @@ export interface PersistentAuthState {
 export type MaybeSignedInState = SignedInState | SignedOutState | null;
 
 export interface SignedInState {
-    /** Client which may detour requests to redux cache */
     authenticatedClient: MegalodonInterface;
-    /** Client which will always directly make requests, bypassing the redux cache */
-    directClient: MegalodonInterface;
     instanceData: Instance;
     accountData: Account;
     domain: string;

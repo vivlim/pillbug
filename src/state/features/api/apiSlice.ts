@@ -1,25 +1,17 @@
 import { BaseQueryFn, createApi } from "@reduxjs/toolkit/query"
 import { createEntityAdapter, EntityState } from "@reduxjs/toolkit"
-import { Gotosocial, Mastodon, MegalodonInterface, Response } from "megalodon"
+import { MegalodonInterface, Response } from "megalodon"
 import { Status } from "megalodon/lib/src/entities/status"
 import { StaticSessionContextWorkaround } from "~/App"
 import { unwrapResponse } from "~/lib/clientUtil"
 import { Account } from "megalodon/lib/src/entities/account"
 import { logger } from "~/logging"
 
-export type MegalodonSuperset = keyof MegalodonInterface | keyof Mastodon | keyof Gotosocial
 //** List of methods that will be detoured to and cached by redux */
 export const MegalodonCachedMethods = [
     'getHomeTimeline',
     'getAccountStatuses',
     'search',
-    'getStatus',
-    'getRelationship',
-    'getStatusContext',
-    'getAccountFollowing',
-    'lookupAccount',
-    'getFavourites',
-    'getBookmarks',
 ] as const satisfies Array<keyof MegalodonInterface>;
 
 //** Methods that will be detoured to and cached by redux */
@@ -55,7 +47,7 @@ export const apiSlice = createApi({
             if (!auth.state.signedIn) {
                 throw new Error("Not signed in");
             }
-            const megalodon = auth.state.directClient;
+            const megalodon = auth.state.authenticatedClient;
 
             if (args.kind === "post") {
                 if (args.action === "get") {
@@ -88,11 +80,11 @@ export const apiSlice = createApi({
                     if (!auth.state.signedIn) {
                         throw new Error("Not signed in");
                     }
-                    const megalodonClient = auth.state.directClient as any;
-                    // logger.debug("In queryfn for", arg)
+                    const megalodonClient = auth.state.authenticatedClient as any;
                     const result = await megalodonClient[arg._method](...arg.args);
                     // Need to unpack the resulting data object and drop header info
                     const { headers, ...rest } = result
+                    // logger.debug("In queryfn, result data:", result, arg)
                     return {
                         data: rest, meta: {
                             headers
@@ -122,4 +114,3 @@ export type NormalizedStatus = Omit<Status, "account"> & { account: EntityState<
 
 
 export const { getStatus } = apiSlice.endpoints;
-export const cachedMegalodonApiEndpoint = apiSlice.endpoints.megalodon;

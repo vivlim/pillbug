@@ -25,10 +25,6 @@ export function CreateCachedMegalodon(megalodon: MegalodonInterface) {
                 }
                 throw new Error(`Unimplemented cached megalodon property ${String(p)}`)
             }
-            else if (propertyName as string === 'client') {
-                // This is a property.
-                return target[propertyName];
-            }
             else {
                 // Non-cached methods
                 logger.debug("Directly calling megalodon method", propertyName)
