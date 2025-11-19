@@ -2,11 +2,8 @@ import { MegalodonInterface } from "megalodon";
 import { logger } from "~/logging"
 import { store } from "~/state/store";
 import { apiSlice, DetouredMegalodonCall, MegalodonCachedMethods, MegalodonCachedMethodsType, } from "./apiSlice";
-import { SignedInAccount } from "~/auth/auth-types";
-import { Instance } from "megalodon/lib/src/entities/instance";
-import { Account } from "megalodon/lib/src/entities/account";
 
-export function CreateCachedMegalodon(megalodon: MegalodonInterface, account: Account, instance: Instance) {
+export function CreateCachedMegalodon(megalodon: MegalodonInterface) {
     return new Proxy(megalodon, {
         get(target, p, receiver) {
             const propertyName = String(p) as keyof MegalodonInterface;
@@ -19,9 +16,7 @@ export function CreateCachedMegalodon(megalodon: MegalodonInterface, account: Ac
                         const detouredCall: DetouredMegalodonCall = {
                             _method: propertyName as MegalodonCachedMethodsType,
                             args,
-                            accountId: account.id,
-                            instanceUri: instance.uri,
-                            extraTags: ['accountSpecific']
+                            extraTags: []
                         }
                         const result = await store.dispatch(apiSlice.endpoints.megalodon.initiate(detouredCall))
                         // logger.debug(`Detoured result for ${propertyName}`, result)

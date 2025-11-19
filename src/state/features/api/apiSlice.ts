@@ -41,7 +41,7 @@ const initialState = accountAdapter.getInitialState();
 
 // https://steveholgado.com/typescript-types-from-arrays/
 //** Extra tag types that may be passed in from the cached megalodon proxy */
-export const MegalodonExtraTags = ['accountSpecific'] as const;
+export const MegalodonExtraTags = ["foo", "bar"] as const;
 
 export const apiSlice = createApi({
     reducerPath: 'api',
@@ -70,7 +70,7 @@ export const apiSlice = createApi({
         }
 
     },
-    tagTypes: ['accountSpecific', 'Post'],
+    tagTypes: [...MegalodonExtraTags, 'Post'],
     endpoints: (builder) => ({
         getStatus: builder.query<NormalizedStatus, string>({
             query: (postId) => ({ action: 'get', kind: 'post', id: postId }),
@@ -106,6 +106,7 @@ export const apiSlice = createApi({
             providesTags: (result, error, args) => {
                 return [...args.extraTags]
             }
+
         })
     })
 })
@@ -113,8 +114,6 @@ export const apiSlice = createApi({
 export type DetouredMegalodonCall = {
     _method: MegalodonCachedMethodsType, // The name starts with a _ so it is sorted before args when serialized - that improves readability
     args: any,
-    accountId: string,
-    instanceUri: string,
     extraTags: (typeof MegalodonExtraTags[number])[]
 }
 
