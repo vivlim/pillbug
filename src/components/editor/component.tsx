@@ -1,61 +1,44 @@
+import { BeforeLeaveEventArgs, useBeforeLeave } from "@solidjs/router";
+import { IoWarningOutline } from "solid-icons/io";
 import {
     Accessor,
     Component,
     createMemo,
-    createSignal,
-    ErrorBoundary,
     For,
     JSX,
-    Match,
     Setter,
     Show,
-    Switch,
 } from "solid-js";
-import { CommentPostComponent } from "~/views/comment";
+import { unwrap } from "solid-js/store";
+import { KeyBindingMap } from "tinykeys";
+import { logger } from "~/logging";
+import { isValidVisibility } from "~/views/editdialog";
+import { Button } from "../ui/button";
 import {
-    PostTreeStatusNode,
-    IPostTreeNode,
-    PostTreePlaceholderNode,
-    usePostPageContext,
-} from "~/views/postpage";
-import { Card } from "../ui/card";
-import { useAuth } from "~/auth/auth-manager";
-import { Entity, MegalodonInterface } from "megalodon";
-import { isValidVisibility, PostOptions } from "~/views/editdialog";
-import { IoAttachOutline, IoWarningOutline } from "solid-icons/io";
-import {
-    DropdownMenuTrigger,
+    DropdownMenu,
     DropdownMenuContent,
     DropdownMenuRadioGroup,
     DropdownMenuRadioItem,
-    DropdownMenu,
-    DropdownMenuItem,
+    DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import { TextFieldTextArea, TextFieldInput, TextField } from "../ui/text-field";
-import { VisibilityIcon } from "../visibility-icon";
+import { KeyboardShortcutTextArea } from "../ui/keyboard-shortcut-text-field";
 import { MenuButton } from "../ui/menubutton";
-import { Button } from "../ui/button";
+import { TextField, TextFieldInput } from "../ui/text-field";
+import { VisibilityIcon } from "../visibility-icon";
+import { AddAttachmentMenu, AttachmentComponent } from "./attachments";
 import {
     EditorActions,
     EditorAttachment,
-    EditorCommentDocument,
     EditorConfig,
     EditorDocument,
     EditorDocumentModel,
     EditorProps,
     IEditorSubmitter,
     IEditorTransformer,
-    NewCommentEditorProps,
     ValidationError,
 } from "./editor-types";
-import { SetStoreFunction, unwrap } from "solid-js/store";
 import { MegalodonPostStatus } from "./megalodon-status-transformer";
-import { KeyboardShortcutTextArea } from "../ui/keyboard-shortcut-text-field";
-import { KeyBindingMap } from "tinykeys";
-import { filesize } from "filesize";
-import { AddAttachmentMenu, AttachmentComponent } from "./attachments";
-import { BeforeLeaveEventArgs, useBeforeLeave } from "@solidjs/router";
-import { logger } from "~/logging";
+import { MarkdownTextField } from "../ui/markdown-text-field";
 
 export const MegalodonStatusEditorComponent: Component<
     EditorProps<MegalodonPostStatus, string, EditorDocument>
@@ -189,15 +172,6 @@ export class EditorComponentBase<TOutput, TDoc extends EditorDocument> {
         const config = this.config;
         const model = this.model;
 
-        const keyboardShortcuts: Accessor<KeyBindingMap> = createMemo(() => {
-            return {
-                "Control+Enter": () => {
-                    logger.info("pushed ctrl+enter");
-                    this.performAction("submit");
-                },
-            };
-        });
-
         const onPaste = (e: ClipboardEvent) => {
             logger.info("entering clipboard handler");
             if (e.clipboardData === null) {
@@ -233,18 +207,16 @@ export class EditorComponentBase<TOutput, TDoc extends EditorDocument> {
         return (
             <>
                 {/* body */}
-                <TextField class="border-none w-full flex-grow py-0 items-start justify-between">
-                    <KeyboardShortcutTextArea
-                        tabindex={0}
-                        placeholder={config.bodyPlaceholder}
+                <div class="border-none w-full flex-grow py-0 items-start justify-between">
+                    <MarkdownTextField
                         class="pbPostEditor resize-none overflow-hidden px-3 py-2 text-md border-2 rounded-md"
+                        placeholder={config.bodyPlaceholder}
                         disabled={this.busy()}
-                        value={model.document.body}
-                        setValue={(b: string) => model.set("body", b)}
-                        shortcuts={keyboardShortcuts()}
+                        onValueChange={(b) => model.set("body", b)}
                         onPaste={onPaste}
+                        onSubmit={() => this.performAction("submit")}
                     />
-                </TextField>
+                </div>
                 {/* tags */}
                 <TextField class="border-none w-full flex-shrink">
                     <TextFieldInput
