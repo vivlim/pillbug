@@ -1,5 +1,5 @@
 import { createEntityAdapter, createSlice, EntityId, isAnyOf, PayloadAction, UnknownAction } from "@reduxjs/toolkit";
-import { apiSlice, cachedMegalodonApiEndpoint, MegalodonCachedMethods, MegalodonCachedMethodsType } from "../api/apiSlice";
+import { apiSlice, cachedMegalodonApiEndpoint, MegalodonCachedMethods } from "../api/apiSlice";
 import { Status } from "megalodon/lib/src/entities/status";
 import { MegalodonInterface } from "megalodon";
 import { logger } from "~/logging";
@@ -87,22 +87,10 @@ function flatten(x: StatusNormalizationOutputs[]): StatusNormalizationOutputs {
 
 }
 
-/** Narrows down the type of the api response based on the method that was called. Mapped type -> union */
-type MegalodonApiResponse = {
-    [Property in keyof MegalodonInterface]: {
-        method: Property;
-        result: Awaited<ReturnType<MegalodonInterface[Property]>>;
-    }
-}[MegalodonCachedMethodsType]
-
-/** Pulls Post objects out of api responses. */
-function extractPostsFromApiResponse(response: MegalodonApiResponse): { posts: Post[], authors: Account[] } {
-    if (response.method === 'getHomeTimeline') {
-        response.method
-        return flatten(response.result.data.map(status => normalizeStatus(status)))
-    } else if (response.method === 'search') {
-        response.result.data
-
+//** Pulls Post objects out of api responses. */
+function extractPostsFromApiResponse<T extends typeof MegalodonCachedMethods[number]>(method: T, result: Awaited<ReturnType<MegalodonInterface[T]>>): { posts: Post[], authors: Account[] } {
+    if (method === 'getHomeTimeline') {
+        return flatten(result.data.map(status => normalizeStatus(status)))
     }
     return { posts: [], authors: [] }
 }
@@ -117,9 +105,9 @@ export const entityGraphSlice = createSlice({
     extraReducers(builder) {
         builder.addMatcher(cachedMegalodonApiEndpoint.matchFulfilled, (state, action) => {
             // When a cached api call is made, check if it contains any posts we can store.
-            const megalodonMethod = action.meta.arg.originalArgs._method
+            const megalodonMethod = action.meta.arg.originalArgs.method
             // TODO: If the posts are already stored, just update those instead of re-normalizing them
-            const extractedPosts = extractPostsFromApiResponse({ method: megalodonMethod, result: action.payload })
+            const extractedPosts = extractPostsFromApiResponse(megalodonMethod, action.payload)
             postAdapter.setAll(state.posts, extractedPosts.posts)
             userAdapter.setAll(state.users, extractedPosts.authors)
         })
