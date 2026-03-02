@@ -39,7 +39,6 @@
         "@codemirror/view": "^6.34.2",
         "@fontsource/atkinson-hyperlegible": "^5.1.0",
         "@kobalte/core": "^0.13.6",
-        "@reduxjs/toolkit": "^2.5.0",
         "@solid-primitives/storage": "^4.2.1",
         "@solidjs/router": "^0.14.5",
         "blurhash": "^2.0.5",
