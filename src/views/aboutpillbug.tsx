@@ -108,6 +108,10 @@ const AboutPillbugView: Component = () => {
                         probably encounter bugs.
                     </p>
                     <p>
+                        pillbug stores all of its state in your browser's local storage, there is no backend server.
+                    </p>
+
+                    <p>
                         For a list of third-party dependencies,{" "}
                         <A href="/about/details" class="underline">
                             click here
