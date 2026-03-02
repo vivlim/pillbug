@@ -103,9 +103,15 @@ export const PreprocessedPostUserBar: Component<{
     sharedStatus?: Status | undefined;
 }> = (props) => {
     const userHref = `/user/${props.status.account.acct}`;
-    const postHref = `/post/${props.status.id}`;
     const status = props.status;
     const shared = props.sharedStatus ?? status.reblog ?? null;
+    const postHref = createMemo(() => {
+        const s = props.status;
+        if (s.reblog) {
+            return `/post/${s.reblog.id}`;
+        }
+        return `/post/${s.id}`;
+    });
 
     return (
         <div class="pbPostUserBar pbUserBar border-b items-center flex-auto">
@@ -137,7 +143,7 @@ export const PreprocessedPostUserBar: Component<{
                     </A>
                 </ContextMenuTrigger>
             </UserContextMenu>
-            <A href={postHref} class="postTimestamp pbSubtleText text-xs">
+            <A href={postHref()} class="postTimestamp pbSubtleText text-xs">
                 <Timestamp ts={DateTime.fromISO(status.created_at)} />
             </A>
             <Show when={shared !== null}>
@@ -266,7 +272,7 @@ export const PreprocessedPostBody: Component<PreprocessedPostBodyProps> = (
                             onClick={() => {
                                 const prevValue = expandButtonClicked();
                                 setExpandButtonClicked(!prevValue);
-                                if (prevValue && expandButtonRef) {
+                                if (prevValue && expandButtonRef!) {
                                     // After collapsing, make sure the button is in view
                                     logger.info("scrolling");
 
@@ -334,7 +340,7 @@ async function toggleLike(
     return res.data;
 }
 
-async function toggleBookmark(
+export async function toggleBookmark(
     client: MegalodonInterface,
     status: Status
 ): Promise<Status> {
@@ -357,6 +363,15 @@ const ShareButton: Component<ShareButtonProps> = (props) => {
     const navigate = useNavigate();
     const auth = useAuth();
     const [status, setStatus] = createSignal<string>("");
+    const postId = createMemo(() => {
+        const s = props.status;
+        if (s.reblog) {
+            return s.reblog.id;
+        }
+        return s.id;
+    });
+
+
     return (
         <>
             <span>{status()}</span>
@@ -372,7 +387,7 @@ const ShareButton: Component<ShareButtonProps> = (props) => {
                                 setStatus("sharing...");
                                 const result =
                                     await auth.assumeSignedIn.client.reblogStatus(
-                                        props.status.id
+                                        postId()
                                     );
                                 unwrapResponse(result);
                                 setStatus("shared!");
@@ -391,7 +406,7 @@ const ShareButton: Component<ShareButtonProps> = (props) => {
                     <DropdownMenuItem
                         class="py-4 md:py-2"
                         onClick={() => {
-                            navigate(`/share/${props.status.id}`);
+                            navigate(`/share/${postId()}`);
                         }}
                     >
                         <IoChatboxEllipsesOutline class="size-6 mr-2" />
@@ -430,9 +445,30 @@ export const PreprocessedPost: Component<PreprocessedPostProps> = (
     const isLiked = createMemo(() => status().favourited ?? false);
 
     const userHref = `/user/${status().account.acct}`;
-    const postHref = `/post/${status().id}`;
+    // Post with boost dereferenced, if it is applicable
+    const dereferencedPost = createMemo(() => {
+        const s = status();
+        if (s.reblog) {
+            return s.reblog;
+        }
+        return s;
+    });
+    const isBookmarked = createMemo(
+        () => dereferencedPost().bookmarked ?? false
+    );
+
+    const postHref = createMemo(() => {
+        return `/post/${dereferencedPost().id}`;
+    });
 
     const postOriginalUrl = createMemo(() => {
+        if (postData.status.status.reblog) {
+            let rburl = postData.status.status.reblog.url;
+            if (rburl === undefined || rburl === "") {
+                rburl = postData.status.status.reblog.uri;
+            }
+            return rburl;
+        }
         let url = postData.status.status.url;
         if (url === undefined || url === "") {
             url = postData.status.status.uri;
@@ -471,7 +507,7 @@ export const PreprocessedPost: Component<PreprocessedPostProps> = (
                     <PreprocessedPostFooter>
                         <ContextMenu>
                             <ContextMenuTrigger class="flex-auto">
-                                <A href={postHref}>{replyCount()} replies</A>
+                                <A href={postHref()}>{replyCount()} replies</A>
                             </ContextMenuTrigger>
                             <ContextMenuContent>
                                 <ContextMenuItem
@@ -506,18 +542,28 @@ export const PreprocessedPost: Component<PreprocessedPostProps> = (
                                             const updated =
                                                 await toggleBookmark(
                                                     auth.assumeSignedIn.client,
-                                                    status()
+                                                    dereferencedPost()
                                                 );
                                             setDisableAsyncButtons(false);
-                                            updateStatus(updated);
+
+                                            if (status().reblog) {
+                                                // patch the bookmarked status into the reblog
+                                                let newStatus: Status = {
+                                                    ...status(),
+                                                };
+                                                newStatus.reblog = updated;
+                                                updateStatus(newStatus);
+                                            } else {
+                                                updateStatus(updated);
+                                            }
                                         }}
                                     >
                                         <Switch>
-                                            <Match when={status().bookmarked}>
+                                            <Match when={isBookmarked()}>
                                                 <IoBookmark class="size-6 mr-2" />
                                                 unbookmark
                                             </Match>
-                                            <Match when={!status().bookmarked}>
+                                            <Match when={!isBookmarked()}>
                                                 <IoBookmarkOutline class="size-6 mr-2" />
                                                 bookmark
                                             </Match>

@@ -129,3 +129,46 @@ export const defaultPostPageRules: FeedRuleProperties[] = [
         { type: "applyLabel", params: { label: "pillbug" } }
     )
 ]
+
+export const defaultBookmarksRules: FeedRuleProperties[] = [
+    new FeedRuleProperties(
+        "attach linked ancestor posts to all posts when available",
+        {
+            all: [
+                {
+                    fact: "id",
+                    operator: "notEqual",
+                    value: null,
+                }
+            ]
+        },
+        { type: "attachLinked" }
+    ),
+    new FeedRuleProperties(
+        "label replies",
+        {
+            all: [
+                {
+                    fact: "in_reply_to_id",
+                    operator: "notEqual",
+                    value: null,
+                }
+            ]
+        },
+        { type: "applyLabel", params: { label: "reply" } }
+    ),
+    new FeedRuleProperties(
+        "label posts written with pillbug",
+        {
+            all: [
+                {
+                    fact: "application",
+                    operator: "equal",
+                    path: "$.name",
+                    value: "pillbug",
+                }
+            ]
+        },
+        { type: "applyLabel", params: { label: "posted with pillbug" } }
+    )
+]

@@ -4,7 +4,7 @@ import {
 import { useAuth } from "~/auth/auth-manager";
 import { FeedComponent } from "~/components/feed";
 import { FeedManifest } from "~/components/feed/feed-engine";
-import { defaultHomeFeedRules } from "~/components/feed/preset-rules";
+import { defaultBookmarksRules } from "~/components/feed/preset-rules";
 import { BookmarksFeedSource } from "~/components/feed/sources/bookmarks";
 import { useSettings } from "~/lib/settings-manager";
 
@@ -12,7 +12,7 @@ export const BookmarksFacet: Component = () => {
     const feedManifest: FeedManifest = {
         source: new BookmarksFeedSource(useAuth(), useSettings()),
         fetchReferencedPosts: 5,
-        postsPerPage: 10,
+        postsPerPage: 20,
         postsToFetchPerBatch: 40,
     };
 
@@ -20,8 +20,8 @@ export const BookmarksFacet: Component = () => {
         <>
             <FeedComponent
                 manifest={feedManifest}
-                rules={defaultHomeFeedRules}
-                initialOptions={{ limit: 25 }}
+                rules={defaultBookmarksRules}
+                initialOptions={{ limit: 40 }}
             />
         </>
     );
