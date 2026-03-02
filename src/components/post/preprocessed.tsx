@@ -542,11 +542,12 @@ export const PreprocessedPost: Component<PreprocessedPostProps> = (
                                             const updated =
                                                 await toggleBookmark(
                                                     auth.assumeSignedIn.client,
-                                                    status()
+                                                    dereferencedPost()
                                                 );
                                             setDisableAsyncButtons(false);
 
                                             if (status().reblog) {
+                                                // patch the bookmarked status into the reblog
                                                 let newStatus: Status = {
                                                     ...status(),
                                                 };
