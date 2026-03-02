@@ -103,9 +103,15 @@ export const PreprocessedPostUserBar: Component<{
     sharedStatus?: Status | undefined;
 }> = (props) => {
     const userHref = `/user/${props.status.account.acct}`;
-    const postHref = `/post/${props.status.id}`;
     const status = props.status;
     const shared = props.sharedStatus ?? status.reblog ?? null;
+    const postHref = createMemo(() => {
+        const s = props.status;
+        if (s.reblog) {
+            return `/post/${s.reblog.id}`;
+        }
+        return `/post/${s.id}`;
+    });
 
     return (
         <div class="pbPostUserBar pbUserBar border-b items-center flex-auto">
@@ -137,7 +143,7 @@ export const PreprocessedPostUserBar: Component<{
                     </A>
                 </ContextMenuTrigger>
             </UserContextMenu>
-            <A href={postHref} class="postTimestamp pbSubtleText text-xs">
+            <A href={postHref()} class="postTimestamp pbSubtleText text-xs">
                 <Timestamp ts={DateTime.fromISO(status.created_at)} />
             </A>
             <Show when={shared !== null}>
@@ -430,9 +436,22 @@ export const PreprocessedPost: Component<PreprocessedPostProps> = (
     const isLiked = createMemo(() => status().favourited ?? false);
 
     const userHref = `/user/${status().account.acct}`;
-    const postHref = `/post/${status().id}`;
+    const postHref = createMemo(() => {
+        const s = status();
+        if (s.reblog) {
+            return `/post/${s.reblog.id}`;
+        }
+        return `/post/${s.id}`;
+    });
 
     const postOriginalUrl = createMemo(() => {
+        if (postData.status.status.reblog) {
+            let rburl = postData.status.status.reblog.url;
+            if (rburl === undefined || rburl === "") {
+                rburl = postData.status.status.reblog.uri;
+            }
+            return rburl;
+        }
         let url = postData.status.status.url;
         if (url === undefined || url === "") {
             url = postData.status.status.uri;
@@ -471,7 +490,7 @@ export const PreprocessedPost: Component<PreprocessedPostProps> = (
                     <PreprocessedPostFooter>
                         <ContextMenu>
                             <ContextMenuTrigger class="flex-auto">
-                                <A href={postHref}>{replyCount()} replies</A>
+                                <A href={postHref()}>{replyCount()} replies</A>
                             </ContextMenuTrigger>
                             <ContextMenuContent>
                                 <ContextMenuItem
