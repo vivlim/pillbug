@@ -12,7 +12,7 @@ export const BookmarksFacet: Component = () => {
     const feedManifest: FeedManifest = {
         source: new BookmarksFeedSource(useAuth(), useSettings()),
         fetchReferencedPosts: 5,
-        postsPerPage: 10,
+        postsPerPage: 20,
         postsToFetchPerBatch: 40,
     };
 
@@ -21,7 +21,7 @@ export const BookmarksFacet: Component = () => {
             <FeedComponent
                 manifest={feedManifest}
                 rules={defaultBookmarksRules}
-                initialOptions={{ limit: 25 }}
+                initialOptions={{ limit: 40 }}
             />
         </>
     );
