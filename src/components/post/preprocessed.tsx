@@ -266,7 +266,7 @@ export const PreprocessedPostBody: Component<PreprocessedPostBodyProps> = (
                             onClick={() => {
                                 const prevValue = expandButtonClicked();
                                 setExpandButtonClicked(!prevValue);
-                                if (prevValue && expandButtonRef) {
+                                if (prevValue && expandButtonRef!) {
                                     // After collapsing, make sure the button is in view
                                     logger.info("scrolling");
 
@@ -334,7 +334,7 @@ async function toggleLike(
     return res.data;
 }
 
-async function toggleBookmark(
+export async function toggleBookmark(
     client: MegalodonInterface,
     status: Status
 ): Promise<Status> {
