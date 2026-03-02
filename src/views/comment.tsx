@@ -3,8 +3,10 @@ import { Status } from "megalodon/lib/src/entities/status";
 import {
     createMemo,
     createSignal,
+    Match,
     Show,
     splitProps,
+    Switch,
     type Component,
 } from "solid-js";
 import HtmlSandbox, { HtmlSandboxSpan } from "./htmlsandbox";
@@ -26,6 +28,8 @@ import { NewCommentEditor } from "~/components/editor/comments";
 import { IconProps } from "solid-icons";
 import { cn } from "~/lib/utils";
 import {
+    IoBookmark,
+    IoBookmarkOutline,
     IoEllipsisHorizontal,
     IoHeart,
     IoHeartOutline,
@@ -47,21 +51,27 @@ import { MenuButton } from "~/components/ui/menubutton";
 import { unwrapResponse } from "~/lib/clientUtil";
 import { UserContextMenu } from "~/components/post-embedded/user-link";
 import { ProcessedStatus } from "~/components/feed/feed-engine";
+import {
+    toggleBookmark,
+    wrapUnprocessedStatus,
+} from "~/components/post/preprocessed";
 export type CommentProps = {
     status: ProcessedStatus;
 };
 
 export const CommentPostComponent: Component<CommentProps> = (postData) => {
-    const [status, updateStatus] = createSignal(postData.status);
-    const isLiked = createMemo(() => status().status.favourited ?? false);
+    // const [status, updateStatus] = createSignal(postData.status);
+    const [status, updateStatus] = createSignal(postData.status.status);
+    const isLiked = createMemo(() => status().favourited ?? false);
     const auth = useAuth();
     const settings = useSettings();
+    const [disableAsyncButtons, setDisableAsyncButtons] = createSignal(false);
 
     const [showingReplyBox, setShowingReplyBox] = createSignal<boolean>(false);
     const [showRaw, setShowRaw] = createSignal<boolean>(false);
 
-    const userHref = createMemo(() => `/user/${status().status.account.acct}`);
-    const postHref = createMemo(() => `/post/${status().status.id}`);
+    const userHref = createMemo(() => `/user/${status().account.acct}`);
+    const postHref = createMemo(() => `/post/${status().id}`);
 
     const postOriginalUrl = createMemo(() => {
         let url = postData.status.status.url;
@@ -76,12 +86,12 @@ export const CommentPostComponent: Component<CommentProps> = (postData) => {
         <>
             <div class="pbCommentUserBar pbUserBar border-b items-center flex-auto">
                 <UserContextMenu
-                    account={status().status.account}
-                    href={status().status.account.url}
+                    account={status().account}
+                    href={status().account.url}
                 >
                     <ContextMenuTrigger class="pbContents">
                         <AvatarLink
-                            user={status().status.account}
+                            user={status().account}
                             imgClass="size-8"
                             class=""
                             linkClass="authorAvatar"
@@ -91,33 +101,31 @@ export const CommentPostComponent: Component<CommentProps> = (postData) => {
                                 href={userHref()}
                                 class="authorDisplayName font-bold whitespace-nowrap"
                             >
-                                {status().status.account.display_name}
+                                {status().account.display_name}
                             </A>
                             <VisibilityIcon
                                 class="visibilityIcon size-4"
-                                value={status().status.visibility}
+                                value={status().visibility}
                             />
                         </div>
                         <A href={userHref()} class="authorAcct pbSubtleText">
-                            {status().status.account.acct}
+                            {status().account.acct}
                         </A>
                     </ContextMenuTrigger>
                 </UserContextMenu>
                 <A href={postHref()} class="postTimestamp pbSubtleText text-xs">
-                    <Timestamp
-                        ts={DateTime.fromISO(status().status.created_at)}
-                    />
+                    <Timestamp ts={DateTime.fromISO(status().created_at)} />
                 </A>
             </div>
             <div class="md:px-3 pt-2">
-                <ContentGuard warnings={status().status.spoiler_text}>
+                <ContentGuard warnings={status().spoiler_text}>
                     <HtmlSandbox
-                        html={status().status.content}
-                        emoji={status().status.emojis}
+                        html={status().content}
+                        emoji={status().emojis}
                     />
                     <ImageBox
-                        attachments={status().status.media_attachments}
-                        sensitive={status().status.sensitive}
+                        attachments={status().media_attachments}
+                        sensitive={status().sensitive}
                     />
                 </ContentGuard>
             </div>
@@ -138,15 +146,14 @@ export const CommentPostComponent: Component<CommentProps> = (postData) => {
                             // copy the status but with like toggled
                             // instead of waiting for the api result
                             const newStatus = { ...status() };
-                            newStatus.status = { ...newStatus.status };
-                            const newLikeStatus = !newStatus.status.favourited;
-                            newStatus.status.favourited = newLikeStatus;
+                            const newLikeStatus = !newStatus.favourited;
+                            newStatus.favourited = newLikeStatus;
 
                             updateStatus(newStatus);
 
                             const updated = await toggleLike(
                                 auth.assumeSignedIn.client,
-                                newStatus.status.id,
+                                newStatus.id,
                                 newLikeStatus
                             );
                         }}
@@ -176,6 +183,31 @@ export const CommentPostComponent: Component<CommentProps> = (postData) => {
                             <IoLinkOutline class="size-6 mr-2" />
                             view on origin
                         </DropdownMenuItem>
+                        <Show when={auth.signedIn}>
+                            <DropdownMenuItem
+                                class="py-4 md:py-2"
+                                onClick={async () => {
+                                    setDisableAsyncButtons(true);
+                                    const updated = await toggleBookmark(
+                                        auth.assumeSignedIn.client,
+                                        status()
+                                    );
+                                    setDisableAsyncButtons(false);
+                                    updateStatus(updated);
+                                }}
+                            >
+                                <Switch>
+                                    <Match when={status().bookmarked}>
+                                        <IoBookmark class="size-6 mr-2" />
+                                        unbookmark
+                                    </Match>
+                                    <Match when={!status().bookmarked}>
+                                        <IoBookmarkOutline class="size-6 mr-2" />
+                                        bookmark
+                                    </Match>
+                                </Switch>
+                            </DropdownMenuItem>
+                        </Show>
 
                         <Show
                             when={
@@ -240,7 +272,7 @@ export const CommentPostComponent: Component<CommentProps> = (postData) => {
             </Show>
             <Show when={showingReplyBox()}>
                 <div>
-                    <NewCommentEditor parentStatus={status().status} />
+                    <NewCommentEditor parentStatus={status()} />
                 </div>
             </Show>
         </>
