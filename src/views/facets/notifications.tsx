@@ -127,6 +127,15 @@ export const GroupedNotificationComponent: Component<{
 }> = (props) => {
     const group = props.kindGroup.group;
     const notifications = props.kindGroup.items;
+    if (notifications.length === 0) {
+        // Seems like this might be what's happening in #122, show a message so we can tell
+        return (
+            <>
+                <div class="pbNotification">(empty notification group)</div>
+            </>
+        );
+    }
+
     const [showRaw, setShowRaw] = createSignal<boolean>(false);
     const status = notifications[0].status;
 
