@@ -17,10 +17,12 @@ import {
 } from "./ui/card";
 import { Button } from "./ui/button";
 import LoginView from "~/views/login";
+import { RawDataViewer } from "./raw-data";
 
 export interface ErrorBoxProps {
     error: any;
     description: string;
+    data?: any;
 }
 
 export const ErrorBox: Component<ErrorBoxProps> = (props) => {
@@ -81,6 +83,7 @@ export const ErrorBox: Component<ErrorBoxProps> = (props) => {
                             <InnerErrorBox
                                 error={props.error}
                                 description={props.description}
+                                data={props.data}
                             ></InnerErrorBox>
                         </details>
                     </CardFooter>
@@ -91,6 +94,7 @@ export const ErrorBox: Component<ErrorBoxProps> = (props) => {
                     <InnerErrorBox
                         error={props.error}
                         description={props.description}
+                        data={props.data}
                     ></InnerErrorBox>
                 </div>
             </Match>
@@ -98,15 +102,29 @@ export const ErrorBox: Component<ErrorBoxProps> = (props) => {
                 <Card>
                     <CardTitle>{props.description}</CardTitle>
                     <CardContent>No error info available</CardContent>
+                    {/*this is duplicated from below, consider popping this into a separate component.*/}
+                    <Show when={props.data !== undefined && props.data != null}>
+                        <div>
+                            <details>
+                                <summary>
+                                    click here to see data that may be related
+                                    to the failure (may contain personal info)
+                                </summary>
+                                <RawDataViewer data={props.data} show={true} />
+                            </details>
+                        </div>
+                    </Show>
                 </Card>
             </Match>
         </Switch>
     );
 };
 
-const InnerErrorBox: Component<{ error: Error; description: string }> = (
-    props
-) => {
+const InnerErrorBox: Component<{
+    error: Error;
+    description: string;
+    data?: any;
+}> = (props) => {
     const [showLoginView, setShowLoginView] = createSignal<boolean>(false);
 
     return (
@@ -121,11 +139,22 @@ const InnerErrorBox: Component<{ error: Error; description: string }> = (
                         <TextField>
                             <TextFieldTextArea
                                 readOnly={true}
-                                class="h-[40vh]"
+                                class="h-[30vh]"
                                 value={props.error.stack}
                             ></TextFieldTextArea>
                         </TextField>
                     </div>
+                    <Show when={props.data !== undefined && props.data != null}>
+                        <div>
+                            <details>
+                                <summary>
+                                    click here to see data that may be related
+                                    to the failure (may contain personal info)
+                                </summary>
+                                <RawDataViewer data={props.data} show={true} />
+                            </details>
+                        </div>
+                    </Show>
                     <div>
                         <a
                             href="https://github.com/vivlim/pillbug/issues"
