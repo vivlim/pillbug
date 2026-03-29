@@ -85,6 +85,7 @@ import {
 import { logger } from "~/logging";
 import { UserContextMenu } from "../post-embedded/user-link";
 import "./post.css";
+import ErrorBox from "../error";
 
 export type PreprocessedPostProps = {
     class?: string;
@@ -115,59 +116,72 @@ export const PreprocessedPostUserBar: Component<{
 
     return (
         <div class="pbPostUserBar pbUserBar border-b items-center flex-auto">
-            <Show when={status.pinned}>
-                <BsPinAngleFill aria-label="Pinned post" class="size-4" />
-            </Show>
-            <UserContextMenu account={status.account} href={status.account.url}>
-                <ContextMenuTrigger class="pbContents">
-                    <AvatarLink
-                        user={status.account}
-                        imgClass="size-8"
-                        class=""
-                        linkClass="authorAvatar"
+            <ErrorBoundary
+                fallback={(e) => (
+                    <ErrorBox
+                        error={e}
+                        description="Failed to show post user bar"
+                        data={props}
                     />
-                    <div class="pbContents">
-                        <A
-                            href={userHref}
-                            class="authorDisplayName font-bold whitespace-nowrap"
-                        >
-                            {status.account.display_name}
-                        </A>
-                        <VisibilityIcon
-                            class="visibilityIcon size-4"
-                            value={status.visibility}
-                        />
-                    </div>
-                    <A href={userHref} class="authorAcct pbSubtleText">
-                        {status.account.acct}
-                    </A>
-                </ContextMenuTrigger>
-            </UserContextMenu>
-            <A href={postHref()} class="postTimestamp pbSubtleText text-xs">
-                <Timestamp ts={DateTime.fromISO(status.created_at)} />
-            </A>
-            <Show when={shared !== null}>
+                )}
+            >
+                <Show when={status.pinned}>
+                    <BsPinAngleFill aria-label="Pinned post" class="size-4" />
+                </Show>
                 <UserContextMenu
-                    account={shared!.account}
-                    href={shared!.account.url}
+                    account={status.account}
+                    href={status.account.url}
                 >
-                    <ContextMenuTrigger class="pbContents originalAuthor">
-                        <FaSolidArrowsRotate class="sharedIcon" />
-                        <A
-                            href={`/user/${shared!.account.acct}`}
-                            class="originalAuthorDisplayName font-bold whitespace-nowrap"
-                        >
-                            {shared!.account.display_name}
-                        </A>
-                        <A
-                            href={`/user/${shared!.account.acct}`}
-                            class="originalAuthorAcct pbSubtleText whitespace-nowrap"
-                        >
-                            {shared!.account.acct}
+                    <ContextMenuTrigger class="pbContents">
+                        <AvatarLink
+                            user={status.account}
+                            imgClass="size-8"
+                            class=""
+                            linkClass="authorAvatar"
+                        />
+                        <div class="pbContents">
+                            <A
+                                href={userHref}
+                                class="authorDisplayName font-bold whitespace-nowrap"
+                            >
+                                {status.account.display_name}
+                            </A>
+                            <VisibilityIcon
+                                class="visibilityIcon size-4"
+                                value={status.visibility}
+                            />
+                        </div>
+                        <A href={userHref} class="authorAcct pbSubtleText">
+                            {status.account.acct}
                         </A>
                     </ContextMenuTrigger>
                 </UserContextMenu>
-            </Show>
+                <A href={postHref()} class="postTimestamp pbSubtleText text-xs">
+                    <Timestamp ts={DateTime.fromISO(status.created_at)} />
+                </A>
+                <Show when={shared !== null}>
+                    <UserContextMenu
+                        account={shared!.account}
+                        href={shared!.account.url}
+                    >
+                        <ContextMenuTrigger class="pbContents originalAuthor">
+                            <FaSolidArrowsRotate class="sharedIcon" />
+                            <A
+                                href={`/user/${shared!.account.acct}`}
+                                class="originalAuthorDisplayName font-bold whitespace-nowrap"
+                            >
+                                {shared!.account.display_name}
+                            </A>
+                            <A
+                                href={`/user/${shared!.account.acct}`}
+                                class="originalAuthorAcct pbSubtleText whitespace-nowrap"
+                            >
+                                {shared!.account.acct}
+                            </A>
+                        </ContextMenuTrigger>
+                    </UserContextMenu>
+                </Show>
+            </ErrorBoundary>
         </div>
     );
 };
@@ -231,68 +245,91 @@ export const PreprocessedPostBody: Component<PreprocessedPostBodyProps> = (
 
     return (
         <>
-            <CardContent class={cn(props.class)} {...rest}>
-                <Suspense>
-                    <div
-                        class={
-                            heightLimited() && !expandButtonClicked()
-                                ? "pbPostHeightLimiter"
-                                : ""
-                        }
-                        ref={setCollapser}
-                    >
-                        <div ref={setCollapsee}>
-                            <ContentGuard warnings={props.status.spoiler_text}>
-                                <div class="p-3">
-                                    <HtmlSandbox
-                                        html={props.status.content}
-                                        emoji={props.status.emojis}
-                                    />
-                                </div>
-                                <ImageBox
-                                    attachments={props.status.media_attachments}
-                                    sensitive={props.status.sensitive}
-                                />
-                                <PostPreviewCard
-                                    status={props.status}
-                                    linkedAncestors={
-                                        props.processedStatus?.linkedAncestors
-                                    }
-                                />
-                                <MediaAttachments
-                                    attachments={props.status.media_attachments}
-                                    sensitive={props.status.sensitive}
-                                />
-                            </ContentGuard>
-                        </div>
-                    </div>
-                    <Show when={expandButtonVisible() || expandButtonClicked()}>
-                        <Button
-                            ref={expandButtonRef!}
-                            onClick={() => {
-                                const prevValue = expandButtonClicked();
-                                setExpandButtonClicked(!prevValue);
-                                if (prevValue && expandButtonRef!) {
-                                    // After collapsing, make sure the button is in view
-                                    logger.info("scrolling");
-
-                                    setTimeout(() => {
-                                        expandButtonRef.scrollIntoView({
-                                            behavior: prefersReducedMotion()
-                                                ? "instant"
-                                                : "smooth",
-                                            block: "center",
-                                        });
-                                    }, 50);
-                                }
-                            }}
-                            class="w-full"
+            <ErrorBoundary
+                fallback={(e) => (
+                    <ErrorBox
+                        error={e}
+                        description="Failed to show post content"
+                        data={props}
+                    />
+                )}
+            >
+                <CardContent class={cn(props.class)} {...rest}>
+                    <Suspense>
+                        <div
+                            class={
+                                heightLimited() && !expandButtonClicked()
+                                    ? "pbPostHeightLimiter"
+                                    : ""
+                            }
+                            ref={setCollapser}
                         >
-                            {expandButtonClicked() ? "show less" : "show more"}
-                        </Button>
-                    </Show>
-                </Suspense>
-            </CardContent>
+                            <div ref={setCollapsee}>
+                                <ContentGuard
+                                    warnings={props.status.spoiler_text}
+                                >
+                                    <div class="p-3">
+                                        <HtmlSandbox
+                                            html={props.status.content}
+                                            emoji={props.status.emojis}
+                                        />
+                                    </div>
+                                    <ImageBox
+                                        attachments={
+                                            props.status.media_attachments
+                                        }
+                                        sensitive={props.status.sensitive}
+                                    />
+                                    <PostPreviewCard
+                                        status={props.status}
+                                        linkedAncestors={
+                                            props.processedStatus
+                                                ?.linkedAncestors
+                                        }
+                                    />
+                                    <MediaAttachments
+                                        attachments={
+                                            props.status.media_attachments
+                                        }
+                                        sensitive={props.status.sensitive}
+                                    />
+                                </ContentGuard>
+                            </div>
+                        </div>
+                        <Show
+                            when={
+                                expandButtonVisible() || expandButtonClicked()
+                            }
+                        >
+                            <Button
+                                ref={expandButtonRef!}
+                                onClick={() => {
+                                    const prevValue = expandButtonClicked();
+                                    setExpandButtonClicked(!prevValue);
+                                    if (prevValue && expandButtonRef!) {
+                                        // After collapsing, make sure the button is in view
+                                        logger.info("scrolling");
+
+                                        setTimeout(() => {
+                                            expandButtonRef.scrollIntoView({
+                                                behavior: prefersReducedMotion()
+                                                    ? "instant"
+                                                    : "smooth",
+                                                block: "center",
+                                            });
+                                        }, 50);
+                                    }
+                                }}
+                                class="w-full"
+                            >
+                                {expandButtonClicked()
+                                    ? "show less"
+                                    : "show more"}
+                            </Button>
+                        </Show>
+                    </Suspense>
+                </CardContent>
+            </ErrorBoundary>
         </>
     );
 };
