@@ -209,12 +209,22 @@ export const FeedComponentPostList: Component<{
                     <For each={posts()?.posts}>
                         {(status, index) => (
                             <>
-                                <Show when={!status.hide}>
-                                    <PreprocessedPost
-                                        status={status}
-                                        limitInitialHeight={true}
-                                    />
-                                </Show>
+                                <ErrorBoundary
+                                    fallback={(e) => (
+                                        <ErrorBox
+                                            error={e}
+                                            description="Failed to show a post"
+                                            data={status}
+                                        />
+                                    )}
+                                >
+                                    <Show when={!status.hide}>
+                                        <PreprocessedPost
+                                            status={status}
+                                            limitInitialHeight={true}
+                                        />
+                                    </Show>
+                                </ErrorBoundary>
                             </>
                         )}
                     </For>

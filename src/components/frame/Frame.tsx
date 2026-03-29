@@ -127,11 +127,18 @@ const FrameTopBar: Component = (props) => {
                                 <Menubar>
                                     <MenubarMenu>
                                         <MenubarTrigger>
-                                            <CurrentAccountWithAvatar
-                                                signInState={
-                                                    auth.assumeSignedIn.state
-                                                }
-                                            />
+                                            <ErrorBoundary
+                                                fallback={(e) => (
+                                                    <span>account picker</span>
+                                                )}
+                                            >
+                                                <CurrentAccountWithAvatar
+                                                    signInState={
+                                                        auth.assumeSignedIn
+                                                            .state
+                                                    }
+                                                />
+                                            </ErrorBoundary>
                                         </MenubarTrigger>
                                         <MenubarContent>
                                             <For each={auth.getAccountList()}>
@@ -143,9 +150,18 @@ const FrameTopBar: Component = (props) => {
                                                             )
                                                         }
                                                     >
-                                                        <AvailableAccountWithAvatar
-                                                            account={a}
-                                                        />
+                                                        <ErrorBoundary
+                                                            fallback={(e) => (
+                                                                <span>
+                                                                    {a.fullAcct ??
+                                                                        "unknown account"}
+                                                                </span>
+                                                            )}
+                                                        >
+                                                            <AvailableAccountWithAvatar
+                                                                account={a}
+                                                            />
+                                                        </ErrorBoundary>
                                                     </MenubarItem>
                                                 )}
                                             </For>
@@ -286,26 +302,39 @@ const AppFrame: Component<{ children: JSX.Element }> = (props) => {
             }}
         >
             <>
-                <DynamicStyle />
+                <ErrorBoundary
+                    fallback={(e) => <div>failed to render dynamic style</div>}
+                >
+                    <DynamicStyle />
+                </ErrorBoundary>
                 <FrameTopBar />
-                <LayoutColumnsRoot>
-                    <LayoutLeftColumn />
-                    <LayoutMainColumn>
-                        <ErrorBoundary
-                            fallback={(e) => (
-                                <ErrorBox
-                                    error={e}
-                                    description={`failed to show page`}
-                                />
-                            )}
-                        >
-                            {props.children}
-                        </ErrorBoundary>
-                    </LayoutMainColumn>
-                </LayoutColumnsRoot>
-                <LayoutLeftColumnPortal>
-                    <FacetNavigation />
-                </LayoutLeftColumnPortal>
+                <ErrorBoundary
+                    fallback={(e) => (
+                        <ErrorBox
+                            error={e}
+                            description={`failed to show page`}
+                        />
+                    )}
+                >
+                    <LayoutColumnsRoot>
+                        <LayoutLeftColumn />
+                        <LayoutMainColumn>
+                            <ErrorBoundary
+                                fallback={(e) => (
+                                    <ErrorBox
+                                        error={e}
+                                        description={`failed to show page (main column)`}
+                                    />
+                                )}
+                            >
+                                {props.children}
+                            </ErrorBoundary>
+                        </LayoutMainColumn>
+                    </LayoutColumnsRoot>
+                    <LayoutLeftColumnPortal>
+                        <FacetNavigation />
+                    </LayoutLeftColumnPortal>
+                </ErrorBoundary>
             </>
         </FrameContext.Provider>
     );
