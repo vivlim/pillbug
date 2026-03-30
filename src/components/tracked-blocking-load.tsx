@@ -17,6 +17,7 @@ import {
     LoadingOperation,
 } from "~/lib/blocking-load";
 import { ErrorBox } from "./error";
+import { LoadingAnimation } from "./loading-animation";
 
 export interface ErrorBoxProps {
     error: any;
@@ -70,7 +71,7 @@ const LoadOperationComponent: Component<{ operation: LoadingOperation }> = (
                     <Match when={props.operation.error !== undefined}>❌</Match>
                     <Match when={props.operation.complete}>✔️</Match>
                     <Match when={!props.operation.complete}>
-                        <span class="animate-spin">⏳</span>
+                        <LoadingAnimation />
                     </Match>
                 </Switch>
             </span>

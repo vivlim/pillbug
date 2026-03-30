@@ -31,6 +31,8 @@ import { createStore } from "solid-js/store";
 import { PageNav } from "../ui/page-footer";
 import { useSettings } from "~/lib/settings-manager";
 import { logger } from "~/logging";
+import { LoadingAnimation } from "../loading-animation";
+import { Card } from "../ui/card";
 
 export type FeedComponentProps = {
     rules: FeedRuleProperties[];
@@ -81,7 +83,15 @@ export const FeedComponent: Component<FeedComponentProps> = (props) => {
                 <ErrorBox error={e} description="failed to load posts" />
             )}
         >
-            <Show when={engine()} fallback={"loading"}>
+            <Show
+                when={engine()}
+                fallback={
+                    <div>
+                        <LoadingAnimation />
+                        loading engine
+                    </div>
+                }
+            >
                 <FeedComponentPostList
                     engine={engine()!}
                     onLoaded={props.onLoaded}
@@ -199,6 +209,11 @@ export const FeedComponentPostList: Component<{
             )}
         >
             <Switch>
+                <Match when={posts.loading}>
+                    <Card>
+                        <LoadingAnimation text="pillbug is loading posts" />
+                    </Card>
+                </Match>
                 <Match when={!posts.loading}>
                     <Show when={posts()?.error !== undefined}>
                         <div>

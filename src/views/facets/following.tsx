@@ -49,6 +49,7 @@ import { FeedManifest } from "~/components/feed/feed-engine";
 import { UserFeedSource } from "~/components/feed/sources/userfeed";
 import { logger } from "~/logging";
 import { useAccountStore } from "~/lib/following-accounts-store";
+import { LoadingAnimation } from "~/components/loading-animation";
 
 interface AccountInfo {
     acct: string;
@@ -371,6 +372,9 @@ const FollowingFacet: Component = () => {
                 </ul>
 
                 <Switch>
+                    <Match when={fetching()}>
+                        <LoadingAnimation />
+                    </Match>
                     <Match when={facetStore.followingAccountCount < 0}>
                         loading account list
                     </Match>
