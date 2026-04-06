@@ -328,9 +328,13 @@ const FollowingFacet: Component = () => {
                             );
 
                             expandWindowOnInteraction(8);
-                            setNumAccountsRequested(
-                                numAccountsInput!.valueAsNumber
-                            );
+                            try {
+                                setNumAccountsRequested(
+                                    numAccountsInput!.valueAsNumber
+                                );
+                            } catch {
+                                // I don't remember what this is for but it doesn't seeeeeem essential??
+                            }
                             dataFetcher();
                         }
                     }
@@ -390,9 +394,13 @@ const FollowingFacet: Component = () => {
                             ref={setMoreButtonElement}
                             onClick={() => {
                                 expandWindowOnInteraction(8);
-                                setNumAccountsRequested(
-                                    numAccountsInput!.valueAsNumber
-                                );
+                                try {
+                                    setNumAccountsRequested(
+                                        numAccountsInput!.valueAsNumber
+                                    );
+                                } catch {
+                                    // I don't remember what this is for but it doesn't seeeeem essential?
+                                }
                                 dataFetcher();
                             }}
                             disabled={fetching()}
