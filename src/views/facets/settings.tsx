@@ -102,6 +102,9 @@ const SettingsFacet: Component = () => {
                     <CardTitle>misc</CardTitle>
                 </CardHeader>
                 <CardContent class="px-4 pb-2">
+                    <PersistentFlagCheckbox flag="progressAnimation">
+                        Show animation at bottom of screen when loading
+                    </PersistentFlagCheckbox>
                     <PersistentFlagCheckbox flag="enableDevTools">
                         Enable developer tools
                     </PersistentFlagCheckbox>

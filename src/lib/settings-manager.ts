@@ -42,6 +42,7 @@ export interface PersistentSettings {
     globalState?: Flag
     flatAppearance?: Flag
     beveledAppearance?: Flag
+    progressAnimation?: Flag
     unroundedCornersAppearance?: Flag
     pageForegroundColor?: ColorSetting
     pageBackgroundColor?: ColorSetting
@@ -114,6 +115,7 @@ export class SettingsManager extends PersistentStoreBacked<EphemeralSettings, Pe
         this.updateDocumentClass("unlimitedColumnWidth")
         this.updateDocumentClass("flatAppearance")
         this.updateDocumentClass("beveledAppearance")
+        this.updateDocumentClass("progressAnimation")
         this.updateDocumentClass("unroundedCornersAppearance")
     }
 

@@ -807,3 +807,18 @@ html.setting-unlimitedColumnWidth #layoutColumnsRoot {
     }
     }
 }
+
+/* begin progress animation stuff */
+canvas#progressCanvas {
+  -ms-interpolation-mode: nearest-neighbor;
+  image-rendering: crisp-edges;
+  image-rendering: pixelated;
+  position: fixed;
+  bottom: 0px;
+  left: 0px;
+  pointer-events: none;
+}
+html.not-setting-progressAnimation canvas#progressCanvas {
+    display:none;
+}
+/* end progress animation stuff */

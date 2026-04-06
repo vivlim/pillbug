@@ -7,6 +7,7 @@ import { unwrapResponse } from "../lib/clientUtil";
 import { PersistentStoreBacked } from "../lib/store-backed";
 import { useSessionContext } from "~/lib/session-context";
 import { logger } from "~/logging";
+import { WrappedMegalodon } from "~/client/megalodonProxy";
 
 const AppDisplayName: string = "pillbug";
 
@@ -27,7 +28,7 @@ export class SessionAuthManagerAssumingSignedIn {
         if (!client) {
             throw new Error("Not signed in")
         }
-        return client;
+        return WrappedMegalodon(client);
     }
 
     public get state(): SignedInState {
